@@ -53,9 +53,12 @@ bash scripts/new_week.sh w02          # create a new week folder from the scaffo
 open lessons/w01/index.html           # open a lesson (must work from file://, offline)
 ```
 
-The build script uses stdlib + `jsonschema` only (falls back to built-in
-validation if `jsonschema` is not installed). On invalid `lesson.json` it must
-**fail with a clear error**, never build silently.
+The build script is stdlib-only — validation is intentionally hand-rolled
+(T-002 decision; `templates/lesson.schema.json` is documentation, not
+executed). On invalid `lesson.json` it must **fail with a clear error**,
+never build silently. `--quiet` suppresses the progress block; `--all`
+rebuilds every week. `scripts/wpm.sh <file> <minutes>` reports words, wpm
+and a listening-difficulty verdict.
 
 ## Lesson architecture
 
@@ -67,10 +70,13 @@ with no server, no build tooling, no internet. Consequences:
 - `lesson.json` next to `index.html` is the source of truth; edit the JSON, regenerate the HTML with the build script.
 - `localStorage` for progress, keys `etai:wNN:*`.
 
-Quiz (the most important mechanic; full spec in T-001): exactly 3 options,
-exactly one correct, feedback of 40–120 words on **all three** options —
-it explains and adds new information; after answering, options lock and
-cannot be re-selected.
+Quiz (the most important mechanic; spec updated in T-002): exactly 10
+questions per real lesson (3 easy, 5 medium, 2 hard); exactly 3 options,
+exactly one correct; a short `note` (max 25 words) per option; one
+`explanation` of 80–150 words per question, shown below the question after
+answering — it teaches, not grades. Options lock after answering and the
+correct option is revealed even when not chosen. The build fails on rule
+violations and warns when the question count is not 10 or TODOs remain.
 
 ## Conventions
 
