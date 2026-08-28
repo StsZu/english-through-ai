@@ -1,0 +1,9 @@
+recordings/*.m4a
+recordings/*.mp3
+recordings/*.wav
+lessons/*/audio/*.mp3
+lessons/*/audio/*.m4a
+.DS_Store
+node_modules/
+__pycache__/
+.venv/
