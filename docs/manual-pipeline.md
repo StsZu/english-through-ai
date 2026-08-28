@@ -14,7 +14,7 @@
 
 ```
 lessons/wNN/
-├── transcript_raw.txt     # сирий транскрипт з Coursera
+├── source.md              # сирий матеріал з Coursera (транскрипти + readings)
 ├── transcript_b1.md       # адаптована версія для читання
 ├── terms.json             # витягнуті терміни
 ├── glossary.md            # людиночитний глосарій
@@ -34,7 +34,7 @@ mkdir -p lessons/w01 && touch lessons/w01/friction.md
 
 1. Coursera → відео → вкладка **Transcript** (не Subtitles).
 2. Виділити все → скопіювати.
-3. Вставити в `transcript_raw.txt`.
+3. Вставити в `source.md` (readings — виділити текст сторінки і вставити).
 4. Для кожного наступного відео модуля додати розділювач:
 
 ```
@@ -48,7 +48,7 @@ mkdir -p lessons/w01 && touch lessons/w01/friction.md
 ## Крок 2. Швидкість мовлення (2 хв)
 
 ```bash
-wc -w lessons/w01/transcript_raw.txt
+bash scripts/wpm.sh lessons/w01/source.md <хвилини>
 ```
 
 `wpm = слова / хвилини`
@@ -196,7 +196,7 @@ Do NOT write the talk itself. I will write and speak it myself.
 
 ## Чек-лист готовності до уроку
 
-- [ ] `transcript_raw.txt` заповнено
+- [ ] `source.md` заповнено
 - [ ] wpm пораховано
 - [ ] `terms.json` перевірено вручну, 12 термінів
 - [ ] `transcript_b1.md` прочитано двічі
