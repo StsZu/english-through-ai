@@ -113,24 +113,30 @@
   .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
   .quiz-option {
     display: block; width: 100%; text-align: left;
-    margin: 10px 0; padding: 14px 16px;
+    margin: 10px 0 0; padding: 14px 16px;
     border: 1.5px solid var(--border); border-radius: 10px;
     background: var(--card-bg);
   }
   .quiz-option:not(:disabled):hover { border-color: var(--accent); }
   .quiz-option:disabled { cursor: default; opacity: 0.75; }
-  .quiz-option.chosen-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
   .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
-  .quiz-feedback {
-    margin: 16px 0; padding: 16px; border-radius: 10px;
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
     opacity: 0; transition: opacity 200ms ease;
   }
-  .quiz-feedback.show { opacity: 1; }
-  .quiz-feedback.fb-correct { background: var(--correct-bg); border-left: 4px solid var(--correct); }
-  .quiz-feedback.fb-incorrect { background: var(--incorrect-bg); border-left: 4px solid var(--incorrect); }
-  .quiz-feedback .verdict { font-weight: 700; display: block; margin-bottom: 4px; }
-  .fb-correct .verdict { color: var(--correct); }
-  .fb-incorrect .verdict { color: var(--incorrect); }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
   .btn-primary {
     background: var(--accent); color: #fff; border: none; border-radius: 8px;
     padding: 10px 22px; font-weight: 600;
@@ -251,26 +257,28 @@
         "delegation",
         "description"
       ],
+      "difficulty": "easy",
       "options": [
         {
           "id": "a",
           "text": "Letting the AI make every decision for you.",
           "correct": false,
-          "feedback": "Not exactly. Delegation is not about giving away all control. It means deciding which parts of a task you should do yourself and which parts the AI can help with. You stay responsible for the goal and the final result. A useful comparison: a good manager gives tasks to a team, but still checks the work and owns the outcome."
+          "note": "Too far — delegation keeps you in control of the goal and the final result."
         },
         {
           "id": "b",
           "text": "Deciding what work to do yourself and what work to give to the AI.",
           "correct": true,
-          "feedback": "Correct. Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? For example, AI can draft a summary quickly, but you should choose the goal and check the facts. Good delegation saves time and keeps you in control of the result."
+          "note": "Yes — you split the task between yourself and the AI, and stay responsible."
         },
         {
           "id": "c",
           "text": "Writing very detailed instructions for the AI.",
           "correct": false,
-          "feedback": "Not this one. Writing clear and detailed instructions is a different D, called Description. It covers how you explain a task to the AI: the context, the format, and the style you want. Delegation happens one step earlier, when you decide if the AI should do the task at all. The two skills work together: first you delegate, then you describe."
+          "note": "That is Description, a different D: how you explain the task, not whether to hand it over."
         }
-      ]
+      ],
+      "explanation": "Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? Option (a) goes too far, because delegation is not about giving away all control. You stay responsible for the goal and the final result, like a good manager who gives tasks to a team but still checks the work. Option (c) describes a different D, called Description: how you explain a task to the AI — the context, the format and the style you want. Delegation happens one step earlier, and the two skills work together: first you delegate, then you describe. For example, AI can draft a summary quickly, but you should choose the goal and check the facts."
     },
     {
       "id": "q2",
@@ -278,26 +286,28 @@
       "term_refs": [
         "discernment"
       ],
+      "difficulty": "medium",
       "options": [
         {
           "id": "a",
           "text": "Trust the answer, because confident language means the facts are correct.",
           "correct": false,
-          "feedback": "Careful, this is exactly the trap. AI models often sound confident even when they are wrong; this is sometimes called a hallucination. Confident style is not evidence. Discernment means you judge the quality of the output yourself: check the facts, notice what is missing, and compare with a trusted source. The better the answer sounds, the more careful you should be."
+          "note": "Confident style is not evidence — AI can sound sure and still be wrong."
         },
         {
           "id": "b",
           "text": "Evaluate the answer critically: check the facts, the logic, and what might be missing.",
           "correct": true,
-          "feedback": "Correct. Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). One practical habit: always verify names, numbers, and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
+          "note": "Yes — judge the quality yourself: facts, logic, and what is missing."
         },
         {
           "id": "c",
           "text": "Ask the same question again until the AI gives a shorter answer.",
           "correct": false,
-          "feedback": "Not really. Asking again can be useful, but it is not what discernment means, and a shorter answer is not automatically a better one. Discernment is about quality, not length: you compare the answer with what you already know, look for mistakes, and decide what to keep. If you only repeat the question, you may get the same errors in fewer words."
+          "note": "Repeating the question may only give you the same errors in fewer words."
         }
-      ]
+      ],
+      "explanation": "Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). Option (a) is exactly the trap: AI models often sound confident even when they are wrong — this is sometimes called a hallucination, so confident style is not evidence. Option (c) mixes up quality and length: asking again can be useful, but a shorter answer is not automatically a better one, and you may get the same errors in fewer words. One practical habit: always verify names, numbers and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
     }
   ],
   "speaking_prompts": [
@@ -488,33 +498,41 @@ const addSection = (id, title, node) => {
       el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
       el("p", { class: "quiz-prompt" }, q.prompt)
     );
-    const optionButtons = [];
+    const rows = [];
     q.options.forEach(opt => {
       const btn = el("button", { class: "quiz-option" }, opt.text);
-      btn.addEventListener("click", () => answer(q, opt, btn, optionButtons));
-      optionButtons.push(btn);
-      app.append(btn);
+      const note = el("p", { class: "option-note", hidden: "" }, opt.note);
+      btn.addEventListener("click", () => answer(q, opt, rows));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
     });
   }
 
-  function answer(q, opt, btn, optionButtons) {
+  function answer(q, chosen, rows) {
     /* Lock all options: no re-selection — that would spoil the exercise. */
-    optionButtons.forEach(b => { b.disabled = true; });
-    btn.classList.add(opt.correct ? "chosen-correct" : "chosen-incorrect");
-    if (opt.correct) state.score++;
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
     else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
 
-    const fb = el("div", { class: "quiz-feedback " + (opt.correct ? "fb-correct" : "fb-incorrect") },
-      el("span", { class: "verdict" }, opt.correct ? "Correct" : "Not quite"),
-      opt.feedback);
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      q.explanation);
     const next = el("button", { class: "btn-primary" },
       state.i + 1 < data.quiz.length ? "Next" : "Finish");
     next.addEventListener("click", () => {
       state.i++;
       state.i < data.quiz.length ? renderQuestion() : renderSummary();
     });
-    app.append(fb, next);
-    requestAnimationFrame(() => requestAnimationFrame(() => fb.classList.add("show")));
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
   }
 
   function renderSummary() {

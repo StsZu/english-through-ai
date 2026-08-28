@@ -113,24 +113,30 @@
   .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
   .quiz-option {
     display: block; width: 100%; text-align: left;
-    margin: 10px 0; padding: 14px 16px;
+    margin: 10px 0 0; padding: 14px 16px;
     border: 1.5px solid var(--border); border-radius: 10px;
     background: var(--card-bg);
   }
   .quiz-option:not(:disabled):hover { border-color: var(--accent); }
   .quiz-option:disabled { cursor: default; opacity: 0.75; }
-  .quiz-option.chosen-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
   .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
-  .quiz-feedback {
-    margin: 16px 0; padding: 16px; border-radius: 10px;
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
     opacity: 0; transition: opacity 200ms ease;
   }
-  .quiz-feedback.show { opacity: 1; }
-  .quiz-feedback.fb-correct { background: var(--correct-bg); border-left: 4px solid var(--correct); }
-  .quiz-feedback.fb-incorrect { background: var(--incorrect-bg); border-left: 4px solid var(--incorrect); }
-  .quiz-feedback .verdict { font-weight: 700; display: block; margin-bottom: 4px; }
-  .fb-correct .verdict { color: var(--correct); }
-  .fb-incorrect .verdict { color: var(--incorrect); }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
   .btn-primary {
     background: var(--accent); color: #fff; border: none; border-radius: 8px;
     padding: 10px 22px; font-weight: 600;
@@ -356,33 +362,41 @@ const addSection = (id, title, node) => {
       el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
       el("p", { class: "quiz-prompt" }, q.prompt)
     );
-    const optionButtons = [];
+    const rows = [];
     q.options.forEach(opt => {
       const btn = el("button", { class: "quiz-option" }, opt.text);
-      btn.addEventListener("click", () => answer(q, opt, btn, optionButtons));
-      optionButtons.push(btn);
-      app.append(btn);
+      const note = el("p", { class: "option-note", hidden: "" }, opt.note);
+      btn.addEventListener("click", () => answer(q, opt, rows));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
     });
   }
 
-  function answer(q, opt, btn, optionButtons) {
+  function answer(q, chosen, rows) {
     /* Lock all options: no re-selection — that would spoil the exercise. */
-    optionButtons.forEach(b => { b.disabled = true; });
-    btn.classList.add(opt.correct ? "chosen-correct" : "chosen-incorrect");
-    if (opt.correct) state.score++;
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
     else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
 
-    const fb = el("div", { class: "quiz-feedback " + (opt.correct ? "fb-correct" : "fb-incorrect") },
-      el("span", { class: "verdict" }, opt.correct ? "Correct" : "Not quite"),
-      opt.feedback);
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      q.explanation);
     const next = el("button", { class: "btn-primary" },
       state.i + 1 < data.quiz.length ? "Next" : "Finish");
     next.addEventListener("click", () => {
       state.i++;
       state.i < data.quiz.length ? renderQuestion() : renderSummary();
     });
-    app.append(fb, next);
-    requestAnimationFrame(() => requestAnimationFrame(() => fb.classList.add("show")));
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
   }
 
   function renderSummary() {

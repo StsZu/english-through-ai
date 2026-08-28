@@ -9,11 +9,9 @@
 
 ## Language
 
-- **English only** for all documentation, reports, and commit messages
-  (per the project owner's instruction of 2026-08-28; this supersedes the
-  earlier "documentation in Ukrainian" rule from T-001).
-- Learning content is in English. The only Ukrainian is the `ua` field in
-  vocabulary and termbank entries.
+- **English only** — all repo content: docs, scripts, comments, commit
+  messages, transport files, learning content.
+- The only Ukrainian is the `ua` field in vocabulary and termbank entries.
 
 ## Git
 
@@ -27,7 +25,9 @@
 - Term definitions: CEFR B1 vocabulary, max 20 words.
 - Termbank schema:
   `week;term;definition_b1;collocation_1;collocation_2;ua;source_sentence;added_at`
-- Quiz: exactly 3 options per question, exactly one correct, feedback of
-  40–120 words on every option.
+- Quiz: exactly 10 questions per real lesson (3 easy, 5 medium, 2 hard);
+  exactly 3 options per question, exactly one correct; a short `note`
+  (max 25 words) on every option; one `explanation` of 80–150 words per
+  question that teaches, not grades.
 - AI never writes the student's talk or lesson content — structure and
   skeletons only.

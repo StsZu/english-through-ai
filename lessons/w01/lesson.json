@@ -54,51 +54,55 @@
       "id": "q1",
       "prompt": "In the AI Fluency framework, what does 'Delegation' mean? (demo question — replace with your own)",
       "term_refs": ["delegation", "description"],
+      "difficulty": "easy",
       "options": [
         {
           "id": "a",
           "text": "Letting the AI make every decision for you.",
           "correct": false,
-          "feedback": "Not exactly. Delegation is not about giving away all control. It means deciding which parts of a task you should do yourself and which parts the AI can help with. You stay responsible for the goal and the final result. A useful comparison: a good manager gives tasks to a team, but still checks the work and owns the outcome."
+          "note": "Too far — delegation keeps you in control of the goal and the final result."
         },
         {
           "id": "b",
           "text": "Deciding what work to do yourself and what work to give to the AI.",
           "correct": true,
-          "feedback": "Correct. Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? For example, AI can draft a summary quickly, but you should choose the goal and check the facts. Good delegation saves time and keeps you in control of the result."
+          "note": "Yes — you split the task between yourself and the AI, and stay responsible."
         },
         {
           "id": "c",
           "text": "Writing very detailed instructions for the AI.",
           "correct": false,
-          "feedback": "Not this one. Writing clear and detailed instructions is a different D, called Description. It covers how you explain a task to the AI: the context, the format, and the style you want. Delegation happens one step earlier, when you decide if the AI should do the task at all. The two skills work together: first you delegate, then you describe."
+          "note": "That is Description, a different D: how you explain the task, not whether to hand it over."
         }
-      ]
+      ],
+      "explanation": "Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? Option (a) goes too far, because delegation is not about giving away all control. You stay responsible for the goal and the final result, like a good manager who gives tasks to a team but still checks the work. Option (c) describes a different D, called Description: how you explain a task to the AI — the context, the format and the style you want. Delegation happens one step earlier, and the two skills work together: first you delegate, then you describe. For example, AI can draft a summary quickly, but you should choose the goal and check the facts."
     },
     {
       "id": "q2",
       "prompt": "You asked an AI to explain a topic, and the answer sounds very confident. What does 'Discernment' tell you to do? (demo question — replace with your own)",
       "term_refs": ["discernment"],
+      "difficulty": "medium",
       "options": [
         {
           "id": "a",
           "text": "Trust the answer, because confident language means the facts are correct.",
           "correct": false,
-          "feedback": "Careful, this is exactly the trap. AI models often sound confident even when they are wrong; this is sometimes called a hallucination. Confident style is not evidence. Discernment means you judge the quality of the output yourself: check the facts, notice what is missing, and compare with a trusted source. The better the answer sounds, the more careful you should be."
+          "note": "Confident style is not evidence — AI can sound sure and still be wrong."
         },
         {
           "id": "b",
           "text": "Evaluate the answer critically: check the facts, the logic, and what might be missing.",
           "correct": true,
-          "feedback": "Correct. Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). One practical habit: always verify names, numbers, and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
+          "note": "Yes — judge the quality yourself: facts, logic, and what is missing."
         },
         {
           "id": "c",
           "text": "Ask the same question again until the AI gives a shorter answer.",
           "correct": false,
-          "feedback": "Not really. Asking again can be useful, but it is not what discernment means, and a shorter answer is not automatically a better one. Discernment is about quality, not length: you compare the answer with what you already know, look for mistakes, and decide what to keep. If you only repeat the question, you may get the same errors in fewer words."
+          "note": "Repeating the question may only give you the same errors in fewer words."
         }
-      ]
+      ],
+      "explanation": "Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). Option (a) is exactly the trap: AI models often sound confident even when they are wrong — this is sometimes called a hallucination, so confident style is not evidence. Option (c) mixes up quality and length: asking again can be useful, but a shorter answer is not automatically a better one, and you may get the same errors in fewer words. One practical habit: always verify names, numbers and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
     }
   ],
   "speaking_prompts": [

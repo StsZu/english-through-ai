@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "lesson.schema.json",
   "title": "English Through AI — lesson data",
+  "$comment": "Living documentation of the lesson format (T-002). Not executed: validation is hand-rolled in scripts/build_lesson.py so the repo runs on a clean Python 3 with zero dependencies. Rules the schema cannot express: exactly one correct option; note max 25 words; explanation 80-150 words; term_refs must exist in vocabulary; a real lesson has exactly 10 quiz questions (the build warns on any other count).",
   "type": "object",
   "required": ["week", "title", "source", "duration_min", "objectives",
                "vocabulary", "reading", "audio", "quiz",
@@ -60,7 +61,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "prompt", "term_refs", "options"],
+        "required": ["id", "prompt", "term_refs", "options", "explanation"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^q[0-9]+$" },
@@ -69,19 +70,23 @@
             "type": "array",
             "items": { "type": "string" }
           },
+          "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
           "options": {
             "type": "array",
             "minItems": 3,
             "maxItems": 3,
             "items": {
               "type": "object",
-              "required": ["id", "text", "correct", "feedback"],
+              "required": ["id", "text", "correct", "note"],
               "additionalProperties": false,
               "properties": {
                 "id": { "type": "string", "enum": ["a", "b", "c"] },
                 "text": { "type": "string", "minLength": 1 },
                 "correct": { "type": "boolean" },
-                "feedback": { "type": "string", "minLength": 1 }
+                "note": {
+                  "type": "string", "minLength": 1,
+                  "$comment": "Short verdict line, 1-25 words, shown next to the option after answering."
+                }
               }
             },
             "contains": {
@@ -89,6 +94,10 @@
               "properties": { "correct": { "const": true } },
               "required": ["correct"]
             }
+          },
+          "explanation": {
+            "type": "string", "minLength": 1,
+            "$comment": "80-150 words, CEFR B1. Explains the correct answer, briefly why the other two are wrong, and adds one new fact, example or nuance not in the question."
           }
         }
       }

@@ -31,13 +31,15 @@
   "quiz": [
     {
       "id": "q1",
-      "prompt": "TODO: question text",
+      "prompt": "TODO: question text (a real lesson has exactly 10 questions: 3 easy, 5 medium, 2 hard)",
       "term_refs": [],
+      "difficulty": "easy",
       "options": [
-        { "id": "a", "text": "TODO", "correct": false, "feedback": "TODO: 40-120 words, CEFR B1. Explain WHY this option is wrong, and add one new fact or nuance the learner did not know." },
-        { "id": "b", "text": "TODO", "correct": true, "feedback": "TODO: 40-120 words, CEFR B1. Confirm, then EXTEND: give an example or a related idea not mentioned in the question." },
-        { "id": "c", "text": "TODO", "correct": false, "feedback": "TODO: 40-120 words, CEFR B1. Explain WHY this option is wrong, and add one new fact or nuance the learner did not know." }
-      ]
+        { "id": "a", "text": "TODO", "correct": false, "note": "TODO: short verdict, max 25 words" },
+        { "id": "b", "text": "TODO", "correct": true, "note": "TODO: short verdict, max 25 words" },
+        { "id": "c", "text": "TODO", "correct": false, "note": "TODO: short verdict, max 25 words" }
+      ],
+      "explanation": "TODO: 80-150 words, CEFR B1. Explain the correct answer, briefly say why the other two are wrong, and ADD one new fact, example or nuance that was NOT in the question. The build fails until this is a real 80-150 word text."
     }
   ],
   "speaking_prompts": [
