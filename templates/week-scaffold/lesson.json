@@ -1,0 +1,55 @@
+{
+  "week": "wNN",
+  "title": "TODO: module title",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "TODO: By the end of this lesson I can …",
+    "TODO: By the end of this lesson I can …",
+    "TODO: By the end of this lesson I can …"
+  ],
+  "vocabulary": [
+    {
+      "term": "TODO",
+      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "collocations": ["TODO", "TODO"],
+      "ua": "TODO",
+      "source_sentence": "TODO: verbatim from transcript"
+    }
+  ],
+  "reading": {
+    "b1": "TODO: paste the B1 reading version here (docs/manual-pipeline.md, step 4).",
+    "original": "TODO: paste the original transcript here (docs/manual-pipeline.md, step 1)."
+  },
+  "audio": [
+    {
+      "label": "TODO: video 1 (put the mp3 into ./audio/ and set src to ./audio/wNN-v1.mp3)",
+      "src": null,
+      "url": null
+    }
+  ],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "TODO: question text",
+      "term_refs": [],
+      "options": [
+        { "id": "a", "text": "TODO", "correct": false, "feedback": "TODO: 40-120 words, CEFR B1. Explain WHY this option is wrong, and add one new fact or nuance the learner did not know." },
+        { "id": "b", "text": "TODO", "correct": true, "feedback": "TODO: 40-120 words, CEFR B1. Confirm, then EXTEND: give an example or a related idea not mentioned in the question." },
+        { "id": "c", "text": "TODO", "correct": false, "feedback": "TODO: 40-120 words, CEFR B1. Explain WHY this option is wrong, and add one new fact or nuance the learner did not know." }
+      ]
+    }
+  ],
+  "speaking_prompts": [
+    "TODO: speaking prompt 1",
+    "TODO: speaking prompt 2",
+    "TODO: speaking prompt 3",
+    "TODO: speaking prompt 4",
+    "TODO: speaking prompt 5"
+  ],
+  "homework": [
+    "TODO: homework item 1",
+    "TODO: homework item 2",
+    "TODO: homework item 3"
+  ]
+}

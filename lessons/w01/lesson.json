@@ -1,0 +1,116 @@
+{
+  "week": "w01",
+  "title": "AI Fluency — Module 1",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "TODO: By the end of this lesson I can …",
+    "TODO: By the end of this lesson I can …",
+    "TODO: By the end of this lesson I can …"
+  ],
+  "vocabulary": [
+    {
+      "term": "delegation",
+      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "collocations": ["TODO", "TODO"],
+      "ua": "TODO",
+      "source_sentence": "TODO: verbatim from transcript"
+    },
+    {
+      "term": "description",
+      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "collocations": ["TODO", "TODO"],
+      "ua": "TODO",
+      "source_sentence": "TODO: verbatim from transcript"
+    },
+    {
+      "term": "discernment",
+      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "collocations": ["TODO", "TODO"],
+      "ua": "TODO",
+      "source_sentence": "TODO: verbatim from transcript"
+    },
+    {
+      "term": "diligence",
+      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "collocations": ["TODO", "TODO"],
+      "ua": "TODO",
+      "source_sentence": "TODO: verbatim from transcript"
+    }
+  ],
+  "reading": {
+    "b1": "TODO: paste the B1 reading version here (docs/manual-pipeline.md, step 4). Markdown is supported: **bold**, lists, headings. Vocabulary terms are highlighted automatically.",
+    "original": "TODO: paste the original transcript here (docs/manual-pipeline.md, step 1)."
+  },
+  "audio": [
+    {
+      "label": "TODO: Module 1 — video 1 (put the mp3 into ./audio/ and set src to ./audio/w01-v1.mp3)",
+      "src": null,
+      "url": null
+    }
+  ],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "In the AI Fluency framework, what does 'Delegation' mean? (demo question — replace with your own)",
+      "term_refs": ["delegation", "description"],
+      "options": [
+        {
+          "id": "a",
+          "text": "Letting the AI make every decision for you.",
+          "correct": false,
+          "feedback": "Not exactly. Delegation is not about giving away all control. It means deciding which parts of a task you should do yourself and which parts the AI can help with. You stay responsible for the goal and the final result. A useful comparison: a good manager gives tasks to a team, but still checks the work and owns the outcome."
+        },
+        {
+          "id": "b",
+          "text": "Deciding what work to do yourself and what work to give to the AI.",
+          "correct": true,
+          "feedback": "Correct. Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? For example, AI can draft a summary quickly, but you should choose the goal and check the facts. Good delegation saves time and keeps you in control of the result."
+        },
+        {
+          "id": "c",
+          "text": "Writing very detailed instructions for the AI.",
+          "correct": false,
+          "feedback": "Not this one. Writing clear and detailed instructions is a different D, called Description. It covers how you explain a task to the AI: the context, the format, and the style you want. Delegation happens one step earlier, when you decide if the AI should do the task at all. The two skills work together: first you delegate, then you describe."
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "prompt": "You asked an AI to explain a topic, and the answer sounds very confident. What does 'Discernment' tell you to do? (demo question — replace with your own)",
+      "term_refs": ["discernment"],
+      "options": [
+        {
+          "id": "a",
+          "text": "Trust the answer, because confident language means the facts are correct.",
+          "correct": false,
+          "feedback": "Careful, this is exactly the trap. AI models often sound confident even when they are wrong; this is sometimes called a hallucination. Confident style is not evidence. Discernment means you judge the quality of the output yourself: check the facts, notice what is missing, and compare with a trusted source. The better the answer sounds, the more careful you should be."
+        },
+        {
+          "id": "b",
+          "text": "Evaluate the answer critically: check the facts, the logic, and what might be missing.",
+          "correct": true,
+          "feedback": "Correct. Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). One practical habit: always verify names, numbers, and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
+        },
+        {
+          "id": "c",
+          "text": "Ask the same question again until the AI gives a shorter answer.",
+          "correct": false,
+          "feedback": "Not really. Asking again can be useful, but it is not what discernment means, and a shorter answer is not automatically a better one. Discernment is about quality, not length: you compare the answer with what you already know, look for mistakes, and decide what to keep. If you only repeat the question, you may get the same errors in fewer words."
+        }
+      ]
+    }
+  ],
+  "speaking_prompts": [
+    "TODO: speaking prompt 1",
+    "TODO: speaking prompt 2",
+    "TODO: speaking prompt 3",
+    "TODO: speaking prompt 4",
+    "TODO: speaking prompt 5"
+  ],
+  "homework": [
+    "TODO: homework item 1",
+    "TODO: homework item 2",
+    "TODO: homework item 3"
+  ]
+}
