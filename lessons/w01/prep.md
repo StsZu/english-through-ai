@@ -1,46 +1,47 @@
-# Week 1 — підготовка студента
+# Week 1 — Student preparation
 
-Джерело: **Coursera → Anthropic → AI Fluency: Framework & Foundations → Module 1**
+Source: **Coursera → Anthropic → AI Fluency: Framework & Foundations → Module 1**
 
-Загальний час: ~3 години, розбити на 3 дні. Не робити за один захід —
-лексика не осяде.
-
----
-
-## День 1 (≈60 хв) — вхід
-
-- [ ] Пройти Module 1 повністю. **Перший раз — без субтитрів.** Записати,
-      скільки відсотків зрозуміли (чесно, приблизно).
-- [ ] Пройти вдруге з увімкненим transcript. Помітити, де було провалля.
-- [ ] Витягнути транскрипт за `docs/manual-pipeline.md`, крок 1
-      → `lessons/w01/source.md`
-- [ ] Порахувати wpm (крок 2). Записати число.
-- [ ] Пройти quiz Module 1. **Записати рахунок і — головне — які саме
-      питання були незрозумілі через мову, а не через зміст.**
-      Це окремий список: `friction.md`, секція `[language]`.
-
-**Записати в термбанк усі слова, які завадили зрозуміти зміст.** Не тільки
-AI-терміни. Якщо не зрозуміли `blurry`, `leverage`, `shortcut` — вони теж
-у список.
+Total time: ~3 hours, split across 3 days. Do not do it in one sitting — the
+vocabulary will not settle.
 
 ---
 
-## День 2 (≈70 хв) — обробка
+## Day 1 (≈60 min) — input
 
-- [ ] Крок 3: витягнути 12 термінів → `terms.json`. **Відсіяти вручну.**
-- [ ] Крок 4: B1-версія → `transcript_b1.md`. Прочитати вголос.
-- [ ] Крок 5: воркшит → `worksheet.md`. **Пройти самому**, звірити з ключем.
-- [ ] Крок 6: Anki → імпорт колоди `English Through AI::W01`.
-      Почати повторювати сьогодні ж.
-- [ ] Заповнити `glossary.md` (шаблон нижче).
+- [ ] Work through Module 1 completely. **First pass without subtitles.** Note
+      honestly, roughly, what percentage you understood.
+- [ ] Second pass with the transcript on. Notice where the gaps were.
+- [ ] Paste the raw transcript and readings into `lessons/w01/source.md`
+      (`docs/manual-pipeline.md`, step 1)
+- [ ] Count wpm (step 2). Write the number down.
+- [ ] Take the Module 1 quiz. **Record your score and — more importantly —
+      which questions you missed because of the language rather than the
+      content.** That is a separate list: `friction.md`, section `[language]`.
 
-### Стартовий список термінів для перевірки
+**Put every word that blocked your understanding into the termbank.** Not only
+AI terms. If `blurry`, `leverage` or `shortcut` stopped you, they belong on the
+list too.
 
-Це **гіпотеза**, а не готовий список. Ваше завдання — перевірити по
-транскрипту, які з них реально вживаються в Module 1, викинути зайві
-й додати те, що я пропустив. Сама ця перевірка — вправа на reading.
+---
 
-| # | Term | Перевірено в транскрипті? |
+## Day 2 (≈70 min) — processing
+
+- [ ] Step 3: pull out 12 terms → `lesson.json` (`vocabulary`). **Filter them by hand.**
+- [ ] Step 4: the B1 version → `lesson.json` (`reading.b1`). Read it aloud.
+- [ ] Step 5: the quiz → `index.html`. **Take it yourself**, then check against
+      the explanations.
+- [ ] Step 6: run `python3 scripts/termbank_sync.py` to append this week's terms
+      to `termbank/termbank.csv`. Start reviewing them today.
+- [ ] Fill in `lesson.json` (`vocabulary`) using the template below.
+
+### Starting list of terms to verify
+
+This is a **hypothesis**, not a finished list. Your job is to check against the
+transcript which of these are actually used in Module 1, drop the ones that are
+not, and add what I missed. That check is itself a reading exercise.
+
+| # | Term | Verified in the transcript? |
 |---|---|---|
 | 1 | fluency | |
 | 2 | framework | |
@@ -55,27 +56,27 @@ AI-терміни. Якщо не зрозуміли `blurry`, `leverage`, `short
 | 11 | output | |
 | 12 | workflow | |
 
-Плюс набір із чотирьох прикметників, який проходить через увесь курс:
-**effective / efficient / ethical / safe**. Різниця між `effective` і
-`efficient` для B1 неочевидна — це окрема картка.
+Plus the set of four adjectives that runs through the whole course:
+**effective / efficient / ethical / safe**. The difference between `effective`
+and `efficient` is not obvious at B1 — that is a card of its own.
 
 ---
 
-## День 3 (≈50 хв) — вихід
+## Day 3 (≈50 min) — output
 
-- [ ] Крок 7: скелет виступу → `talk.md`.
-      **Текст пишете самі, модель дає лише структуру.**
-- [ ] Написати виступ (≈250 слів), прочитати вголос 2 рази, потім
-      **закрити текст і розповісти своїми словами**.
-- [ ] Записати репетицію на диктофон. Прослухати. Не переписувати —
-      просто помітити, де зупиняєтесь.
-- [ ] Прогнати baseline за `docs/baseline-protocol.md` (якщо ще не зробили).
+- [ ] Step 7: the outline of your talk → `lesson.json` (`speaking_prompts`).
+      **You write the text yourself; the model gives you structure only.**
+- [ ] Write the talk (≈250 words), read it aloud twice, then **close the text
+      and tell it in your own words**.
+- [ ] Record the rehearsal. Listen back. Do not rewrite it — just notice where
+      you stop.
+- [ ] Run the baseline per `docs/baseline-protocol.md` (if you have not yet).
       → `recordings/w00_baseline.m4a` + `errors/w00.json`
-- [ ] Надіслати вчителю `lessons/w01/agenda.md` **за добу до уроку**.
+- [ ] Send `lessons/w01/agenda.md` to the teacher **a day before the lesson**.
 
 ---
 
-## Шаблон `glossary.md`
+## Template for `lesson.json` (`vocabulary`)
 
 ```markdown
 # W01 Glossary — AI Fluency, Module 1
@@ -96,13 +97,13 @@ AI-терміни. Якщо не зрозуміли `blurry`, `leverage`, `short
 3.
 ```
 
-Останній блок — найцінніший. Це порядок денний для вчителя.
+That last block is the most valuable one. It is the agenda for the teacher.
 
 ---
 
-## Чого НЕ робити
+## What NOT to do
 
-- Не просити AI написати виступ. Каркас — так, текст — ні.
-- Не готувати «ідеальний» урок. Помилки — це матеріал.
-- Не перекладати транскрипт українською цілком. Тільки окремі слова.
-- Не пропускати quiz. Це ваш єдиний зовнішній контроль розуміння.
+- Do not ask the AI to write the talk. The skeleton yes, the text no.
+- Do not prepare a "perfect" lesson. Mistakes are the material.
+- Do not translate the whole transcript into Ukrainian. Individual words only.
+- Do not skip the quiz. It is your only external check on understanding.

@@ -1,0 +1,460 @@
+{
+  "week": "w13",
+  "title": "Conclusion — The AI Fluency Framework",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can consolidate the four core competencies of AI Fluency (Delegation, Description, Discernment, Diligence).",
+    "By the end of this lesson I can construct a personal AI usage and disclosure policy to resolve ethical dilemmas.",
+    "By the end of this lesson I can apply the widely applicable 4D framework to shape future engineering workflows."
+  ],
+  "vocabulary": [
+    {
+      "term": "consolidate",
+      "definition_b1": "to combine and strengthen separate pieces of knowledge or skills into a solid whole",
+      "collocations": [
+        "consolidate learning",
+        "consolidate gains"
+      ],
+      "ua": "закріплювати; об'єднувати в єдине ціле",
+      "source_sentence": "Consolidate key learnings from the course"
+    },
+    {
+      "term": "cover ground",
+      "definition_b1": "to travel over distance or deal with a large amount of material and information",
+      "collocations": [
+        "cover a lot of ground",
+        "cover ground together"
+      ],
+      "ua": "охопити великий обсяг матеріалу; пройти значний шлях",
+      "source_sentence": "Over a short period, we've covered quite a lot of ground together, exploring the AI fluency framework and seeing how it applies to everyday collaboration with AI."
+    },
+    {
+      "term": "non-negotiable",
+      "definition_b1": "mandatory and not open to debate, change, or compromise",
+      "collocations": [
+        "non-negotiable responsibility",
+        "non-negotiable requirement"
+      ],
+      "ua": "такий, що не підлягає обговоренню; обов'язковий",
+      "source_sentence": "For discernment, critical evaluation of AI outputs is a non-negotiable responsibility."
+    },
+    {
+      "term": "overnight",
+      "definition_b1": "happening very quickly, suddenly, or within a single day",
+      "collocations": [
+        "not mastered overnight",
+        "overnight success"
+      ],
+      "ua": "за одну ніч; раптово / миттєво",
+      "source_sentence": "These competencies aren't mastered overnight."
+    },
+    {
+      "term": "silver bullet",
+      "definition_b1": "a simple, magical solution that instantly solves a complicated problem",
+      "collocations": [
+        "not a silver bullet",
+        "search for a silver bullet"
+      ],
+      "ua": "панацея; магічне універсальне вирішення",
+      "source_sentence": "These are powerful systems, but they're not silver bullets or magical solutions to every problem."
+    },
+    {
+      "term": "back-and-forth",
+      "definition_b1": "an active discussion or dialogue moving in alternating directions between parties",
+      "collocations": [
+        "back-and-forth conversation",
+        "back-and-forth dialogue"
+      ],
+      "ua": "взаємний обмін думками; живий діалог туди-сюди",
+      "source_sentence": "Practice the art of description and discernment, that thoughtful back-and-forth conversation that transforms AI from simple automation machines into genuine thinking partners."
+    },
+    {
+      "term": "dilemma",
+      "definition_b1": "a difficult situation where a person must choose between two unfavorable options",
+      "collocations": [
+        "ethical dilemma",
+        "face a dilemma"
+      ],
+      "ua": "дилема; складний вибір",
+      "source_sentence": "Develop decision-making criteria for addressing ethical dilemmas"
+    },
+    {
+      "term": "attribution",
+      "definition_b1": "the act of giving credit to the creator or source of an idea or content",
+      "collocations": [
+        "proper attribution",
+        "attribution statement"
+      ],
+      "ua": "зазначення авторства / джерела",
+      "source_sentence": "Create templates for attribution and transparency statements"
+    },
+    {
+      "term": "shape",
+      "definition_b1": "to influence, guide, and determine the development or future of something",
+      "collocations": [
+        "shape the future",
+        "shape collaboration"
+      ],
+      "ua": "формувати; впливати на розвиток",
+      "source_sentence": "The future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully."
+    },
+    {
+      "term": "widely applicable",
+      "definition_b1": "able to be used or put into practice across many different fields and situations",
+      "collocations": [
+        "widely applicable framework",
+        "widely applicable skills"
+      ],
+      "ua": "широко застосовний",
+      "source_sentence": "The fluency framework is designed to be widely applicable to the broad range of generative AI assistants and remain relevant even as AI systems continue to evolve, but it is up to us to make sure we continue to apply our learning as well."
+    },
+    {
+      "term": "equipped",
+      "definition_b1": "having the necessary skills, tools, or knowledge to do a particular task",
+      "collocations": [
+        "well equipped",
+        "better equipped"
+      ],
+      "ua": "озброєний (знаннями); підготовлений",
+      "source_sentence": "The future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully."
+    },
+    {
+      "term": "integrity",
+      "definition_b1": "the quality of being honest and possessing strong moral principles",
+      "collocations": [
+        "maintain integrity",
+        "build trust and integrity"
+      ],
+      "ua": "доброчесність; принциповість; цілісність",
+      "source_sentence": "Being transparent about AI's role in your work builds trust and integrity."
+    }
+  ],
+  "reading": {
+    "b1": "In this concluding lesson, we **consolidate** our understanding of the AI fluency framework. Over recent weeks, we have **cover ground** across four core competencies: Delegation, Description, Discernment, and Diligence. These 4Ds apply across all interaction modes: automation, augmentation, and agency.\n\nDelegation establishes that human domain expertise is the cornerstone of collaboration. Description bridges intent and machine capabilities through structured prompts. Discernment is a **non-negotiable** responsibility, auditing factual correctness and reasoning steps. Diligence guarantees that work remains ethical, safe, and transparent, building professional **integrity**.\n\nFluency is not mastered **overnight**. AI models are powerful, but they are never a magical **silver bullet**. They are thinking partners shaped through thoughtful **back-and-forth** dialogue. To govern your work, create a personal AI policy. Establish clear boundaries for sensitive data, provide proper **attribution**, and resolve any ethical **dilemma**.\n\nThe 4D framework is **widely applicable** across all generative models. You are now well **equipped** to **shape** the future of engineering collaboration thoughtfully.",
+    "original": "---\nTotal video duration in this module: 12 min\nWord count (wc -w): 1501\nWords per minute: 125\nVerdict: <130 comfortable\n---\n\ny the end of this lesson, you will be able to:\n\n- Consolidate key learnings from the course\n- Connect AI Fluency to your continuing development\n\n## Video: Conclusion\n\n\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nHello and welcome to our final session covering the foundations of AI fluency.\n\nI'm Professor Rick Dacen from the Ringling College of Art and Design. Over a short period, we've covered quite a lot of ground together, exploring the AI fluency framework and seeing how it applies to everyday collaboration with AI. Let's take a moment to reflect on what we've learned, highlight some key takeaways, and look ahead to where you might go next.\n\nLet's begin by revisiting the four core competencies, also known as the four Ds, that make up the AI fluency framework.\n\nDelegation focuses on deciding what work should be done by and with AI versus what's best handled by humans alone. It combines your understanding of the problem, awareness of AI capabilities, and skill in distributing work effectively between you and your AI assistants.\n\nDescription addresses how we communicate with AI systems. Through clear articulation of what we want, how we want it approached, and what kind of interaction is most helpful to us, also known as product, process, and performance description, we guide AI to produce the outputs we need and become more effective collaborators and assistants.\n\nDiscernment involves critically evaluating AI outputs and behaviors. By developing your ability to assess outputs, processes, and interactions, also known as product, process, and performance discernment, you ensure quality and appropriateness in all your AI-driven outputs.\n\nAnd finally, diligence ensures our AI interactions are responsible. Through thoughtful selection of AI systems, transparency about AI's role, and taking accountability for the final product, also known as creation, transparency, and deployment diligence, we can work with AI ethically and safely.\n\nRemember that these competencies apply across all three ways we interact with AI: automation, where AI performs specific tasks following your instructions; augmentation, where you and AI collaborate as thinking partners; and agency, where AI is configured to act independently on your behalf.\n\nAs you move forward in your AI journey, keep these essential insights in mind.\n\nFor delegation, your expertise and judgment remain the foundation of effective AI use. The most powerful outcomes often emerge when you can identify opportunities where you and AI can build on each other's strengths through iterative collaboration, creating outcomes neither could achieve alone.\n\nFor description, clear communication bridges your intentions and AI capabilities. Sometimes the most effective instructions aren't elaborate prompts, but thoughtful conversations that provide context, examples, and feedback.\n\nFor discernment, critical evaluation of AI outputs is a non-negotiable responsibility. Your discernment skills protect against AI limitations and, once again, enable you to achieve results neither you nor the AI could easily create alone.\n\nFor diligence, you remain accountable for what you do with AI and its impact on others. Being transparent about AI's role in your work builds trust and integrity.\n\nThese competencies aren't mastered overnight. They develop through practice. As you delegate work, describe your needs, discern the quality of outputs, and apply diligence to your process, your AI fluency will grow naturally.\n\nThe goal isn't perfection. It's about continually developing awareness, commitment, and an intentional approach to working with AI. The fluency framework is designed to be widely applicable to the broad range of generative AI assistants and remain relevant even as AI systems continue to evolve, but it is up to us to make sure we continue to apply our learning as well.\n\nWe hope this course is just the beginning of your AI fluency journey. To close out the AI Fluency Foundations course, you'll find some follow-on activities designed to help you apply what you've learned, along with resources for continued exploration.\n\nWe began this course with the goal of helping you think differently about AI and the ways we work with it. These are powerful systems, but they're not silver bullets or magical solutions to every problem. They're only as useful and safe as we enable them to be.\n\nSo invest in your own expertise and stay aware of technological change so that you can delegate appropriately. Practice the art of description and discernment, that thoughtful back-and-forth conversation that transforms AI from simple automation machines into genuine thinking partners.\n\nAnd above all, take responsibility for the way you work with AI and what you create together. Be effective and efficient. Be ethical and safe.\n\nWe're all learning together how to navigate this rapidly evolving landscape. Thank you for joining us on this journey toward greater AI fluency.\n\nThe future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully.\n\n===\n\nThis concluding video revisits the AI Fluency Framework and brings together the key concepts explored throughout the course. We recap the four core competencies (the 4Ds): Delegation (deciding what work to do with AI versus independently), Description (communicating effectively with AI), Discernment (evaluating AI outputs and behaviors), and Diligence (ensuring responsible AI collaboration). We emphasize that these competencies apply across all three major ways of interacting with AI (Automation, Augmentation, and Agency) and that fluency develops through practice, not overnight mastery. We close with a reminder that AI systems are powerful but not magical solutions; they're only as useful and safe as we enable them to be through our thoughtful engagement.\n\n#### Key takeaways\n\n- AI Fluency develops through intentional practice of the four core competencies\n- Delegation emphasizes that our expertise and judgment remain the foundation of effective AI collaboration\n- Description involves clear communication that bridges our intentions and AI capabilities\n- Discernment requires thoughtful and critical evaluation of outputs to work within the systems constraints\n- Diligence ensures accountability, transparency, and responsibility in our AI work\n- The most powerful outcomes emerge when humans and AI build on each other's strengths\n- The framework is designed to remain relevant as AI systems continue to evolve\n\n## Exercises\n\n### Exercise: Discuss the AI Fluency Course with Claude\n\nEngage Claude in a meaningful conversation about this course and the AI Fluency Framework (upload a copy of the framework from https://ringling.libguides.com/ai/framework)\n\nSuggested conversation starters:\n\n- \"I've just completed a course on AI Fluency covering Delegation, Description, Discernment, and Diligence. Let’s discuss how these competencies might apply to [my degree program or my job or whatever].\"\n- \"Let's explore how the AI Fluency Framework might evolve as AI capabilities advance. What new competencies might become important in the future?\" (If you do this one, reach out and let us know what you discover!)\n- \"Help me identify which of the 4D competencies I seem to understand well and which I might need to develop further, based on our conversation.\"\n- “Here’s [some exercise you did in this course]. Let’s analyze it to improve my competencies.”\n\n### Exercise: Build a Personal AI Policy\n\nWith the help of Claude, create your own guidelines for responsible and ethical AI collaboration in your personal and professional contexts:\n\n- Create clear standards for when and how you'll work with AI in different contexts\n- Establish boundaries for sensitive or confidential information\n- Define how you'll maintain quality control for AI-assisted work\n- Identify ethical issues most relevant to your field or activities\n- Develop decision-making criteria for addressing ethical dilemmas\n- Consider the perspectives of different people who might be affected by your AI interactions\n- Determine how you'll disclose AI collaboration in different contexts\n- Create templates for attribution and transparency statements\n- Establish criteria for when more detailed disclosure is appropriate\n\nWork with Claude as a thinking partner in this process to explore ethical considerations from multiple perspectives.\n\n### Reflection\n\nThe exercises above serve as the reflection component for this lesson. Through them, you'll have the opportunity to consolidate your learning and connect it to your ongoing development.\n\n#### What’s next\n\nCongratulations on completing the AI Fluency: Framework and Foundations course! This is just the beginning of your AI Fluency journey. As AI technologies continue to evolve, the competencies you've developed in Delegation, Description, Discernment, and Diligence, will provide a lasting framework to guide your work with these systems.\n\nRemember that fluency develops through practice. Each interaction with AI is an opportunity to refine your skills and deepen your understanding. By approaching AI as a thinking partner rather than just a tool, and by maintaining a commitment to effectiveness, efficiency, ethics, and safety, you're well-positioned to navigate the future of human-AI collaboration.\n\nWe encourage you to continue exploring, experimenting, and reflecting on your AI interactions. There are many good additional exercises in Lesson 12 to continue your journey.\n\nWe encourage you to share what you've learned with others (and us!), seek out diverse perspectives, and contribute to the ongoing conversation about how we can work with AI in ways that amplify human potential while respecting our values and responsibilities to each other. Thank you for your participation and engagement throughout this course!\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "Why are large language models described as 'not silver bullets' in the course conclusion?",
+      "difficulty": "easy",
+      "term_refs": [
+        "silver bullet",
+        "non-negotiable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because server microprocessors are made of copper and silicon rather than silver metal.",
+          "correct": false,
+          "note": "Incorrect: silver bullet is a metaphor for magical instant solutions."
+        },
+        {
+          "id": "b",
+          "text": "Because they are cognitive tools that require human domain expertise, clear description, and rigorous discernment to be useful and safe.",
+          "correct": true,
+          "note": "Correct: AI models amplify competence but do not replace human judgment."
+        },
+        {
+          "id": "c",
+          "text": "Because AI models permanently shut down whenever a user encounters a technical bug.",
+          "correct": false,
+          "note": "Incorrect: models continue functioning regardless of application bugs."
+        }
+      ],
+      "explanation": "Describing AI systems as 'not silver bullets' emphasizes that language models cannot magically solve engineering problems on their own. They are powerful cognitive amplifiers that depend entirely on human direction. Without domain expertise to scope delegation, clear description to set constraints, and non-negotiable discernment to catch hallucinations, AI outputs can easily mislead. The {{opt:a}} option is an amusing literal metallic confusion. The {{opt:c}} option is nonsensical. AI fluency recognizes that tools are only as reliable and safe as the human methodology guiding them."
+    },
+    {
+      "id": "q2",
+      "prompt": "How does an active 'back-and-forth' dialogue transform AI from an automation tool into a true thinking partner?",
+      "difficulty": "easy",
+      "term_refs": [
+        "back-and-forth",
+        "consolidate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By sending tennis balls back and forth across a physical sports court.",
+          "correct": false,
+          "note": "Incorrect: back-and-forth describes conversational dialogue, not athletic sports."
+        },
+        {
+          "id": "b",
+          "text": "By enabling continuous questioning, assumption challenging, iterative feedback, and progressive refinement of ideas.",
+          "correct": true,
+          "note": "Correct: bidirectional exchange unlocks collaborative augmentation."
+        },
+        {
+          "id": "c",
+          "text": "By forcing the AI to repeat the exact same sentence 100 times in a loop.",
+          "correct": false,
+          "note": "Incorrect: repetitive looping degrades conversation quality."
+        }
+      ],
+      "explanation": "A back-and-forth dialogue transforms AI interaction from basic mechanical automation into intellectual augmentation. By exchanging ideas, probing edge cases, challenging unstated assumptions, and offering corrective feedback, human and machine consolidate complex knowledge into superior solutions. The {{opt:a}} option takes the idiom literally. The {{opt:c}} option describes an unhelpful infinite loop. Dynamic conversational interaction allows engineers to explore complex architectural tradeoffs, discovering insights and edge-case solutions that neither partner would have produced in isolation, fostering deep technical creativity. This collaborative synergy unlocks novel engineering solutions that accelerate project timelines."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why is critical evaluation considered a 'non-negotiable' responsibility in professional AI use?",
+      "difficulty": "easy",
+      "term_refs": [
+        "non-negotiable",
+        "integrity",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because software licenses require engineers to sign printed papers with blue ink.",
+          "correct": false,
+          "note": "Incorrect: non-negotiable refers to ethical ownership, not physical stationery."
+        },
+        {
+          "id": "b",
+          "text": "Because language models will refuse to generate responses unless you praise them.",
+          "correct": false,
+          "note": "Incorrect: models generate outputs objectively based on prompt tokens."
+        },
+        {
+          "id": "c",
+          "text": "Because human authors remain legally and ethically accountable for the truthfulness, safety, and security of what they share.",
+          "correct": true,
+          "note": "Correct: professional accountability mandates active verification."
+        }
+      ],
+      "explanation": "Critical evaluation is non-negotiable because software engineers, architects, and writers bear total professional accountability for their deliverables. AI models generate text probabilistically and can produce subtle, confident hallucinations. Abdicating verification violates professional integrity and risks deploying catastrophic vulnerabilities to live networks. The {{opt:a}} option is an irrelevant stationery distraction. The {{opt:b}} option is factually false. Exercising non-negotiable discernment ensures that every line of code or technical recommendation is validated before it impacts live production environments, protecting corporate infrastructure from preventable service disruptions."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why is the 4D framework considered 'widely applicable' across the entire generative AI landscape?",
+      "difficulty": "medium",
+      "term_refs": [
+        "widely applicable",
+        "overnight",
+        "equipped"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because Delegation, Description, Discernment, and Diligence address fundamental human-machine collaboration principles that transcend specific models.",
+          "correct": true,
+          "note": "Correct: the 4Ds establish timeless collaboration skills for all AI platforms."
+        },
+        {
+          "id": "b",
+          "text": "Because future AI systems will completely eliminate all computer software code.",
+          "correct": false,
+          "note": "Incorrect: software engineering and code will continue to evolve."
+        },
+        {
+          "id": "c",
+          "text": "Because international treaties require all computer users to memorize the 4Ds by law.",
+          "correct": false,
+          "note": "Incorrect: the framework is an educational methodology, not a legal mandate."
+        }
+      ],
+      "explanation": "The 4D framework is widely applicable because it is built upon fundamental cognitive and organizational principles rather than narrow, ephemeral prompt hacks. Whether you collaborate with large language models, vision systems, autonomous CLI agents, or future reasoning models, you will always need to delegate wisely, describe intentions clearly, discern output quality, and exercise ethical diligence. The {{opt:c}} option is a legal fantasy. The {{opt:b}} option is unrealistic. Mastering these four competencies equips engineers with durable skills that remain relevant across technological generations."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does creating a 'Personal AI Policy' help resolve an ethical dilemma in a development team?",
+      "difficulty": "medium",
+      "term_refs": [
+        "dilemma",
+        "attribution",
+        "integrity"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It automatically uninstalls all code editors from employee laptops.",
+          "correct": false,
+          "note": "Incorrect: policies guide human behavior, not software uninstallation."
+        },
+        {
+          "id": "b",
+          "text": "It provides explicit decision-making criteria for data privacy, attribution disclosure, and quality control boundaries in advance.",
+          "correct": true,
+          "note": "Correct: pre-established rules guide ethical decisions during complex situations."
+        },
+        {
+          "id": "c",
+          "text": "It forces developers to delete all git commits every Friday evening.",
+          "correct": false,
+          "note": "Incorrect: deleting git history destroys valuable engineering records."
+        }
+      ],
+      "explanation": "A Personal AI Policy serves as an ethical compass when facing complex professional dilemmas, such as sharing proprietary logs, attributing co-created code, or deciding when AI disclosure is required. Having predefined rules on data confidentiality, disclosure thresholds, and verification checklists ensures you uphold professional integrity consistently under deadline pressure. The {{opt:a,c}} options are absurd, destructive caricatures. A well-constructed AI policy protects both the individual engineer's reputation and the organization's intellectual property, establishing clear guidelines for transparent and responsible technical collaboration across teams."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why is true AI fluency described as developing through continuous practice rather than 'overnight'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "overnight",
+        "consolidate",
+        "cover ground"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because mastering nuanced delegation, prompt description, and critical discernment requires building hands-on muscle memory across real projects.",
+          "correct": true,
+          "note": "Correct: practical collaboration skills require repeated real-world application."
+        },
+        {
+          "id": "b",
+          "text": "Because software engineering certificates take ten years to print on paper.",
+          "correct": false,
+          "note": "Incorrect: certificate printing is unrelated to developing collaboration skills."
+        },
+        {
+          "id": "c",
+          "text": "Because computer monitors only refresh their pixels once every twenty-four hours.",
+          "correct": false,
+          "note": "Incorrect: monitor refresh rates have no bearing on human learning curves."
+        }
+      ],
+      "explanation": "AI fluency cannot be achieved overnight because it is an active pair-programming craft, not passive memorization. Learning how to steer diverging conversations, spot subtle logic lapses, balance model temperature, and sanitize sensitive inputs requires experiential learning across diverse technical tasks. The {{opt:c}} option is an absurd hardware joke. The {{opt:b}} option is irrelevant. As you iteratively cover ground across real-world refactors and system designs, you consolidate practical intuition, turning the 4D framework into second nature and ensuring consistent high-quality engineering outputs."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does proper 'attribution' build stakeholder trust when delivering AI-assisted technical documentation?",
+      "difficulty": "medium",
+      "term_refs": [
+        "attribution",
+        "integrity",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It legally forces readers to pay royalties to the computer monitor manufacturer.",
+          "correct": false,
+          "note": "Incorrect: attribution is an ethical disclosure, not a hardware royalty."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that the documentation will never require updates in the future.",
+          "correct": false,
+          "note": "Incorrect: documentation must always be maintained as systems evolve."
+        },
+        {
+          "id": "c",
+          "text": "It transparently clarifies AI's role while demonstrating that human domain experts reviewed, verified, and endorsed the final content.",
+          "correct": true,
+          "note": "Correct: honest attribution confirms verification rigor and builds credibility."
+        }
+      ],
+      "explanation": "Providing clear attribution in technical documentation or software releases demonstrates transparency and professional integrity. When stakeholders see a clear diligence statement explaining that AI was used for scaffolding while human engineers verified all technical claims, confidence in the deliverable increases. The {{opt:a}} option is a bizarre legal claim. The {{opt:b}} option is unrealistic. Transparent attribution proves that the team adheres to high ethical standards and takes full responsibility for system accuracy, fostering an organizational culture of openness and technical excellence."
+    },
+    {
+      "id": "q8",
+      "prompt": "Reflecting on the course journey, how has covering this ground 'equipped' you for future technical leadership?",
+      "difficulty": "medium",
+      "term_refs": [
+        "cover ground",
+        "equipped",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "You have memorized a single magic prompt that solves all computer problems.",
+          "correct": false,
+          "note": "Incorrect: AI fluency relies on adaptable methodology rather than magic prompts."
+        },
+        {
+          "id": "b",
+          "text": "You are now legally permitted to ignore all software testing protocols forever.",
+          "correct": false,
+          "note": "Incorrect: testing protocols remain fundamental to engineering success."
+        },
+        {
+          "id": "c",
+          "text": "You now possess a structured 4D mental model to evaluate tools, design prompts, audit code, and enforce safety across your team.",
+          "correct": true,
+          "note": "Correct: provides a complete operational framework for AI-assisted engineering."
+        }
+      ],
+      "explanation": "Covering the complete AI Fluency curriculum equips engineers with a disciplined, holistic framework for technical collaboration. Instead of relying on random prompt hacks or treating AI as a mysterious black box, you now understand how to structure tasks, specify exact execution constraints, catch subtle hallucinations, and maintain ethical data safeguards. The {{opt:b,a}} options describe dangerous engineering anti-patterns. This comprehensive mental model empowers you to lead AI adoption responsibly across your organization, ensuring that innovative tools are deployed safely and effectively."
+    },
+    {
+      "id": "q9",
+      "prompt": "A junior developer uses a CLI agent to refactor a core network script without testing it. How does the 4D framework correct this?",
+      "difficulty": "hard",
+      "term_refs": [
+        "non-negotiable",
+        "silver bullet",
+        "integrity"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By reinforcing that AI is not a silver bullet, mandating non-negotiable Discernment testing in a virtual lab, and upholding Diligence accountability.",
+          "correct": true,
+          "note": "Correct: enforces the necessity of rigorous verification and human accountability."
+        },
+        {
+          "id": "b",
+          "text": "By blaming the language model vendor for generating valid syntax that was misapplied.",
+          "correct": false,
+          "note": "Incorrect: the deploying team remains responsible for verifying code before execution."
+        },
+        {
+          "id": "c",
+          "text": "By disconnecting the junior developer's internet access permanently.",
+          "correct": false,
+          "note": "Incorrect: constructive coaching and safety protocols resolve skill gaps."
+        }
+      ],
+      "explanation": "In this scenario, the junior developer committed a classic AI fluency mistake: assuming the tool is a silver bullet and skipping verification. The 4D framework corrects this by establishing that Discernment testing in a sandbox environment is non-negotiable. Furthermore, Diligence requires developers to stand behind their commits with personal accountability. The {{opt:c}} option is an unhelpful punitive reaction. The {{opt:b}} option avoids accountability. Enforcing 4D quality gates ensures that automated refactoring never bypasses critical verification standards, preventing broken configurations from reaching production networks."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does mastering the 4D framework empower engineers to thoughtfully 'shape' the future of human-AI collaboration?",
+      "difficulty": "hard",
+      "term_refs": [
+        "shape",
+        "consolidate",
+        "equipped"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By combining technical speed and computational scale with irreplaceable human creativity, domain expertise, and ethical stewardship.",
+          "correct": true,
+          "note": "Correct: harmonizes machine capabilities with human judgment to lead innovation."
+        },
+        {
+          "id": "b",
+          "text": "By replacing all human programmers with fully autonomous, unmonitored server robots.",
+          "correct": false,
+          "note": "Incorrect: the framework champions human-in-the-loop stewardship and oversight."
+        },
+        {
+          "id": "c",
+          "text": "By prohibiting all machine learning research across global universities.",
+          "correct": false,
+          "note": "Incorrect: the goal is fluent, responsible collaboration rather than technological prohibition."
+        }
+      ],
+      "explanation": "Mastering Delegation, Description, Discernment, and Diligence equips engineers to shape the future of technology responsibly. Rather than passively fearing automation or recklessly deploying unverified code, fluent practitioners leverage AI as a powerful collaborative partner. They combine the computational velocity of large language models with the indispensable human virtues of domain expertise, moral stewardship, and critical judgment. The {{opt:b,c}} options are dystopian extremes. True AI fluency elevates human potential, building a future where technology serves society with excellence and integrity."
+    }
+  ],
+  "speaking_prompts": [
+    "How do you consolidate the four Ds (Delegation, Description, Discernment, Diligence) in your daily technical work?",
+    "Why is critical evaluation a non-negotiable responsibility? How does a thoughtful back-and-forth conversation turn AI into a thinking partner?",
+    "Explain why AI models are not silver bullets. How do human expertise and integrity keep software systems robust?",
+    "How would you handle an ethical dilemma regarding code attribution and disclosure when delivering a project to a client?",
+    "Reflecting on how much ground we covered, how are you now better equipped to shape the future of AI-assisted engineering?"
+  ],
+  "homework": [
+    "Complete two final review sessions with the complete AI Fluency vocabulary deck in Anki. Say each key term and its definition aloud.",
+    "Record a 90-second speech explaining the full 4D framework (Delegation, Description, Discernment, Diligence) and how you apply it.",
+    "Draft a 3-minute talk plan for your teacher presenting your personal AI usage policy, covering attribution, security, and verification."
+  ]
+}

@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w03",
+  "title": "The 4D Framework",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can explain the 4D Framework and its four core competencies.",
+    "By the end of this lesson I can analyze how description and discernment form an iterative collaboration loop.",
+    "By the end of this lesson I can evaluate diligence, fairness, and transparency in AI-assisted workflows."
+  ],
+  "vocabulary": [
+    {
+      "term": "competency",
+      "definition_b1": "an important skill or ability needed to do a task well",
+      "collocations": [
+        "core competency",
+        "key competency"
+      ],
+      "ua": "компетентність; ключова навичка",
+      "source_sentence": "Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely."
+    },
+    {
+      "term": "navigate",
+      "definition_b1": "to deal successfully with a difficult situation or complex process",
+      "collocations": [
+        "navigate collaboration",
+        "navigate change"
+      ],
+      "ua": "орієнтуватися; успішно проходити крізь",
+      "source_sentence": "Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely."
+    },
+    {
+      "term": "offload",
+      "definition_b1": "to give a task or responsibility to someone else to reduce your work",
+      "collocations": [
+        "offload tasks",
+        "offload work"
+      ],
+      "ua": "перекладати завдання (на когось/щось); скидати навантаження",
+      "source_sentence": "Delegation isn't just about offloading tasks."
+    },
+    {
+      "term": "context-rich",
+      "definition_b1": "providing a lot of useful background information and clear details",
+      "collocations": [
+        "context-rich conversation",
+        "context-rich prompt"
+      ],
+      "ua": "насичений контекстом; інформативний",
+      "source_sentence": "Description goes beyond just writing prompts. It's about having detailed, context-rich conversations that establish what you're hoping to achieve, the format of the output, how you want the AI to approach the task, the context and information that the AI might need to best work with you on this task, and the tone and style of interaction."
+    },
+    {
+      "term": "articulate",
+      "definition_b1": "to express an idea, thought, or feeling clearly in words",
+      "collocations": [
+        "articulate your vision",
+        "articulate needs clearly"
+      ],
+      "ua": "чітко формулювати; висловлювати",
+      "source_sentence": "Effective description means articulating your needs and vision in a way that sets up both you and the AI for the greatest collaborative success."
+    },
+    {
+      "term": "align with",
+      "definition_b1": "to match or agree with specific goals, standards, or values",
+      "collocations": [
+        "align with values",
+        "align with goals"
+      ],
+      "ua": "узгоджуватися з; відповідати",
+      "source_sentence": "Does the reasoning make sense? Do the recommendations align with your brand values and audience?"
+    },
+    {
+      "term": "refinement",
+      "definition_b1": "the process of making small changes to improve something",
+      "collocations": [
+        "need refinement",
+        "continuous refinement"
+      ],
+      "ua": "доопрацювання; покращення; вдосконалення",
+      "source_sentence": "Discernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely."
+    },
+    {
+      "term": "set aside",
+      "definition_b1": "to decide not to use or consider something",
+      "collocations": [
+        "set aside completely",
+        "set aside an idea"
+      ],
+      "ua": "відкласти вбік; відмовитися від використання",
+      "source_sentence": "Discernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely."
+    },
+    {
+      "term": "fairness",
+      "definition_b1": "treating people equally and without unfair advantage",
+      "collocations": [
+        "ensure fairness",
+        "check for fairness"
+      ],
+      "ua": "справедливість; неупередженість",
+      "source_sentence": "For example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases?"
+    },
+    {
+      "term": "bias",
+      "definition_b1": "an unfair preference or prejudice for or against something",
+      "collocations": [
+        "potential bias",
+        "unconscious bias"
+      ],
+      "ua": "упередженість; викривлення",
+      "source_sentence": "For example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases?"
+    },
+    {
+      "term": "transparency",
+      "definition_b1": "being open, clear, and honest about how something is done",
+      "collocations": [
+        "ensure transparency",
+        "maintain transparency"
+      ],
+      "ua": "прозорість; відкритість",
+      "source_sentence": "Have you considered how to be transparent about the involvement of AI?"
+    },
+    {
+      "term": "stand behind",
+      "definition_b1": "to support and take full responsibility for a product or decision",
+      "collocations": [
+        "stand behind results",
+        "stand behind final products"
+      ],
+      "ua": "ручатися за; нести відповідальність за",
+      "source_sentence": "Diligence means taking ownership of your AI-assisted work and being willing to stand behind final products created using AI."
+    }
+  ],
+  "reading": {
+    "b1": "Rick Dacon from Ringling College introduces the **4D framework**. This framework guides human-AI collaboration across **automation**, **augmentation**, and **agency**. The goal is effective, efficient, ethical, and safe interaction. Four core **competencies** make the difference. They are **delegation**, **description**, **discernment**, and **diligence**.\n\n**Delegation** focuses on the big picture. You decide what work to handle yourself. You decide where AI can help. Effective delegation is not just about **offload**ing tasks. It requires a clear vision and strategic division of labor. For example, AI can review long documents. However, humans should keep critical analysis and final conclusions.\n\n**Description** is about clear communication. It goes far beyond short prompt commands. It means having **context-rich** conversations with AI. You should **articulate** your goal, format, context, and preferred tone clearly. For instance, you can ask AI to teach step by step instead of giving the answer.\n\n**Discernment** means evaluating AI outputs thoughtfully. You check if facts are accurate and logical. You verify whether suggestions **align with** your goals. Domain expertise helps you separate useful output from flawed output. You decide when AI ideas need **refinement** or when to **set aside** bad suggestions. Most interactions form small loops of **description** and **discernment**.\n\n**Diligence** focuses on responsible interaction. Users must ensure **fairness** and control for **bias** in AI decisions. They must protect sensitive data and maintain **transparency**. Diligence means taking ownership. You must be ready to **stand behind** any AI-assisted work.\n\nThese core **competencies** help learners **navigate** AI collaboration confidently. They are lasting skills that adapt as technology continues to change.",
+    "original": "# w03 — source material\n\nRaw text collected from Coursera. No editing, no cleaning.\nReadings: select the page text and paste it.\nVideos: use the Transcript tab under the player, not Subtitles.\n\nSeparator format:\n\n--- reading: <title> ---\n--- video N: <title> (MM:SS) ---\n\nTotal video duration in this module: ___ min\nWord count (wc -w): ___\nWords per minute: ___\n\n\n\n# The 4D Framework\n\n## What you’ll learn\n\nBy the end of this lesson you will be able to:\n\n- Explain the basic AI Fluency Framework and its core \"4Ds\": Delegation, Description, Discernment, and Diligence\n\n## The 4D framework\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nHi, my name is Rick Dacon from the Ringling College of Art and Design. Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely.\n\nNo matter how you're working with AI, whether through automation, augmentation, or agency, there are four essential competencies that make all the difference. We call them the four Ds: delegation, description, discernment, and diligence.\n\nFirst is delegation, which focuses on the big picture. What are you trying to accomplish? What kinds of work are involved? What work should you handle yourself? And where might AI be helpful?\n\nThink about a research project you're working on. You might decide to have your AI assistant review lengthy documents and data, then engage in a thoughtful discussion about the implications and findings, but reserve the critical analysis and final conclusions for yourself.\n\nTo delegate effectively, you need to understand your goal and the problem you're solving, recognize what AI can and can't do well, and, lastly, thoughtfully divide the work between you and the AI.\n\nDelegation isn't just about offloading tasks. It's about having a clear vision and strategically choosing how AI fits into your process. This thoughtful approach is essential for both effective and efficient AI collaboration.\n\nNext comes description, which focuses on clear communication with AI. Consider the difference between vaguely stating, \"Make me a logo,\" versus describing your company's values, target audience, preferred colors, style references, and so on.\n\nOr, if you're using an AI as a tutor, you might take the extra step to specify, \"Don't tell me the answer. Just help me work through this problem step by step so I can better understand the concept.\"\n\nDescription goes beyond just writing prompts. It's about having detailed, context-rich conversations that establish what you're hoping to achieve, the format of the output, how you want the AI to approach the task, the context and information that the AI might need to best work with you on this task, and the tone and style of interaction.\n\nEffective description means articulating your needs and vision in a way that sets up both you and the AI for the greatest collaborative success.\n\nThe third D is discernment, which involves thoughtfully evaluating what AI gives you. Let's say you've asked an AI assistant to suggest a marketing strategy. Your discernment comes into play as you assess: Are the facts accurate? Does the reasoning make sense? Do the recommendations align with your brand values and audience? And most importantly, does this output actually help you move forward?\n\nDiscernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely.\n\nMost of our interactions with AI involve small loops of description and discernment: describing what we need, evaluating what we get, refining our request, and so on. We'll explore this more deeply later in the course.\n\nFinally, there's diligence, which focuses on responsible AI interactions.\n\nFor example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases? When making important decisions with AI assistance, how are you verifying the accuracy of the information presented to you? Are you protecting sensitive data? Have you considered how to be transparent about the involvement of AI? Are you willing to be accountable for the AI-assisted work you have done?\n\nDiligence means taking ownership of your AI-assisted work and being willing to stand behind final products created using AI. Diligence is critical for safe and ethical AI collaboration.\n\nTo recap, AI fluency means developing practical skills, knowledge, insights, and values that help you use AI effectively, efficiently, ethically, and safely.\n\nAI fluency includes four key competencies: delegation to decide when and how to use AI, description to communicate clearly with AI, discernment to evaluate AI outputs, and diligence to use AI responsibly.\n\nWhat makes these competencies so valuable is that they aren't tied to specific AI tools or techniques that might become outdated. Instead, they're fundamental skills that will help you adapt and grow alongside this rapidly evolving technology.\n\n\n\nThis video introduces the four core competencies of AI Fluency, or the \"4Ds\": Delegation, Description, Discernment, and Diligence.\n\n- Delegation: Thoughtfully deciding what work to do with AI vs. doing yourself\n- Description: Communicating clearly with AI systems\n- Discernment: Evaluating AI outputs and behavior with a critical eye\n- Diligence: Ensuring you interact with AI responsibly\n\nWe explore how these competencies work together across different ways of engaging with AI, and why developing these skills prepares you for whatever AI evolution brings next.\n\n#### Key takeaways\n\n- AI Fluency means engaging with AI in ways that are effective, efficient, ethical, and safe\n- There are three primary ways we engage with AI:\n  - Automation: AI executes specific tasks based on your instructions\n  - Augmentation: You and AI collaborate as creative thinking and task execution partners\n  - Agency: You guide AI to work independently on your behalf, shaping its knowledge and behavior rather than specific actions\n- The AI Fluency Framework consists of four core competencies (the 4Ds):\n  - Delegation: Deciding what work to do with AI vs. yourself\n  - Description: Communicating effectively with AI systems\n  - Discernment: Evaluating AI outputs critically\n  - Diligence: Ensuring responsible AI collaboration\n- These competencies apply across all three ways of working with AI\n- Developing these competencies prepares you for evolving AI capabilities\n\n## Exercises\n\n### Exercise 1: Apply the 4D's\n\n*Estimated time: 5 minutes*\n\nPick one of these collaboration scenarios and consider how you might apply the 4D Framework:\n\n#### Communication project\n\nYou're working with an AI assistant to draft a series of emails for a marketing campaign.\n\n- **Delegation:** What aspects of this project would you handle yourself vs. collaborate on with AI?\n- **Description:** How would you communicate your vision for the campaign's tone, purpose, and success criteria to the AI?\n- **Discernment:** What criteria would help you evaluate whether the AI-drafted emails meet your needs?\n- **Diligence:** What considerations around transparency and responsibility would be important?\n\n#### Research project\n\nYou're using AI to help analyze a large dataset for a research paper.\n\n- **Delegation:** How would you divide the analytical work between yourself and the AI?\n- **Description:** What context would the AI need to understand about your research question to do its share of the tasks well?\n- **Discernment:** How would you verify the AI's analysis for accuracy?\n- **Diligence:** What ethical considerations might arise when publishing AI-assisted research?\n\n#### Creative project\n\nYou're collaborating with AI to develop character concepts for a story.\n\n- **Delegation:** What creative elements would you want to explore through AI collaboration vs. develop independently?\n- **Description:** How might you guide the AI to generate characters that fit your story's world?\n- **Discernment:** How would you decide which AI-suggested elements to keep, modify, or discard?\n- **Diligence:** How would you acknowledge AI's contribution to your creative work?\n\n### Exercise 2: Explore something you love\n\n*Estimated time: 5-10 minutes*\n\nSpend 5-10 minutes chatting with Claude about a topic you're passionate about and know well. We will be using Claude across exercises for the rest of the course, but you can also do these exercises with another AI. In fact, it might be worthwhile for you to try the exercises across this course with several AI assistants to get a feel for how they differ.\n\nInstructions:\n\n1. Choose a topic you know well and enjoy discussing such as a hobby, professional interest, favorite book series, etc.\n2. Have a natural conversation with Claude about this topic, like you would with someone who shares your interest.\n3. Try to notice moments where:\n   1. Claude enhances your thinking\n   2. You need to clarify or correct the Claude's understanding\n   3. Your expertise leads you to evaluate the Claude's responses\n\n### Exercise 3: Learn something new\n\n*Estimated time: 5-10 minutes*\n\nSpend 5-10 minutes asking Claude to teach you about a topic you're unfamiliar with but interested in exploring. See how this experience differs from your conversation about something you love and know well.\n\nInstructions:\n\n1. Choose a topic you'd like to learn more about.\n2. Engage Claude in a conversation to help you understand the basics of this topic. Don't worry about prompting the \"wrong way\" or the \"right way.\" Just ask Claude to teach you.\n3. Try to notice moments where the Claude:\n   1. Offers helpful explanations\n   2. Provides examples that make abstract ideas concrete\n   3. Responds naturally to your questions as they arise\n   4. Explains things where you would want to double check its explanations\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which of the 4Ds (Delegation, Description, Discernment, Diligence) do you feel most confident in already? Which might need more development?\n- Can you recall a recent AI interaction where the framework might have helped?\n- What specific skills from the 4D framework would most enhance your work or personal projects?\n\n#### What's next\n\nThe next lesson, Deep Dive 1: \"What is Generative AI?\" is a two-part technical lesson that explains the foundational workings of modern AI, how it differs from previous technologies, and its current capabilities and limitations. This knowledge will provide valuable context for the 4Ds and especially strengthen your Delegation competence.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "A researcher asks an AI to summarize 20 articles, but reserves the final conclusions for herself. Which competency does this demonstrate?",
+      "difficulty": "easy",
+      "term_refs": [
+        "competency",
+        "offload"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Strategic delegation that divides work thoughtfully rather than blindly offloading everything.",
+          "correct": true,
+          "note": "Correct: the human decides which parts AI handles and keeps critical judgment."
+        },
+        {
+          "id": "b",
+          "text": "Complete automation where the human gives up all responsibility for findings.",
+          "correct": false,
+          "note": "Incorrect: the researcher explicitly keeps the critical synthesis."
+        },
+        {
+          "id": "c",
+          "text": "Automatic transcription without reviewing the quality of the sources.",
+          "correct": false,
+          "note": "Incorrect: this does not describe the intentional division of research tasks."
+        }
+      ],
+      "explanation": "The correct choice is strategic delegation. Delegation is about understanding the problem, knowing what AI can do, and dividing work thoughtfully between yourself and the system. Rather than offloading the entire project, the researcher uses AI for reading speed while preserving human judgment for critical analysis. The {{opt:c}} option is wrong because summarizing documents is not simple transcription. The third is wrong because keeping final conclusions is the opposite of giving up responsibility. A useful extra nuance is that effective delegation often changes across project phases: early research may use more AI support, while final approval remains human."
+    },
+    {
+      "id": "q2",
+      "prompt": "Instead of typing 'Write an email', a manager describes the target audience, preferred tone, constraints, and success criteria. What is this?",
+      "difficulty": "easy",
+      "term_refs": [
+        "context-rich",
+        "articulate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "A context-rich description where the user articulates precise needs and constraints.",
+          "correct": true,
+          "note": "Correct: detailed description sets up the AI for collaborative success."
+        },
+        {
+          "id": "b",
+          "text": "A technical error that confuses the language model with too much detail.",
+          "correct": false,
+          "note": "Incorrect: background details and constraints improve output relevance."
+        },
+        {
+          "id": "c",
+          "text": "An example of diligence that eliminates all possible hallucinations instantly.",
+          "correct": false,
+          "note": "Incorrect: this is description, and prompts alone cannot guarantee total accuracy."
+        }
+      ],
+      "explanation": "The correct answer is context-rich description. Description in the 4D framework goes far beyond basic prompts. It involves articulating your goals, audience, format, background information, and interaction style clearly. The {{opt:b}} option is incorrect because modern language models benefit greatly from relevant context and explicit constraints. The {{opt:c}} option confuses description with diligence and assumes prompts alone prevent all errors. A practical tip when writing technical instructions is to provide negative constraints too, such as 'do not modify existing function names' or 'use only standard Python libraries'."
+    },
+    {
+      "id": "q3",
+      "prompt": "A developer reviews an AI-generated database schema and notices two redundant tables that do not match project goals. What should she do?",
+      "difficulty": "easy",
+      "term_refs": [
+        "align with",
+        "set aside",
+        "refinement"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delete the entire codebase and avoid using AI for software development forever.",
+          "correct": false,
+          "note": "Incorrect: discernment refines outputs iteratively instead of abandoning collaboration."
+        },
+        {
+          "id": "b",
+          "text": "Use discernment to set aside the redundant tables and request targeted refinement.",
+          "correct": true,
+          "note": "Correct: critical evaluation identifies what to keep and what to adjust."
+        },
+        {
+          "id": "c",
+          "text": "Accept the schema without changes because AI models never make architecture mistakes.",
+          "correct": false,
+          "note": "Incorrect: AI outputs often require domain verification and editing."
+        }
+      ],
+      "explanation": "The developer should apply discernment to evaluate the output, set aside unnecessary parts, and request refinement. Discernment relies on your domain expertise to separate useful code from flawed ideas and check whether suggestions align with your architecture. Accepting the schema blindly is dangerous because AI can propose redundant structures. Completely abandoning AI is also unnecessary because small iterative corrections solve most problems. An extra insight is that discernment works best when combined with automated unit tests or schema validation scripts, giving you objective evidence alongside your personal review."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why are the core competencies in the 4D framework considered durable over time?",
+      "difficulty": "medium",
+      "term_refs": [
+        "competency",
+        "navigate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because they only work with current version chat models and will expire next year.",
+          "correct": false,
+          "note": "Incorrect: the entire framework is designed to avoid obsolescence."
+        },
+        {
+          "id": "b",
+          "text": "Because prompts memorized today will produce identical results in every future model.",
+          "correct": false,
+          "note": "Incorrect: specific prompt tricks frequently change or break across model updates."
+        },
+        {
+          "id": "c",
+          "text": "Because they focus on human judgment and collaboration rather than temporary tool settings.",
+          "correct": true,
+          "note": "Correct: fundamental skills help users navigate evolving technologies."
+        }
+      ],
+      "explanation": "The 4D competencies are durable because they represent fundamental human abilities—deciding when to delegate, communicating goals clearly, evaluating results, and taking responsibility. These skills help you navigate technological changes regardless of which AI tool you use. The {{opt:a}} option is wrong because the framework specifically avoids tool-dependent rules. The {{opt:b}} option is wrong because exact prompt templates often become obsolete when models update. For example, whether you work with text models, code agents, or multimodal systems, the need to evaluate truthfulness and verify fairness remains identical across every platform."
+    },
+    {
+      "id": "q5",
+      "prompt": "An HR team uses AI to screen job applications. Which action best demonstrates diligence?",
+      "difficulty": "medium",
+      "term_refs": [
+        "fairness",
+        "bias",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Audit candidate criteria for bias, ensure fairness, and maintain transparency about AI usage.",
+          "correct": true,
+          "note": "Correct: diligence actively manages ethics, bias, and accountability."
+        },
+        {
+          "id": "b",
+          "text": "Automate all hiring decisions fully without human oversight to increase speed.",
+          "correct": false,
+          "note": "Incorrect: unmonitored automation can amplify bias and violates diligence."
+        },
+        {
+          "id": "c",
+          "text": "Hide AI usage from applicants and delete all screening logs to avoid questions.",
+          "correct": false,
+          "note": "Incorrect: secrecy and deleting records contradict ethical transparency."
+        }
+      ],
+      "explanation": "The HR team demonstrates diligence by testing screening criteria for potential bias, ensuring fairness, and being transparent about AI assistance. Diligence means taking active ownership of ethics, safety, and accountability in AI-assisted work. The {{opt:b}} option is irresponsible because automated hiring without human oversight can perpetuate historical discrimination. The {{opt:c}} option contradicts transparency and makes auditing impossible. In many jurisdictions, regulations now legally require organizations to disclose automated employment decision tools and provide candidate appeal mechanisms, showing that diligence is both an ethical and legal necessity."
+    },
+    {
+      "id": "q6",
+      "prompt": "What happens in a typical 'description-discernment loop' during an AI coding session?",
+      "difficulty": "medium",
+      "term_refs": [
+        "articulate",
+        "refinement",
+        "align with"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The AI rewrites your codebase without receiving any input or feedback from you.",
+          "correct": false,
+          "note": "Incorrect: human guidance and critical review are essential to the loop."
+        },
+        {
+          "id": "b",
+          "text": "You write a prompt once and never review the resulting code before deployment.",
+          "correct": false,
+          "note": "Incorrect: a loop requires repeated evaluation and prompt adjustment."
+        },
+        {
+          "id": "c",
+          "text": "You articulate a task, evaluate the output, and refine instructions until results align with goals.",
+          "correct": true,
+          "note": "Correct: description and discernment operate in an iterative cycle."
+        }
+      ],
+      "explanation": "In a description-discernment loop, you articulate your request, carefully evaluate the AI output against your requirements, and provide refinement feedback in iterative cycles. This repeating loop turns collaboration into an evolving dialogue where both prompt and output improve. The second choice ignores discernment entirely by skipping code review. The third choice describes unconstrained agency without human direction. A practical example is refactoring: you ask the model to simplify a function, inspect the diff for edge cases, and ask it to preserve specific error handling it missed on the first pass."
+    },
+    {
+      "id": "q7",
+      "prompt": "A consultant publishes an AI-generated market report under his own name with false statistics. Why did he fail diligence?",
+      "difficulty": "medium",
+      "term_refs": [
+        "stand behind",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "He used an AI assistant instead of writing every word manually on paper.",
+          "correct": false,
+          "note": "Incorrect: using AI is permitted, but unverified claims violate diligence."
+        },
+        {
+          "id": "b",
+          "text": "He failed to verify the facts and was unwilling or unable to stand behind his final product.",
+          "correct": true,
+          "note": "Correct: diligence requires verifying accuracy and owning the final result."
+        },
+        {
+          "id": "c",
+          "text": "He provided too many collocations and definitions in his initial prompt.",
+          "correct": false,
+          "note": "Incorrect: prompt vocabulary has no bearing on ethical accountability."
+        }
+      ],
+      "explanation": "The consultant failed diligence because he did not verify the statistics and cannot legitimately stand behind the final product. Diligence requires taking personal ownership of your work, ensuring accuracy, and remaining accountable for errors regardless of whether AI drafted the text. Using AI tools is completely acceptable, but publishing unverified hallucinations under your name breaches professional ethics. A robust diligence checklist includes cross-referencing every cited number against original primary sources, checking calculation methods, and maintaining transparency about how AI contributed to the document."
+    },
+    {
+      "id": "q8",
+      "prompt": "How does domain expertise influence your ability to use discernment when collaborating with AI?",
+      "difficulty": "medium",
+      "term_refs": [
+        "refinement",
+        "align with",
+        "set aside"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Domain expertise makes AI assistants unnecessary for all professional tasks.",
+          "correct": false,
+          "note": "Incorrect: experts use AI effectively for speed and augmentation."
+        },
+        {
+          "id": "b",
+          "text": "Expertise guarantees that the AI model will never generate hallucinations.",
+          "correct": false,
+          "note": "Incorrect: human knowledge does not alter model generation limits."
+        },
+        {
+          "id": "c",
+          "text": "Expertise gives you the critical insight to catch subtle errors and guide necessary refinement.",
+          "correct": true,
+          "note": "Correct: domain knowledge enables accurate evaluation of AI output."
+        }
+      ],
+      "explanation": "Domain expertise allows you to evaluate AI outputs critically, recognize subtle hallucinations, verify whether recommendations align with best practices, and guide targeted refinement. Non-experts often accept plausible-sounding but incorrect answers because they lack the background to judge accuracy. The {{opt:a}} option is wrong because experts often achieve the highest productivity gains from AI by delegating routine work. The third is wrong because AI models generate errors independently of who is prompting them. Deep domain insight turns AI from a risky black box into a powerful thinking partner."
+    },
+    {
+      "id": "q9",
+      "prompt": "An autonomous agent suggests modifying firewall rules on a live router. Which plan best balances delegation and diligence?",
+      "difficulty": "hard",
+      "term_refs": [
+        "offload",
+        "stand behind",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delegate rule analysis and diff generation to AI, but require human review before applying changes.",
+          "correct": true,
+          "note": "Correct: balances automation efficiency with strict human accountability."
+        },
+        {
+          "id": "b",
+          "text": "Offload all live configuration updates to the agent without saving backup scripts or logs.",
+          "correct": false,
+          "note": "Incorrect: unmonitored live updates create severe security and stability risks."
+        },
+        {
+          "id": "c",
+          "text": "Prohibit all AI network analysis because delegation is never safe in infrastructure.",
+          "correct": false,
+          "note": "Incorrect: read-only analysis and draft generation are safe with proper checks."
+        }
+      ],
+      "explanation": "The best plan delegates traffic analysis and draft rule generation to the agent, while requiring human verification and manual approval before touching live infrastructure. This allows the network engineer to stand behind the configuration while maintaining transparency through diff inspection and logs. Offloading live changes without human checks creates severe operational hazards. Completely forbidding AI analysis misses valuable optimization and diagnostic support. In professional DevOps workflows, this pattern is known as human-in-the-loop (HITL), ensuring automated speed never bypasses critical safety verification."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why is 'prompt engineering' insufficient on its own to achieve true AI fluency in complex projects?",
+      "difficulty": "hard",
+      "term_refs": [
+        "competency",
+        "navigate",
+        "context-rich"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because modern AI assistants do not read or interpret text prompts anymore.",
+          "correct": false,
+          "note": "Incorrect: text-based prompting remains the primary human interface."
+        },
+        {
+          "id": "b",
+          "text": "Because prompting covers only description, whereas fluency also demands delegation, discernment, and diligence.",
+          "correct": true,
+          "note": "Correct: prompting is just one of four interconnected competencies."
+        },
+        {
+          "id": "c",
+          "text": "Because prompt engineering has been completely replaced by hardware accelerators.",
+          "correct": false,
+          "note": "Incorrect: prompt crafting remains relevant as part of description."
+        }
+      ],
+      "explanation": "Prompt engineering alone is insufficient because it addresses only the description competency. True AI fluency is a multi-dimensional ability requiring you to decide what to delegate, evaluate output quality critically with discernment, and ensure responsible, transparent deployment through diligence. The {{opt:c,a}} options are factually absurd because prompts remain the primary interface for human-AI interaction. In real engineering projects, writing a clever prompt will not save you if you delegated the wrong task, failed to catch algorithmic flaws, or neglected data privacy requirements."
+    }
+  ],
+  "speaking_prompts": [
+    "When you collaborate with a CLI agent on a coding task, how do you divide work? Explain your approach to delegation and how you avoid simply offloading tasks.",
+    "Why is a context-rich prompt better than a short command? Give an example where you had to articulate your vision to an AI.",
+    "Describe a situation where an AI output did not align with your goal. How did discernment help you decide whether to request refinement or set it aside?",
+    "How do you practice diligence and maintain transparency when creating software or documentation with AI tools? What helps you stand behind the final result?",
+    "Which of the four Ds (Delegation, Description, Discernment, Diligence) is most critical when using AI for network administration or drone projects? Defend your opinion."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 3 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the description-discernment loop using at least four vocabulary terms. Check the transcription for accurate pronunciation.",
+    "Draft a short 3-minute talk plan for your teacher about applying the 4D Framework to one of your real technical projects."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

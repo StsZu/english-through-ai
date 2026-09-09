@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w06",
+  "title": "Delegation",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can explain the three components of Delegation: Problem Awareness, Platform Awareness, and Task Delegation.",
+    "By the end of this lesson I can evaluate which tasks to automate, augment, or reserve exclusively for human judgment.",
+    "By the end of this lesson I can strategically distribute programming and networking tasks across CLI agents."
+  ],
+  "vocabulary": [
+    {
+      "term": "nuanced",
+      "definition_b1": "having small and subtle but important differences in meaning or approach",
+      "collocations": [
+        "nuanced understanding",
+        "surprisingly nuanced"
+      ],
+      "ua": "тонкий; сповнений важливих нюансів",
+      "source_sentence": "That might sound simple, but it's surprisingly nuanced."
+    },
+    {
+      "term": "cornerstone",
+      "definition_b1": "something of basic and fundamental importance upon which everything else depends",
+      "collocations": [
+        "cornerstone of success",
+        "cornerstone of delegation"
+      ],
+      "ua": "наріжний камінь; фундаментальна основа",
+      "source_sentence": "The cornerstone of good delegation isn't actually about AI at all."
+    },
+    {
+      "term": "time-consuming",
+      "definition_b1": "taking a lot of time and effort to complete",
+      "collocations": [
+        "time-consuming task",
+        "time-consuming process"
+      ],
+      "ua": "трудомісткий; такий, що забирає багато часу",
+      "source_sentence": "Are there areas that are simple but time-consuming?"
+    },
+    {
+      "term": "intervention",
+      "definition_b1": "action taken to become intentionally involved in a situation to improve it",
+      "collocations": [
+        "human intervention",
+        "require intervention"
+      ],
+      "ua": "втручання; пряма участь людини",
+      "source_sentence": "You'll struggle to effectively work with AI assistants, evaluate their outputs, or know when human intervention is necessary."
+    },
+    {
+      "term": "problem awareness",
+      "definition_b1": "clearly understanding your project goals and work requirements before using AI",
+      "collocations": [
+        "develop problem awareness",
+        "lack problem awareness"
+      ],
+      "ua": "розуміння проблеми / суті завдання",
+      "source_sentence": "We call this first concept problem awareness: the ability to clearly define your goals and understand what work is needed before bringing AI into the picture."
+    },
+    {
+      "term": "platform awareness",
+      "definition_b1": "working knowledge of available AI systems and their specific strengths and limits",
+      "collocations": [
+        "build platform awareness",
+        "require platform awareness"
+      ],
+      "ua": "розуміння можливостей платформ (моделей/інструментів)",
+      "source_sentence": "We call this second concept platform awareness: a working knowledge of available AI systems and their specific capabilities and limitations."
+    },
+    {
+      "term": "task delegation",
+      "definition_b1": "the strategic process of dividing work between humans and AI systems",
+      "collocations": [
+        "effective task delegation",
+        "strategic task delegation"
+      ],
+      "ua": "делегування завдань (стратегічний розподіл роботи)",
+      "source_sentence": "We call this third concept task delegation: the strategic process of dividing work between humans and AI."
+    },
+    {
+      "term": "prioritize",
+      "definition_b1": "to treat something as more important than other things",
+      "collocations": [
+        "prioritize speed",
+        "prioritize accuracy"
+      ],
+      "ua": "надавати пріоритет; виділяти головне",
+      "source_sentence": "Do you know which AI systems prioritize speed over depth, or accuracy over creativity?"
+    },
+    {
+      "term": "distribute",
+      "definition_b1": "to divide and share tasks or resources among different people or systems",
+      "collocations": [
+        "distribute tasks",
+        "distribute work thoughtfully"
+      ],
+      "ua": "розподіляти",
+      "source_sentence": "Once you understand both your problem and the available AI assistance, the real art of delegation emerges: thoughtfully distributing work between human and artificial intelligence to leverage the unique strengths of each."
+    },
+    {
+      "term": "exclusively",
+      "definition_b1": "only and completely, without sharing with anyone or anything else",
+      "collocations": [
+        "reserved exclusively",
+        "exclusively human"
+      ],
+      "ua": "виключно; суто",
+      "source_sentence": "Are there critical judgment areas that should remain exclusively human and shouldn't be delegated at all?"
+    },
+    {
+      "term": "hand over the wheel",
+      "definition_b1": "to surrender total control and responsibility to someone or something else",
+      "collocations": [
+        "hand over the wheel",
+        "not hand over the wheel"
+      ],
+      "ua": "відпустити кермо; повністю віддати контроль",
+      "source_sentence": "Effective AI collaboration isn't about handing over the wheel and calling it a day."
+    },
+    {
+      "term": "call it a day",
+      "definition_b1": "to stop working or conclude that a task is finished",
+      "collocations": [
+        "call it a day",
+        "ready to call it a day"
+      ],
+      "ua": "вважати справу завершеною; закінчувати роботу",
+      "source_sentence": "Effective AI collaboration isn't about handing over the wheel and calling it a day."
+    }
+  ],
+  "reading": {
+    "b1": "Delegation is the first core competency of AI fluency. It focuses on effective and efficient collaboration. At its core, delegation is surprisingly **nuanced**. It requires deciding what work to handle yourself. It also determines where AI assistance provides value. Surprisingly, the **cornerstone** of good delegation is not AI technology. It is your own domain expertise and clear understanding.\n\nDelegation contains three key components. First is **problem awareness**. Before involving AI, define your project goals and success criteria. Identify simple, **time-consuming** tasks that can be automated. Pinpoint areas of uncertainty where you need a thinking partner. Without clear goals, even the most advanced AI will fail. The best AI collaborators are domain experts first and AI delegators second.\n\nThe second component is **platform awareness**. AI tools evolve rapidly and offer different strengths. Some models **prioritize** speed, while others focus on deep reasoning. Knowing which tool fits your task requires continuous hands-on experimentation.\n\nThe third component is **task delegation**. This is the strategic art of dividing labor. You **distribute** work between human intelligence and AI systems. You decide which workflows benefit from automation or augmentation. Certain critical decisions must remain **exclusively** human. Effective collaboration is never about **hand over the wheel** and **call it a day**. It requires continuous human oversight and thoughtful partnership.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1402\nWords per minute: 140\nVerdict: 130-150 needs pre-teaching\n---\n\n# w06 — source material\n\nRaw text collected from Coursera. No editing, no cleaning.\nReadings: select the page text and paste it.\nVideos: use the Transcript tab under the player, not Subtitles.\n\nSeparator format:\n\n--- reading: <title> ---\n--- video N: <title> (MM:SS) ---\n\nTotal video duration in this module: ___ min\nWord count (wc -w): ___\nWords per minute: ___\n\n\n\n# A closer look at Delegation\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Understand the Delegation competency and its three components: Problem Awareness, Platform Awareness, and Task Delegation\n- Recognize when and how to delegate tasks to AI effectively\n- Develop awareness of task, platform, and mode considerations when working with AI\n\n## A closer look at delegation\n\nIn this video, we're going to take a closer look at the delegation competency. Remember that AI fluency is about working with AI in ways that are effective, efficient, ethical, and safe.\n\nDelegation is primarily focused on the first two of these, helping you work effectively and efficiently with AI assistance.\n\nAt its core, delegation is about deciding what work is to be done, what work you should do yourself, and what work might be better suited to AI. That might sound simple, but it's surprisingly nuanced.\n\nEffective delegation requires understanding both what you're trying to accomplish and what you and AI can each realistically do. It's about breaking down complex work into manageable pieces and making strategic decisions about who handles which part, whether through automation, augmentation, or agency.\n\nHere's something that might surprise you.\n\nThe cornerstone of good delegation isn't actually about AI at all. It's about your own expertise and your own understanding of what you're trying to accomplish.\n\nBefore involving AI in any project, take a moment to answer some important questions. What exactly are you trying to accomplish? What are you trying to create or solve? What is your vision or key project goals? What does success look like to you?\n\nAnd ask yourself what kind of thinking and work is needed to get there. Are there areas that are simple but time-consuming? Areas of uncertainty where you could use a trusted thinking partner? Areas of ignorance where what you need is more data? Or areas requiring critical judgment?\n\nEvery project and every domain is different. We can't make you an expert in your problem space. But we can say that without a clear understanding of your goals and the work involved, even the most advanced AI won't get you where you need to go.\n\nYou'll struggle to effectively work with AI assistants, evaluate their outputs, or know when human intervention is necessary. The most effective AI collaborators are experts in their fields first and AI delegators second.\n\nWe call this first concept problem awareness: the ability to clearly define your goals and understand what work is needed before bringing AI into the picture.\n\nBeyond understanding your problem, you also need a working knowledge of the AI landscape. Different AI systems offer vastly different capabilities, and this field evolves almost daily.\n\nEffective delegation isn't about finding one perfect system. It's about understanding the unique strengths and limitations of the various options available to you.\n\nHave you investigated which models perform best for the kind of work you have in mind? Do you know which AI systems prioritize speed over depth, or accuracy over creativity?\n\nThis course includes several technical sections that will help you build this knowledge, but the landscape moves quickly. The best approach is hands-on. Experiment with different AI systems as often as you can and develop your own insights based on personal experience.\n\nWe call this second concept platform awareness: a working knowledge of available AI systems and their specific capabilities and limitations.\n\nOnce you understand both your problem and the available AI assistance, the real art of delegation emerges: thoughtfully distributing work between human and artificial intelligence to leverage the unique strengths of each.\n\nAsk yourself which specific parts of your workflow would benefit from automation, or where would an augmentation approach create more value than either working alone or fully automating? Are there critical judgment areas that should remain exclusively human and shouldn't be delegated at all? What routine interactions can AI agents handle on your behalf?\n\nWith a clear understanding of both your problem and available AI systems, you can make informed decisions about which aspects of work should be automated by AI, completed through human-AI collaboration, reserved exclusively for human execution, or handled by AI agents acting on your behalf.\n\nWe call this third concept task delegation: the strategic process of dividing work between humans and AI.\n\nTo recap, delegation involves three key elements: problem awareness, understanding your goals and the problem to be solved; platform awareness, understanding AI capabilities and limitations; and task delegation, strategically dividing the work.\n\nThis competency highlights something important. Effective AI collaboration isn't about handing over the wheel and calling it a day. It's about making thoughtful choices and delegating work that leverages the unique strengths of both human and artificial intelligence.\n\n\n\nThis video explores the first core competency of AI Fluency: Delegation. We explain that Delegation focuses on deciding what work to do yourself, what to collaborate on with AI, and how to distribute tasks effectively. We go over the three key components of Delegation:\n\n- Problem Awareness: Understanding your goals and the work involved to achieve it\n- Platform Awareness: Knowing what different AI systems can do\n- Task Delegation: Strategically dividing work between you and AI\n\nWe also emphasize why effective Delegation requires both expertise in your field and understanding of AI capabilities —and why it's essential for working effectively and efficiently with AI systems.\n\n#### Key takeaways\n\n- Delegation is about making thoughtful decisions about what work to do yourself, what to do together with AI, or what to let AI handle independently, and how to distribute those tasks.\n- Problem Awareness means clearly understanding your goals and the nature of the work before involving AI.\n- Platform Awareness involves understanding the capabilities and limitations of different AI systems.\n- Task Delegation is the process of thoughtfully distributing work between humans and AI to leverage the strengths of each.\n- Effective delegation requires both domain expertise and an understanding of AI capabilities.\n- The goal isn't to automate everything, but to create the most effective human-AI partnership for any given task or goal.\n\n## Exercises\n\n### Analyze tasks with an AI assistant\n\nInstructions:\n\n1. Pick a simple task from your work or personal life (something fairly small like drafting an email, outlining a presentation, or planning a meeting or event).\n2. Start a conversation with Claude\n3. With Claude, share the task you are thinking about doing.\n   1. E.g. \"Hi Claude, I'm preparing how to [insert task] and want to discuss with you what a delegation plan may look like for figuring out which parts I should delegate to an AI like you vs. not. Can you help me with this?\"\n4. Together, explore these questions:\n   1. What is the overall vision for the task? What does a good result look like?\n   2. What are the different bits of work needed to get there?\n   3. Which of these bits of work require human expertise, creativity, or judgment?\n   4. *Note: When discussing these questions, have an actual conversation! Don't just make statements or list answers. Actually have a chat back and forth—you each may see something the other doesn't!*\n5. Work together to create a simple delegation plan that uses both your strengths and the AI's strengths.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Think about a recent project where you worked with AI. How might your approach have been different with this Delegation framework in mind?\n- What types of tasks in your work or studies do you think would benefit most from AI collaboration?\n\n#### What's next\n\nIn the next lesson, you'll apply what you've learned about Delegation to a multi-step project that you'll work on throughout the rest of this course. You'll select a project that interests you, define your vision for it, break it down into tasks, and create a delegation plan that strategically divides work between you and AI (much like you practiced in this lesson). This project will serve as a practical canvas for applying all the AI Fluency competencies as you progress through the course.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "According to the lesson, what is the true cornerstone of effective AI delegation?",
+      "difficulty": "easy",
+      "term_refs": [
+        "cornerstone",
+        "problem awareness"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Buying the most expensive subscription plan available on the market.",
+          "correct": false,
+          "note": "Incorrect: tool price has no bearing on strategic delegation competence."
+        },
+        {
+          "id": "b",
+          "text": "Your own domain expertise and clear understanding of project goals before involving AI.",
+          "correct": true,
+          "note": "Correct: domain knowledge is the foundation of successful delegation."
+        },
+        {
+          "id": "c",
+          "text": "Memorizing hundreds of complex Python scripts for server management.",
+          "correct": false,
+          "note": "Incorrect: technical coding tricks do not replace problem awareness."
+        }
+      ],
+      "explanation": "The cornerstone of effective delegation is your own domain expertise and problem awareness. Before touching any AI interface, you must clearly define what success looks like, understand the underlying problem, and recognize the specific cognitive steps needed to reach the solution. The {{opt:c}} option is incorrect because technical script memorization does not provide high-level project vision. The {{opt:a}} option is wrong because expensive software cannot compensate for unclear goals. Effective delegators are domain experts first, using AI to execute well-scoped tasks with precision. In practice, this means knowing which edge cases to test before asking an agent to write code."
+    },
+    {
+      "id": "q2",
+      "prompt": "What does 'platform awareness' mean in the context of the 4D delegation framework?",
+      "difficulty": "easy",
+      "term_refs": [
+        "platform awareness",
+        "prioritize"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Restricting your workflow strictly to one chatbot forever without testing new models.",
+          "correct": false,
+          "note": "Incorrect: platform awareness encourages continuous multi-tool exploration."
+        },
+        {
+          "id": "b",
+          "text": "A working knowledge of available AI systems and knowing which tools prioritize speed, depth, or reasoning.",
+          "correct": true,
+          "note": "Correct: platform awareness matches task needs with model capabilities."
+        },
+        {
+          "id": "c",
+          "text": "Memorizing the physical layout of hardware servers inside data centers.",
+          "correct": false,
+          "note": "Incorrect: platform awareness focuses on functional model capabilities."
+        }
+      ],
+      "explanation": "Platform awareness is having an up-to-date working knowledge of available AI systems, models, and specialized tools. It allows you to select the right tool for each specific task—knowing which models prioritize rapid code generation, which offer deep extended-thinking capabilities, and which support large context windows. The {{opt:c}} option is an irrelevant hardware detail. The {{opt:a}} option directly opposes platform awareness, which encourages active hands-on experimentation. Understanding platform trade-offs ensures that you delegate tasks to tools best equipped to handle them. For instance, using a fast model for repetitive linting saves both time and token budget compared to using heavy reasoning models."
+    },
+    {
+      "id": "q3",
+      "prompt": "What is the primary danger of 'handing over the wheel and calling it a day' when working with AI?",
+      "difficulty": "easy",
+      "term_refs": [
+        "hand over the wheel",
+        "call it a day",
+        "intervention"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "You forfeit critical oversight, risking undetected errors, security issues, and poor alignment with goals.",
+          "correct": true,
+          "note": "Correct: unmonitored delegation eliminates necessary human intervention."
+        },
+        {
+          "id": "b",
+          "text": "The AI model will refuse to generate any output unless you watch it continuously.",
+          "correct": false,
+          "note": "Incorrect: models generate text regardless of whether you review it."
+        },
+        {
+          "id": "c",
+          "text": "The computer keyboard will physically disconnect itself from the workstation.",
+          "correct": false,
+          "note": "Incorrect: hardware components are not affected by management style."
+        }
+      ],
+      "explanation": "Handing over the wheel and calling it a day means abdicating human responsibility and assuming the AI will handle everything perfectly without supervision. This dangerous anti-pattern leads to undetected hallucinations, broken dependencies, or security vulnerabilities because no human intervention verifies output quality. The {{opt:c}} option is an absurd hardware joke. The {{opt:b}} option is false because AI systems execute prompts blindly without demanding user engagement. Effective delegation maintains a human-in-the-loop posture to steer, review, and approve critical deliverables. Ultimately, when an automated script breaks production services, the human engineer remains solely accountable for the outcome."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why is delegation described as 'surprisingly nuanced' rather than a simple binary choice?",
+      "difficulty": "medium",
+      "term_refs": [
+        "nuanced",
+        "distribute",
+        "exclusively"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models can only be operated during daylight hours.",
+          "correct": false,
+          "note": "Incorrect: time of day has no impact on delegation complexity."
+        },
+        {
+          "id": "b",
+          "text": "Because every single line of code must always be written by a human without tools.",
+          "correct": false,
+          "note": "Incorrect: the goal is strategic collaboration, not avoiding assistance."
+        },
+        {
+          "id": "c",
+          "text": "Because tasks can be split across automation, augmentation, agency, or reserved exclusively for humans.",
+          "correct": true,
+          "note": "Correct: delegation requires fine-grained strategic task distribution."
+        }
+      ],
+      "explanation": "Delegation is surprisingly nuanced because it is rarely an all-or-nothing decision. Within a single software project, routine formatting can be automated, complex architecture explored through augmentation, issue monitoring handled via agency, and final security authorization kept exclusively human. The {{opt:a}} option is nonsensical. The {{opt:b}} option ignores the massive productivity benefits of modern AI tools. Mastering task distribution requires analyzing cognitive requirements, risk profiles, and tool reliability for every subtask rather than making sweeping assumptions. By strategically matching each subtask to the right collaboration mode, developers maximize efficiency without introducing unnecessary operational risks."
+    },
+    {
+      "id": "q5",
+      "prompt": "A developer needs to convert 100 CSV log files into JSON format. Which delegation mode fits best?",
+      "difficulty": "medium",
+      "term_refs": [
+        "time-consuming",
+        "task delegation"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Automation, because the task is simple, repetitive, time-consuming, and has a well-defined outcome.",
+          "correct": true,
+          "note": "Correct: structured repetitive data conversion is an ideal automation target."
+        },
+        {
+          "id": "b",
+          "text": "Augmentation, because the developer needs a philosophical discussion for every single file.",
+          "correct": false,
+          "note": "Incorrect: repetitive formatting does not require creative discussion."
+        },
+        {
+          "id": "c",
+          "text": "Exclusively human manual typing to ensure the developer stays busy for days.",
+          "correct": false,
+          "note": "Incorrect: manual retyping of repetitive data is wasteful and error-prone."
+        }
+      ],
+      "explanation": "Converting 100 CSV log files into JSON is a straightforward, time-consuming task with a deterministic, fixed target schema. Strategic task delegation identifies this as an ideal candidate for full automation through a small script or CLI agent instruction. Augmentation is unnecessary because there is no conceptual ambiguity or need for creative debate. Manual typing is inefficient and introduces human transcription errors. Delegating routine data transformation frees the engineer to focus on higher-value diagnostic analysis and system optimization. In production workflows, automated pipelines can run overnight on hundreds of files without requiring active engineer attention."
+    },
+    {
+      "id": "q6",
+      "prompt": "An architect is designing an authentication system with complex regulatory constraints. What should remain exclusively human?",
+      "difficulty": "medium",
+      "term_refs": [
+        "exclusively",
+        "intervention",
+        "cornerstone"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Final compliance sign-off, threat modeling decisions, and legal liability authorization.",
+          "correct": true,
+          "note": "Correct: critical accountability and legal judgment must remain human."
+        },
+        {
+          "id": "b",
+          "text": "Typing boilerplate import statements at the top of code files.",
+          "correct": false,
+          "note": "Incorrect: boilerplate syntax can be generated safely by AI assistants."
+        },
+        {
+          "id": "c",
+          "text": "Reading public documentation about encryption standards.",
+          "correct": false,
+          "note": "Incorrect: AI can summarize public documentation effectively."
+        }
+      ],
+      "explanation": "Critical security decisions, compliance sign-offs, threat modeling, and legal accountability must remain exclusively human. While AI can draft architecture diagrams, summarize regulations, or suggest code snippets, only qualified engineers possess the legal authority and ethical responsibility to stand behind security architectures. The {{opt:b,c}} options describe routine tasks that AI handles safely. Strategic delegation protects organizations by establishing clear boundaries where human intervention is mandatory before deploying sensitive infrastructure. Relying on AI to authorize security policies without expert verification introduces severe vulnerability risks that automated tools cannot evaluate responsibly."
+    },
+    {
+      "id": "q7",
+      "prompt": "Why do users without problem awareness struggle when collaborating with AI assistants?",
+      "difficulty": "medium",
+      "term_refs": [
+        "problem awareness",
+        "nuanced",
+        "intervention"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Their computer monitor will refuse to display text characters in English.",
+          "correct": false,
+          "note": "Incorrect: software interfaces display text normally regardless of prompt quality."
+        },
+        {
+          "id": "b",
+          "text": "The AI model automatically deletes their project files as a disciplinary measure.",
+          "correct": false,
+          "note": "Incorrect: models have no disciplinary agency or malicious actions."
+        },
+        {
+          "id": "c",
+          "text": "They cannot provide clear context, evaluate whether outputs are accurate, or recognize when human intervention is needed.",
+          "correct": true,
+          "note": "Correct: lack of goal clarity undermines the entire collaboration loop."
+        }
+      ],
+      "explanation": "Without problem awareness, users cannot articulate clear goals, supply necessary background constraints, or evaluate whether the generated response truly solves their problem. When requirements are vague, AI assistants produce plausible-sounding generic advice that may be completely misaligned with project reality. The {{opt:b,a}} options are absurd fantasies. Developing problem awareness before writing prompts ensures that you know what success looks like, enabling sharp discernment and timely course corrections throughout the interaction. In technical troubleshooting, knowing the exact symptoms and network topology allows you to guide the AI effectively instead of receiving irrelevant suggestions."
+    },
+    {
+      "id": "q8",
+      "prompt": "How does an experienced engineer choose between multiple AI models during a development sprint?",
+      "difficulty": "medium",
+      "term_refs": [
+        "platform awareness",
+        "prioritize",
+        "distribute"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By forcing all tasks through the slowest possible model regardless of task complexity.",
+          "correct": false,
+          "note": "Incorrect: using heavy reasoning models for trivial tasks wastes time and budget."
+        },
+        {
+          "id": "b",
+          "text": "By applying platform awareness to match tasks to models based on speed, reasoning depth, and cost.",
+          "correct": true,
+          "note": "Correct: matching model traits to specific subtasks optimizes performance."
+        },
+        {
+          "id": "c",
+          "text": "By flipping a coin every morning to pick a random chatbot for the whole day.",
+          "correct": false,
+          "note": "Incorrect: random selection ignores significant performance differences."
+        }
+      ],
+      "explanation": "An experienced engineer exercises platform awareness by matching specific tasks to the most suitable model. Fast, lightweight models are prioritized for quick regex generation, unit test scaffolding, or file renaming, while deep extended-thinking models are chosen for complex architectural refactoring and algorithmic debugging. The {{opt:c}} option relies on arbitrary chance rather than technical judgment. The {{opt:a}} option wastes computing resources and slows down iteration. Distributing subtasks across specialized models optimizes speed, accuracy, and engineering productivity. Knowing each platform's context limits, pricing, and latency characteristics turns diverse AI tools into a coherent, highly efficient development toolkit."
+    },
+    {
+      "id": "q9",
+      "prompt": "You are deploying a CLI agent to manage router alerts. Which delegation strategy balances speed with safety?",
+      "difficulty": "hard",
+      "term_refs": [
+        "distribute",
+        "exclusively",
+        "intervention"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Grant the agent unrestricted root credentials to reboot and reconfigure routers without logs.",
+          "correct": false,
+          "note": "Incorrect: unrestricted live reconfiguration creates severe network failure risks."
+        },
+        {
+          "id": "b",
+          "text": "Prohibit all automated log parsing and force engineers to read raw terminal dumps manually.",
+          "correct": false,
+          "note": "Incorrect: manual inspection of thousands of routine logs is inefficient and prone to fatigue."
+        },
+        {
+          "id": "c",
+          "text": "Allow the agent to autonomously categorize logs and draft fixes, but require human intervention before applying firewall changes.",
+          "correct": true,
+          "note": "Correct: combines agency for routine tasks with human authorization for critical changes."
+        }
+      ],
+      "explanation": "The optimal strategy distributes work into safe, automated diagnostic pipelines and controlled human approval gates. The CLI agent uses agency to filter routine noise, categorize incident severity, and prepare draft configuration scripts. However, applying changes to live router interfaces remains exclusively human, requiring explicit engineer verification. The {{opt:a}} option creates massive operational hazards by removing safety guardrails. The {{opt:b}} option forfeits the immense speed of automated log filtering. This hybrid approach ensures high throughput without sacrificing network stability. In mission-critical environments, requiring a human-in-the-loop for production commits prevents accidental network outages and ensures continuous auditability."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why are effective AI collaborators described as 'experts in their fields first and AI delegators second'?",
+      "difficulty": "hard",
+      "term_refs": [
+        "cornerstone",
+        "problem awareness",
+        "nuanced"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because deep domain expertise provides the critical insight required to scope problems, guide models, and catch subtle errors.",
+          "correct": true,
+          "note": "Correct: domain knowledge drives effective problem scoping and discernment."
+        },
+        {
+          "id": "b",
+          "text": "Because AI delegators are legally forbidden from writing computer software in commercial settings.",
+          "correct": false,
+          "note": "Incorrect: there are no legal prohibitions against AI delegation in engineering."
+        },
+        {
+          "id": "c",
+          "text": "Because learning prompt words eliminates the need to understand software architecture or algorithms.",
+          "correct": false,
+          "note": "Incorrect: prompt keywords without domain comprehension cannot solve complex technical problems."
+        }
+      ],
+      "explanation": "Effective collaborators succeed because their domain expertise forms the cornerstone of every AI interaction. Deep knowledge of networking, software architecture, or business logic enables them to frame nuanced problems with precision, supply essential constraints, and immediately spot subtle hallucinations in AI outputs. Non-experts cannot judge whether an answer is robust or fundamentally flawed. The {{opt:b}} option is factually untrue. The {{opt:c}} option is a dangerous misconception. AI amplifies human competence; it cannot create expertise where none exists. Without deep domain knowledge, engineers cannot write effective tests or determine whether generated code handles critical edge cases safely."
+    }
+  ],
+  "speaking_prompts": [
+    "Why is domain expertise the cornerstone of good delegation? How does problem awareness prevent errors when delegating to an AI?",
+    "How do you practice platform awareness when choosing between different models for speed, accuracy, or reasoning? Give a concrete example.",
+    "Describe a complex technical task from your work. How would you distribute the work between automation, augmentation, and exclusively human judgment?",
+    "Why is effective task delegation different from simply handing over the wheel and calling it a day? Give an example where human intervention was necessary.",
+    "Which routine IT or drone tasks are time-consuming and simple enough for automation, and which require nuanced human thinking?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 6 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record a 60-second explanation of Problem Awareness vs Platform Awareness using at least four vocabulary terms. Verify your pronunciation with a transcription tool.",
+    "Draft a 3-minute talk plan for your teacher analyzing how you distribute tasks between yourself and AI agents in one real project."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w12",
+  "title": "A Closer Look at Diligence",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can evaluate the ethical and safety implications of AI collaboration.",
+    "By the end of this lesson I can practice Creation Diligence, Transparency Diligence, and Deployment Diligence.",
+    "By the end of this lesson I can draft a professional Diligence Statement for my technical projects."
+  ],
+  "vocabulary": [
+    {
+      "term": "implication",
+      "definition_b1": "a likely consequence or future effect of an action or decision",
+      "collocations": [
+        "ethical implications",
+        "broader implications"
+      ],
+      "ua": "наслідок; підтекст; значення",
+      "source_sentence": "Understand the ethical implications of AI collaboration"
+    },
+    {
+      "term": "vacuum",
+      "definition_b1": "a space entirely empty of matter, used metaphorically for isolated situations",
+      "collocations": [
+        "exist in a vacuum",
+        "not in a vacuum"
+      ],
+      "ua": "вакуум; ізольоване середовище",
+      "source_sentence": "Similarly, diligence recognizes that AI systems and our interactions with them don't exist in a vacuum."
+    },
+    {
+      "term": "creation diligence",
+      "definition_b1": "being critical and intentional about which AI tools you use and data shared",
+      "collocations": [
+        "practice creation diligence",
+        "creation diligence standards"
+      ],
+      "ua": "обачність при створенні (вибір інструментів та захист даних)",
+      "source_sentence": "We call this type of diligence creation diligence."
+    },
+    {
+      "term": "disclosure",
+      "definition_b1": "the act of making new or secret information known openly",
+      "collocations": [
+        "expectations of disclosure",
+        "full disclosure"
+      ],
+      "ua": "розкриття інформації; відкрите повідомлення",
+      "source_sentence": "Different settings—personal, academic, creative, and professional—may have different expectations of disclosure about AI interaction."
+    },
+    {
+      "term": "forthright",
+      "definition_b1": "direct, honest, and outspoken in communication without hiding facts",
+      "collocations": [
+        "forthright and honest",
+        "be forthright"
+      ],
+      "ua": "відвертий; прямий; чесний",
+      "source_sentence": "Meeting expectations for transparency—in other words, being forthright and honest—isn't just about following rules and regulations."
+    },
+    {
+      "term": "transparency diligence",
+      "definition_b1": "being open and accurate about AI's role in your work with stakeholders",
+      "collocations": [
+        "exercise transparency diligence",
+        "commit to transparency diligence"
+      ],
+      "ua": "обачність щодо прозорості (відкритість щодо ролі ШІ)",
+      "source_sentence": "We call this transparency diligence. It's the ability to be open and accurate about AI interaction with everyone who needs to know."
+    },
+    {
+      "term": "deployment diligence",
+      "definition_b1": "taking full responsibility to verify and validate outputs before sharing them",
+      "collocations": [
+        "apply deployment diligence",
+        "deployment diligence checklist"
+      ],
+      "ua": "обачність при впровадженні / публікації (перевірка фактів та володіння результатом)",
+      "source_sentence": "We call this deployment diligence. It's the ability to take informed responsibility for the outputs that you use or share after they've been created with AI assistance."
+    },
+    {
+      "term": "stand behind",
+      "definition_b1": "to support, guarantee, and take personal responsibility for a piece of work",
+      "collocations": [
+        "stand behind your work",
+        "stand behind what you share"
+      ],
+      "ua": "ручатися за; стояти за (своїми словами/роботою)",
+      "source_sentence": "This means verifying facts, checking for biases, ensuring accuracy and usage rights, and other checks needed so that you can stand behind what you share."
+    },
+    {
+      "term": "familiarize",
+      "definition_b1": "to learn about something so that you understand it well",
+      "collocations": [
+        "familiarize yourself with",
+        "familiarize with policies"
+      ],
+      "ua": "ознайомитися з; вивчити",
+      "source_sentence": "And in professional contexts, familiarize yourself with organizational policies and industry standards."
+    },
+    {
+      "term": "diligence statement",
+      "definition_b1": "a written disclosure acknowledging AI's role and affirming human responsibility",
+      "collocations": [
+        "draft a diligence statement",
+        "include a diligence statement"
+      ],
+      "ua": "заява про сумлінність / прозорість (декларація використання ШІ)",
+      "source_sentence": "In this exercise, you'll draft a diligence statement for the project you’ve been working on."
+    },
+    {
+      "term": "affirm",
+      "definition_b1": "to state or declare something firmly and publicly as true",
+      "collocations": [
+        "affirm responsibility",
+        "affirm commitment"
+      ],
+      "ua": "стверджувати; підтверджувати",
+      "source_sentence": "I affirm that all AI-generated and co-created content underwent thorough review and evaluation."
+    },
+    {
+      "term": "instrumental",
+      "definition_b1": "acting as an important and effective means in achieving an objective",
+      "collocations": [
+        "instrumental in the process",
+        "play an instrumental role"
+      ],
+      "ua": "важливий; такий, що відіграв ключову роль",
+      "source_sentence": "While AI assistance was instrumental in the process, I maintain full responsibility for the content, its accuracy, and its presentation."
+    }
+  ],
+  "reading": {
+    "b1": "Diligence is the fourth core competency of the AI fluency framework. It focuses on ethical responsibility, safety, and transparency. AI interactions do not exist in a **vacuum**. We must consider the broader ethical **implication**s of our tools on colleagues, clients, and society.\n\nDiligence consists of three interconnected dimensions. First is **creation diligence**. This requires you to be intentional about which AI platforms you choose. You evaluate data privacy, training origins, and company security policies before sharing sensitive technical files.\n\nSecond is **transparency diligence**. You must be **forthright** about AI's role in your work. Different professional environments have clear expectations of **disclosure**. Being open about AI assistance builds long-term trust and mutual respect across engineering teams.\n\nThird is **deployment diligence**. When sharing deliverables, the human author is ultimately responsible. You verify factual claims, check code for security bugs, and ensure you can **stand behind** the final release. Developers should **familiarize** themselves with evolving legal and organizational standards.\n\nFinally, professionals draft a formal **diligence statement**. This document acknowledges that AI was **instrumental** during research and scaffolding. However, the author **affirm**s complete personal responsibility for technical correctness. Diligence ensures that AI collaboration remains ethical, rigorous, and safe.",
+    "original": "---\nTotal video duration in this module: 15 min\nWord count (wc -w): 1693\nWords per minute: 113\nVerdict: <130 comfortable\n---\n\n# A closer look at Diligence\n\nBy the end of this lesson, you'll be able to:\n\n- Understand the ethical implications of AI collaboration\n- Understand the importance of transparency in AI work\n- Recognize your responsibility in AI interactions and outputs\n\n## Video: A closer look at diligence\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nIn this video, we'll examine the diligence competency from the AI fluency framework. Remember that AI fluency means working with AI effectively, efficiently, ethically, and safely.\n\nWhile the other three competencies primarily address effectiveness and efficiency, diligence focuses mostly on the ethical and safety aspects that are just as crucial for successful AI collaboration. At its heart, diligence is about taking responsibility for your AI interactions. It's the dimension of AI fluency that ensures your use of AI systems is not only productive, but also rigorous, transparent, and accountable.\n\nUnlike the other competencies that primarily focus on getting results, diligence asks us to consider broader questions that are nevertheless critical to AI collaboration, particularly in professional environments, such as: What are the implications of working with this AI? Who might be affected by what is created, or by the collaboration itself, or by any missed inaccuracies? Who has access to the data used to produce this output? How do I ensure that my interaction and the outcome align with ethical standards and values?\n\nThink about it like driving a car. We don't just focus on getting from point A to point B efficiently. We also consider safety, follow traffic rules, and remain aware of how our driving affects others on the road. Similarly, diligence recognizes that AI systems and our interactions with them don't exist in a vacuum. Working with AI responsibly requires awareness of broader contexts and their implications.\n\nDiligence begins with becoming more critically thoughtful about which AI systems we work with, how we work with them, and the impacts that come from those collaborations. We should seek answers to questions like: How is this system trained and built? What data was used? Who owns the data I'm inputting right now? Who may have access to it once it's shared? How am I protecting the privacy and security of myself and others? What other impacts does this system have? How does this interaction align with my personal and professional values or with my organization's policies?\n\nFor example, before sharing sensitive company information with an AI assistant, it's important to first check whether the service has appropriate data protection policies in place or if your organization permits such sharing.\n\nWe call this type of diligence creation diligence. It is your ability to be critical and intentional about which AI systems you choose to work with and how you work with them.\n\nDifferent settings—personal, academic, creative, and professional—may have different expectations of disclosure about AI interaction. However, the responsibility is on each of us to understand and meet these expectations.\n\nAsk yourself: Who needs to know about AI's role in this work? How and when should I communicate this? What level of detail makes sense to share?\n\nMeeting expectations for transparency—in other words, being forthright and honest—isn't just about following rules and regulations. It's about maintaining trust and respect in your relationships. It acknowledges that people have the right to know when AI has played a significant role in content creation or in decisions that affect them.\n\nFor instance, if you used AI to help draft a team proposal, letting your colleagues know which parts were AI-assisted allows for a more honest collaboration and keeps everyone on the same page.\n\nWe call this transparency diligence. It's the ability to be open and accurate about AI interaction with everyone who needs to know.\n\nAs we discussed before, AI systems can make mistakes. When you share AI-generated content with the world, you, not the AI, are ultimately responsible for its accuracy and appropriateness. This means verifying facts, checking for biases, ensuring accuracy and usage rights, and other checks needed so that you can stand behind what you share.\n\nConsider a journalist who uses AI to help draft an article. Before publishing, they would need to verify every fact and source, and ensure that the final piece meets every journalistic standard—the same standards that would apply had they written it entirely themselves.\n\nWe call this deployment diligence. It's the ability to take informed responsibility for the outputs that you use or share after they've been created with AI assistance.\n\nNavigating these diligence considerations isn't always straightforward. Different contexts and stakeholders may have different expectations and standards. So it helps to develop personal guidelines for working with AI that align with your own ethics and values. And in professional contexts, familiarize yourself with organizational policies and industry standards.\n\nAnd remember that the legal and regulatory frameworks around AI are still emerging and will continue to evolve. Staying informed is an important part of diligence.\n\nTo recap, creation, transparency, and deployment diligence work together to form the complete diligence competency. By developing your capacity for diligence, you ensure that your AI use is not only effective and efficient, but also ethical and safe.\n\nDiligence reminds us that our interaction with AI comes with responsibilities: to be thoughtful about the systems we choose and about how we work with them, to be honest about AI's role in our work, and ultimately to be accountable for what we create when working with AI.\n\nWe all want AI that is fair and safe and of benefit to our society. Our own behaviors play a key role in making this happen.\n\n===\n\nThis video explores Diligence, the AI Fluency competency that focuses on responsible and ethical AI collaborations. We explain that while the other competencies primarily address effectiveness and efficiency, Diligence addresses ethical and safety aspects that are equally crucial. We introduce three components:\n\n- Creation Diligence: Being thoughtful about which AI systems you choose and how you work with them\n- Transparency Diligence: Being open about AI's role in your work\n- Deployment Diligence: Taking ownership for AI-assisted outputs you share with others\n\nWe emphasize that different contexts may have different expectations, but we each have a responsibility to understand and meet these expectations.\n\n#### Key takeaways\n\n- Diligence is about taking responsibility for our AI collaborations\n- Creation Diligence involves being thoughtful about which AI systems we use and how we engage with them\n- Transparency Diligence means being honest about AI's role in our work with everyone who needs to know\n- Deployment Diligence requires taking responsibility for verifying and vouching for the outputs we use or share\n- Different contexts (personal, academic, professional) may have different expectations for disclosure and verification\n- Thoughtful Diligence helps ensure our AI collaborations are not only effective and efficient, but also ethical and safe\n\n## Exercises\n\n#### Exercise: Creating a Diligence Statement\n\n*Estimated time: 14 minutes*\n\nIn this exercise, you'll draft a diligence statement for the project you’ve been working on. Here is the [diligence statement](https://www-cdn.anthropic.com/0e37fa9da01fab7a5478a2194d352027794c1b89.pdf) for this course itself.\n\n#### **Step 1: Understand Diligence Statements**\n\n*Estimated time: 3 minutes*\n\nA diligence statement is a transparent acknowledgment of AI's role in your work, along with your commitment to responsibility for the final output. Here's an example:\n\n\"In creating this [document/project/content], I collaborated with [AI assistant name] to assist with [specific tasks: drafting, research, editing, etc.]. I affirm that all AI-generated and co-created content underwent thorough review and evaluation. The final output accurately reflects my understanding, expertise, and intended meaning. While AI assistance was instrumental in the process, I maintain full responsibility for the content, its accuracy, and its presentation. This disclosure is made in the spirit of transparency and to acknowledge the role of AI in the creation process.\"\n\n#### Step 2: Reflect on Your AI Collaboration\n\n*Estimated time: 5 minutes*\n\nThink about your work on the course project and consider:\n\n- Creation Diligence:\n  - Which AI systems did you choose to work with and why?\n  - What data or information did you share with the AI?\n  - Were there any privacy, security, or ethical considerations in your choices?\n- Transparency Diligence:\n  - Who is the audience for your project output?\n  - What expectations might they have regarding AI disclosure?\n  - How specifically did AI contribute to different aspects of your work?\n- Deployment Diligence:\n  - What steps did you take to verify the accuracy and appropriateness of AI contributions?\n  - How did you ensure the final output meets your standards and requirements?\n  - What responsibility are you taking for the final product?\n\n#### Step 3: Draft Your Diligence Statement\n\n*Estimated time: 6 minutes*\n\nOpen a conversation with Claude and:\n\n1. Share your reflections from Step 2, as well as optionally your past conversations that you’ve had with Claude about this project\n2. Collaborate with Claude to draft a diligence statement specific to your project\n3. Ensure your statement addresses:\n   1. Which AI systems you used\n   2. How the AI contributed to your project\n   3. The review process you employed\n   4. Your assertion of responsibility for the final output\n   5. Any context-specific considerations (academic, professional, etc.)\n\n#### Step 4: Add Your Statement to Your Project\n\nWhen you finish your project, add your diligence statement in an appropriate location (e.g., footer, appendix, or metadata).\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which aspect of Diligence (Creation, Transparency, or Deployment) do you find most challenging, and why?\n- How might your approach to Diligence vary depending on the context (personal, academic, professional)?\n- How does acknowledging AI's role in your work affect how others might perceive it?\n- What ethical considerations arose during your project that you hadn't anticipated?\n- What personal guidelines might you develop for responsible AI collaboration going forward?\n\n#### What’s next\n\nIn the final lesson of this course, we'll reflect on what we've learned about AI Fluency and how these competencies work together. We'll revisit the framework as a whole and discuss how you can continue developing these skills as AI capabilities evolve. The conclusion will help you synthesize the knowledge and practices you've gained and apply them to future AI collaborations.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary focus of the Diligence competency in the 4D framework?",
+      "difficulty": "easy",
+      "term_refs": [
+        "implication",
+        "vacuum"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Ensuring AI collaboration is ethical, safe, transparent, and accountable, recognizing that tools do not exist in a vacuum.",
+          "correct": true,
+          "note": "Correct: Diligence governs ethics, data safety, and human accountability."
+        },
+        {
+          "id": "b",
+          "text": "Cleaning computer hardware fans with an electric vacuum cleaner.",
+          "correct": false,
+          "note": "Incorrect: vacuum is used metaphorically for isolated social contexts."
+        },
+        {
+          "id": "c",
+          "text": "Maximizing raw script generation speed regardless of safety or privacy risks.",
+          "correct": false,
+          "note": "Incorrect: speed without safety directly violates the diligence standard."
+        }
+      ],
+      "explanation": "While Delegation, Description, and Discernment focus primarily on productivity and technical precision, Diligence governs the ethical, safety, and accountability dimensions of AI collaboration. It reminds engineers that technology does not operate in a vacuum—every automated script, data pipeline, and generated document has broader implications for security, privacy, and team trust. The {{opt:b}} option takes the vacuum metaphor absurdly literally. The {{opt:c}} option ignores safety. Diligence ensures that AI speed is always balanced with rigorous human responsibility, protecting organizations from unintended legal, operational, and ethical liabilities."
+    },
+    {
+      "id": "q2",
+      "prompt": "What does an engineer practice when exercising 'Creation Diligence'?",
+      "difficulty": "easy",
+      "term_refs": [
+        "creation diligence",
+        "familiarize"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Deleting all version control repositories before beginning a project.",
+          "correct": false,
+          "note": "Incorrect: deleting repositories destroys code and violates diligence."
+        },
+        {
+          "id": "b",
+          "text": "Drawing artistic pictures on server cases using permanent markers.",
+          "correct": false,
+          "note": "Incorrect: Creation Diligence refers to data security, not physical drawing."
+        },
+        {
+          "id": "c",
+          "text": "Evaluating platform data protection policies, training provenance, and security rules before sharing sensitive code.",
+          "correct": true,
+          "note": "Correct: Creation Diligence governs tool selection and input data privacy."
+        }
+      ],
+      "explanation": "Creation Diligence is the disciplined practice of vetting AI platforms before engaging with them. Engineers must investigate who owns the data submitted in prompts, verify whether the vendor trains models on user inputs, and ensure data handling complies with company privacy policies and legal regulations. The {{opt:b,a}} options are counterproductive absurdities. Practicing creation diligence protects sensitive intellectual property and confidential infrastructure configurations from unauthorized exposure, ensuring that teams familiarize themselves with vendor terms of service before transmitting proprietary source code."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why is 'Transparency Diligence' essential when delivering AI-assisted projects to clients or colleagues?",
+      "difficulty": "easy",
+      "term_refs": [
+        "transparency diligence",
+        "disclosure",
+        "forthright"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because transparent glass monitors are legally mandated in modern software offices.",
+          "correct": false,
+          "note": "Incorrect: transparency refers to honesty in communication, not physical glass."
+        },
+        {
+          "id": "b",
+          "text": "Because hiding AI use allows developers to charge clients triple the normal rate.",
+          "correct": false,
+          "note": "Incorrect: deceptive billing violates professional ethics completely."
+        },
+        {
+          "id": "c",
+          "text": "Being forthright about AI assistance meets disclosure expectations and maintains professional trust and respect.",
+          "correct": true,
+          "note": "Correct: honest transparency preserves stakeholder trust and collaborative integrity."
+        }
+      ],
+      "explanation": "Transparency Diligence is the commitment to be open, accurate, and forthright about the extent of AI involvement in your deliverables. Different organizations and academic institutions have clear disclosure policies, and stakeholders have a right to know how content or decisions affecting them were generated. The {{opt:a}} option is an amusing hardware confusion. The {{opt:b}} option advocates unethical deception. Open communication builds trust and ensures that everyone understands the verification rigor applied to the work, fostering a culture of honesty and psychological safety across engineering teams."
+    },
+    {
+      "id": "q4",
+      "prompt": "What is the core requirement of 'Deployment Diligence' before publishing an AI-generated artifact?",
+      "difficulty": "medium",
+      "term_refs": [
+        "deployment diligence",
+        "stand behind"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Thoroughly auditing facts, verifying code security, and taking personal responsibility so you can stand behind the release.",
+          "correct": true,
+          "note": "Correct: Deployment Diligence requires rigorous verification and ownership."
+        },
+        {
+          "id": "b",
+          "text": "Publishing the unverified AI draft immediately to social media networks.",
+          "correct": false,
+          "note": "Incorrect: publishing unverified drafts risks sharing severe hallucinations."
+        },
+        {
+          "id": "c",
+          "text": "Blaming the AI company whenever a production server crashes.",
+          "correct": false,
+          "note": "Incorrect: the deploying engineer remains solely accountable for outages."
+        }
+      ],
+      "explanation": "Deployment Diligence demands that the human author rigorously audit and validate all AI-assisted outputs before distributing or deploying them. This includes checking mathematical derivations, testing shell scripts in sandbox labs, and verifying factual sources so that you can confidently stand behind your deliverable. The {{opt:b}} option is reckless. The {{opt:c}} option attempts to evade responsibility. Diligent deployment guarantees that errors are caught internally before affecting production systems or end users, protecting customer data and upholding high engineering standards. In mission-critical software releases, this verification prevents security vulnerabilities from reaching customer environments."
+    },
+    {
+      "id": "q5",
+      "prompt": "What is the purpose of drafting a formal 'Diligence Statement' for a technical project?",
+      "difficulty": "medium",
+      "term_refs": [
+        "diligence statement",
+        "affirm",
+        "instrumental"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To transfer all legal liability to open source software contributors.",
+          "correct": false,
+          "note": "Incorrect: diligence statements affirm personal responsibility rather than evading it."
+        },
+        {
+          "id": "b",
+          "text": "To legally copyright single English letters on the internet.",
+          "correct": false,
+          "note": "Incorrect: diligence statements are ethical disclosures, not copyright claims."
+        },
+        {
+          "id": "c",
+          "text": "To transparently acknowledge where AI was instrumental while affirming full human responsibility for accuracy and security.",
+          "correct": true,
+          "note": "Correct: the statement documents AI tools used and affirms human accountability."
+        }
+      ],
+      "explanation": "A Diligence Statement is a transparent public disclosure accompanying a project. It specifies which AI systems were used, explains the exact tasks they assisted with, and firmly affirms that the human author conducted thorough review and maintains complete accountability for the final result. The {{opt:a}} option tries to shift blame. The {{opt:b}} option is legally absurd. Publishing a diligence statement demonstrates professional integrity and provides a gold standard of transparency for modern engineering teams, making it clear where AI was instrumental and where human oversight intervened."
+    },
+    {
+      "id": "q6",
+      "prompt": "A developer wants to paste proprietary server API keys into a public AI chat interface. Which diligence principle is violated?",
+      "difficulty": "medium",
+      "term_refs": [
+        "creation diligence",
+        "implication"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Deployment Diligence, because the API keys will physically dissolve inside the computer case.",
+          "correct": false,
+          "note": "Incorrect: key leakage is an input Creation Diligence issue, not hardware melting."
+        },
+        {
+          "id": "b",
+          "text": "Creation Diligence, because uploading sensitive credentials to public models risks severe security leaks and data breaches.",
+          "correct": true,
+          "note": "Correct: credential sharing on unvetted platforms violates Creation Diligence."
+        },
+        {
+          "id": "c",
+          "text": "No violation occurs because AI systems automatically pay company cloud hosting invoices.",
+          "correct": false,
+          "note": "Incorrect: sharing API keys creates critical security vulnerabilities."
+        }
+      ],
+      "explanation": "Pasting private API keys, customer database dumps, or proprietary encryption secrets into public AI interfaces directly violates Creation Diligence. Public consumer models may store prompts in logs or use conversation transcripts for future model pre-training, exposing sensitive infrastructure credentials to unauthorized access. The {{opt:a,c}} options are nonsensical claims. Engineers practicing Creation Diligence sanitize all prompt inputs, use dedicated enterprise endpoints with zero-retention guarantees, and store secrets in secure local environment variables, thoroughly evaluating the broader security implications. Maintaining strict credential hygiene ensures that automation never compromises corporate infrastructure or customer privacy."
+    },
+    {
+      "id": "q7",
+      "prompt": "Why is 'standing behind what you share' considered the ultimate test of AI collaboration?",
+      "difficulty": "medium",
+      "term_refs": [
+        "stand behind",
+        "deployment diligence",
+        "affirm"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because it means you have verified every detail thoroughly enough that your professional reputation guarantees its quality.",
+          "correct": true,
+          "note": "Correct: standing behind work means taking full personal ownership of quality."
+        },
+        {
+          "id": "b",
+          "text": "Because AI models will delete themselves if the user sits in an office chair.",
+          "correct": false,
+          "note": "Incorrect: model functionality is completely independent of physical seating."
+        },
+        {
+          "id": "c",
+          "text": "Because standing up while typing burns more calories during office work.",
+          "correct": false,
+          "note": "Incorrect: standing behind work is an idiom for personal endorsement and ownership."
+        }
+      ],
+      "explanation": "Standing behind your work represents the highest standard of Deployment Diligence. It signifies that regardless of whether a paragraph, regex, or configuration script was drafted by an AI, you have inspected, tested, and validated it to the exact same rigorous standard as if you had written every character by hand. The {{opt:c}} option is an amusing fitness joke. The {{opt:b}} option is ridiculous. True AI fluency means never using AI as an excuse for poor quality or unverified claims, publicly affirming that the final deliverable meets all professional benchmarks."
+    },
+    {
+      "id": "q8",
+      "prompt": "How should an engineer familiarize themselves with emerging AI governance and compliance standards?",
+      "difficulty": "medium",
+      "term_refs": [
+        "familiarize",
+        "implication",
+        "disclosure"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By ignoring all organizational policies until a legal lawsuit is filed.",
+          "correct": false,
+          "note": "Incorrect: proactive compliance prevents severe legal and organizational penalties."
+        },
+        {
+          "id": "b",
+          "text": "By reviewing company acceptable-use policies, industry security benchmarks, and regional data protection regulations regularly.",
+          "correct": true,
+          "note": "Correct: staying informed on compliance policies ensures legal and safe AI usage."
+        },
+        {
+          "id": "c",
+          "text": "By disconnecting the company internet permanently and working offline forever.",
+          "correct": false,
+          "note": "Incorrect: engineers can use AI safely within established compliance guardrails."
+        }
+      ],
+      "explanation": "AI regulations, copyright frameworks, and organizational governance policies are evolving rapidly worldwide. Diligent engineers proactively familiarize themselves with their company's AI usage guidelines, client confidentiality agreements, and data privacy frameworks (such as GDPR or SOC2). The {{opt:a}} option invites catastrophic organizational liability. The {{opt:c}} option is an impractical extreme. Staying informed ensures that teams can innovate quickly with AI tools while remaining completely compliant with legal and ethical mandates, avoiding regulatory penalties and respecting stakeholder disclosure expectations. Proactive compliance review ensures that technology adoption accelerates engineering workflows without creating legal exposure."
+    },
+    {
+      "id": "q9",
+      "prompt": "An engineer uses an AI agent to scaffold a MikroTik firewall script. How does Diligence guide the deployment process?",
+      "difficulty": "hard",
+      "term_refs": [
+        "creation diligence",
+        "deployment diligence",
+        "stand behind"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Creation Diligence ensures sensitive IP subnets are sanitized, and Deployment Diligence validates rules in a virtual lab before live deployment.",
+          "correct": true,
+          "note": "Correct: combines input data protection with rigorous pre-deployment testing."
+        },
+        {
+          "id": "b",
+          "text": "Refuse to verify the script and blame the AI vendor if routing loops occur.",
+          "correct": false,
+          "note": "Incorrect: the deploying engineer remains solely responsible for network stability."
+        },
+        {
+          "id": "c",
+          "text": "Upload all company passwords directly to public forums and execute the script blindly on the core router.",
+          "correct": false,
+          "note": "Incorrect: sharing passwords and blind execution creates immediate network failure."
+        }
+      ],
+      "explanation": "In production infrastructure management, Diligence provides a rigorous safety framework. Creation Diligence mandates sanitizing proprietary IP addresses and credentials before submitting prompts. Deployment Diligence requires the engineer to load the generated rules into a virtual RouterOS sandbox lab, audit packet filter logic, and verify that administrative access remains protected. The {{opt:c}} option is an operational disaster. The {{opt:b}} option evades accountability. Diligent verification ensures that automation accelerates network provisioning without risking live service outages, allowing the engineer to stand behind the configuration with complete confidence."
+    },
+    {
+      "id": "q10",
+      "prompt": "How do all four competencies (Delegation, Description, Discernment, Diligence) synthesize to create true AI Fluency?",
+      "difficulty": "hard",
+      "term_refs": [
+        "creation diligence",
+        "deployment diligence",
+        "implication"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "They guarantee that computer software will never experience a bug or crash again.",
+          "correct": false,
+          "note": "Incorrect: bugs remain a reality of software engineering requiring continuous testing."
+        },
+        {
+          "id": "b",
+          "text": "Delegation scopes the work, Description articulates requirements, Discernment audits quality, and Diligence guarantees ethical, accountable execution.",
+          "correct": true,
+          "note": "Correct: the 4Ds form an end-to-end framework for effective, ethical AI collaboration."
+        },
+        {
+          "id": "c",
+          "text": "They allow developers to eliminate all human thinking and work purely on automated autopilot.",
+          "correct": false,
+          "note": "Incorrect: the framework places human expertise and critical judgment at the center."
+        }
+      ],
+      "explanation": "The 4D framework provides a comprehensive, interconnected architecture for mastering AI collaboration. Delegation strategically divides tasks based on human and machine strengths; Description communicates context, process, and performance with precision; Discernment critically inspects outputs and logic; and Diligence ensures that all workflows remain safe, transparent, and legally accountable. The {{opt:c}} option mischaracterizes AI fluency as intellectual abdication. The {{opt:a}} option is unrealistic. Mastering all four competencies transforms engineers into agile, highly effective, and trusted technical leaders who understand the full implications of their tools."
+    }
+  ],
+  "speaking_prompts": [
+    "Why is Diligence just as crucial as Delegation, Description, and Discernment in professional engineering workflows?",
+    "How do you practice Creation Diligence to ensure sensitive company code or API credentials never leak to public models?",
+    "Why is being forthright about AI collaboration through Transparency Diligence important for maintaining team trust?",
+    "How does Deployment Diligence ensure that you can confidently stand behind every script, configuration, or article you share?",
+    "Explain how you would draft a Diligence Statement for an open-source tool where AI was instrumental in scaffolding code."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 12 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds reading your customized Diligence Statement aloud. Check your pronunciation of instrumental and forthright.",
+    "Draft a 3-minute talk skeleton for your teacher summarizing the complete 4D framework (Delegation, Description, Discernment, Diligence)."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

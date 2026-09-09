@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w14",
+  "title": "Additional Activities & Lifelong Fluency",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can build a structured personal AI fluency development plan with measurable proficiency milestones.",
+    "By the end of this lesson I can create a reusable prompt and pattern library for recurring technical tasks.",
+    "By the end of this lesson I can apply steering and discernment techniques to solve tricky riddles and thorny programming challenges."
+  ],
+  "vocabulary": [
+    {
+      "term": "resonate",
+      "definition_b1": "to produce a positive feeling of emotional or intellectual connection",
+      "collocations": [
+        "resonate with interests",
+        "resonate deeply"
+      ],
+      "ua": "відгукуватися; викликати інтерес / співзвуччя",
+      "source_sentence": "Choose the ones that resonate with your interests and needs—or use them as inspiration to create your own!"
+    },
+    {
+      "term": "proficiency",
+      "definition_b1": "a high degree of skill, competence, or expertise in a subject",
+      "collocations": [
+        "level of proficiency",
+        "demonstrate proficiency"
+      ],
+      "ua": "рівень володіння; кваліфікація / майстерність",
+      "source_sentence": "For each of the 4D competencies, rate your current level of proficiency (novice, developing, confident)"
+    },
+    {
+      "term": "placeholder",
+      "definition_b1": "a temporary symbol or text used to mark where specific data will be inserted later",
+      "collocations": [
+        "include placeholders",
+        "variable placeholder"
+      ],
+      "ua": "плейсхолдер; заповнювач місця (для змінних)",
+      "source_sentence": "Include placeholders or notes for variable information you'll need to add each time"
+    },
+    {
+      "term": "recur",
+      "definition_b1": "to happen again, periodically, or repeatedly over time",
+      "collocations": [
+        "recurring interactions",
+        "recurring tasks"
+      ],
+      "ua": "повторюватися; періодично виникати знову",
+      "source_sentence": "Create a personalized collection of effective prompts and patterns for your recurring AI interactions with the help of Claude:"
+    },
+    {
+      "term": "playful",
+      "definition_b1": "intended for fun, enjoyment, and lighthearted experimentation",
+      "collocations": [
+        "playful exercises",
+        "playful approach"
+      ],
+      "ua": "грайливий; невимушено-ігровий",
+      "source_sentence": "These playful exercises for both you and Claude help you practice precise Description and sharpen your Discernment skills through word puzzles."
+    },
+    {
+      "term": "tricky",
+      "definition_b1": "requiring great care, skill, or attention because of hidden difficulties",
+      "collocations": [
+        "deliberately tricky",
+        "tricky problem"
+      ],
+      "ua": "хитрий; підступний; складний",
+      "source_sentence": "And because they're deliberately tricky, they provide great Discernment workouts!"
+    },
+    {
+      "term": "nudge",
+      "definition_b1": "to encourage or guide someone gently in a specific direction",
+      "collocations": [
+        "gently nudge",
+        "nudge in the right direction"
+      ],
+      "ua": "м'яко підштовхувати; скеровувати",
+      "source_sentence": "Then don’t give it the answer, but rather gently nudge Claude towards the right chain-of-thought and context to get to the answer."
+    },
+    {
+      "term": "steering",
+      "definition_b1": "guiding, controlling, or directing the course of a process or interaction",
+      "collocations": [
+        "steering skills",
+        "steering the conversation"
+      ],
+      "ua": "навички спрямування / керування (ходом думок/діалогу)",
+      "source_sentence": "These steering skills will prove surprisingly useful in a “real” project."
+    },
+    {
+      "term": "cohesive",
+      "definition_b1": "forming a united, well-integrated, and logically consistent whole",
+      "collocations": [
+        "cohesive theme",
+        "cohesive structure"
+      ],
+      "ua": "зв'язний; цілісний; згуртований",
+      "source_sentence": "Do the answers make logical sense and truly fit a cohesive theme?"
+    },
+    {
+      "term": "coherence",
+      "definition_b1": "the logical, smooth, and consistent connection of ideas in a text or plan",
+      "collocations": [
+        "maintain coherence",
+        "narrative coherence"
+      ],
+      "ua": "узгодженість; логічна зв'язність",
+      "source_sentence": "Observe how you both maintain narrative coherence and build on each other's ideas."
+    },
+    {
+      "term": "thorny",
+      "definition_b1": "full of unexpected difficulties, complexities, or tough challenges",
+      "collocations": [
+        "thorny problems",
+        "thorny issues"
+      ],
+      "ua": "тернистий; заплутаний / гострий (про проблему)",
+      "source_sentence": "If you are a programmer, you can swap out the puzzles and instead tackle thorny problems like https://projecteuler.net/ with Claude"
+    },
+    {
+      "term": "self-directed",
+      "definition_b1": "guided, organized, and managed by oneself without direct external control",
+      "collocations": [
+        "self-directed learning",
+        "self-directed plan"
+      ],
+      "ua": "самостійний; самокерований",
+      "source_sentence": "The following activities are designed for self-directed learning after completing the AI Fluency: Framework and Foundations course."
+    }
+  ],
+  "reading": {
+    "b1": "This extension module provides activities for lifelong **self-directed** development after the course. Choose exercises that **resonate** with your engineering priorities. First, build a personal AI fluency plan. Rate your **proficiency** across the 4Ds (novice, developing, confident). Identify priority growth areas and establish regular practice sessions.\n\nSecond, build a personal prompt library. Create modular templates for **recur**ring workflows. Include clear **placeholder**s for dynamic data such as IP subnets or file paths. Document successful Description and Discernment patterns in an organized reference notebook.\n\nThird, practice conversational agility through game night workouts. Engage in **playful** exercises like riddles, crosswords, and word puzzles. Because puzzles are **tricky**, they serve as excellent testing grounds. Learn to **nudge** Claude’s chain-of-thought without revealing answers directly. Developing robust **steering** skills is vital for real-world projects.\n\nAs you collaborate, ensure answers form a **cohesive** theme and maintain structural **coherence**. Programmers can also tackle **thorny** algorithmic challenges. Continuous self-directed practice embeds AI fluency into your daily engineering excellence.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 977\nWords per minute: 98\nVerdict: <130 comfortable\n---\n\n# Additional activities\n\nThe following activities are designed for self-directed learning after completing the AI Fluency: Framework and Foundations course.\n\nChoose the ones that resonate with your interests and needs—or use them as inspiration to create your own!\n\n## Build a personal AI fluency plan\n\nWith the help of an AI assistant, create a structured plan for developing your AI fluency over time:\n\n1. Current Competency Assessment\n   1. For each of the 4D competencies, rate your current level of proficiency (novice, developing, confident)\n   2. Document specific strengths and areas for growth within each competency\n   3. Identify which ways of AI interacting (Automation, Augmentation, Agency) you currently use most and least effectively\n2. Development Priority Identification\n   1. Select 1-2 competencies to focus on developing first\n   2. Identify specific aspects of these competencies that would be most valuable in your context\n   3. Consider which ways of AI interaction you want to become more proficient with\n3. Specific Action Planning\n   1. Create specific activities to develop each priority competency\n   2. Establish a timeline and frequency for practice sessions\n   3. Identify resources and tools to support your development\n   4. Define how you'll recognize progress and success\n\nWork with Claude as a thinking partner in this process, sharing your self-assessments and getting feedback on your plan.\n\n## Build a personal prompt & pattern library\n\nCreate a personalized collection of effective prompts and patterns for your recurring AI interactions with the help of Claude:\n\n1. Common Task Template Creation\n   1. Identify 5-10 tasks you regularly perform with AI\n   2. For each task, develop a template prompt that consistently produces good results\n   3. Include placeholders or notes for variable information you'll need to add each time\n2. Effective Strategy Documentation\n   1. Document specific Description techniques that work well for different types of tasks\n   2. Record Discernment patterns that help you evaluate outputs more effectively\n   3. Note which approaches work best for different interaction modes\n3. Personal Reference Resource Building\n   1. Organize your templates and strategies in a way that’s easy to search and access\n   2. Include examples of successful outputs for reference\n   3. Create a system for updating your library as you discover new effective approaches\n\nYou can work with Claude to analyze your past successful interactions and identify patterns that made them effective.\n\n## Game night!\n\nThese playful exercises for both you and Claude help you practice precise Description and sharpen your Discernment skills through word puzzles. Since puzzles have specific instructions (unlike open-ended tasks like \"draft a thank-you note\"), they're excellent for practicing clear communication. And because they're deliberately tricky, they provide great Discernment workouts! You can learn a lot about careful evaluation guidance of AI thinking processes by just playing a few games. Try any or all of the below.\n\n#### Swap Riddles\n\nCreate a riddle (or try this one: \"Five-score and more drums I tap to paint a symphony of light. What am I doing?\").\n\n(*Answer: I am typing on a computer keyboard (usually 104 keys) to create pixels on a monitor.*)\n\nHave Claude guess, and, importantly, explain its reasoning.\n\nTake note of not just what Claude guesses, but why.\n\nThen don’t give it the answer, but rather gently nudge Claude towards the right chain-of-thought and context to get to the answer.\n\nThen switch sides and ask for a riddle in return. Have Claude guide you as you did it.\n\n#### Co-operative crosswords\n\nWork on crossword clues together (cryptic crossword clues can be especially interesting).\n\nThe focus is not about how good you or Claude are at doing the crossword. It's about learning to guide and refine thinking: “Remember, it’s only 5 letters” “No can’t be that because it starts with B” “Maybe they didn’t mean “swallow” like drink, maybe they mean “swallow” like the bird.”\n\nThese steering skills will prove surprisingly useful in a “real” project.\n\n#### Word association\n\nWord association games are very satisfying and informative to play with Claude (or a model of your choice). There are many games freely available online, just have a search!\n\nEven just picking 12 - 20 random words and collaborating with Claude to find relationships between them can be great Discernment practice. When you notice Claude making questionable connections or overlooking promising patterns, point this out and guide it toward better reasoning. Similarly, be open to Claude spotting connections you might miss!\n\nAs you collaborate, practice all three types of Discernment:\n\n- **Product Discernment**: Do the answers make logical sense and truly fit a cohesive theme?\n- **Process Discernment**: How does Claude approach solving the puzzle? Does it consider multiple possibilities? Does it focus too narrowly on one interpretation?\n- **Performance Discernment**: How does Claude communicate its thinking? Is it clear? Does it ask good questions? Does it build on your suggestions effectively?\n\n#### More game suggestions\n\nContinue developing your Description and Discernment skills through these activities:\n\n- **Twenty Questions:** Have Claude think of an object, person, or concept, then try to guess it by asking yes/no questions. Then switch roles. Notice how you each formulate questions and provide clues.\n- **Collaborative Storytelling:** Start a story with one sentence, have Claude continue with another, and alternate back and forth. Observe how you both maintain narrative coherence and build on each other's ideas.\n- **A Wizard Approaches You in the Tavern:** If you enjoy playing role playing games, try playing a game or two with a language model as either player or game master.\n- **Concepts & Constraints:** Choose a complex concept and really tight constraints like “explain using cooking metaphors only.” Then ask Claude to give you a challenge, try it yourself, and compare approaches.\n- **Advanced Puzzling:** Create your own logic or word puzzles, then challenge Claude to solve it. Alternatively, ask Claude to create puzzles for you to solve. (If you are a programmer, you can swap out the puzzles and instead tackle thorny problems like https://projecteuler.net/ with Claude).\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary benefit of building a personal prompt library with placeholders?",
+      "difficulty": "easy",
+      "term_refs": [
+        "placeholder",
+        "recur"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It completely fills computer storage so no other programs can be installed.",
+          "correct": false,
+          "note": "Incorrect: prompt libraries use minimal text storage."
+        },
+        {
+          "id": "b",
+          "text": "It standardizes instructions for recurring tasks while allowing dynamic variables to be inserted quickly and consistently.",
+          "correct": true,
+          "note": "Correct: reusable templates with placeholders accelerate recurring workflows."
+        },
+        {
+          "id": "c",
+          "text": "It permanently removes the need for keyboard input devices in the office.",
+          "correct": false,
+          "note": "Incorrect: keyboards remain essential for inserting variable data."
+        }
+      ],
+      "explanation": "Building a personal prompt library with structured placeholders streamlines recurring technical workflows. By saving proven prompt patterns for log parsing, git commit generation, or code refactoring, engineers eliminate the need to reinvent prompts from scratch each day. Placeholders (such as `{TARGET_SUBNET}` or `{SOURCE_CODE}`) allow variable information to be plugged in effortlessly while preserving rigid constraint structures. The {{opt:a,c}} options are absurd hardware exaggerations. A curated library turns prompt engineering into a reliable, reproducible operational asset, saving developers valuable time during fast-paced sprints."
+    },
+    {
+      "id": "q2",
+      "prompt": "Why are playful word games and tricky puzzles useful for practicing AI collaboration?",
+      "difficulty": "easy",
+      "term_refs": [
+        "playful",
+        "tricky",
+        "steering"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models only understand English when it is formatted as a riddle.",
+          "correct": false,
+          "note": "Incorrect: models understand standard natural language instructions."
+        },
+        {
+          "id": "b",
+          "text": "Because solving word puzzles unlocks secret administrative passwords in the operating system.",
+          "correct": false,
+          "note": "Incorrect: word games are cognitive exercises, not operating system exploits."
+        },
+        {
+          "id": "c",
+          "text": "Because their rigid constraints and hidden difficulties provide a safe environment to sharpen description and steering skills.",
+          "correct": true,
+          "note": "Correct: tricky games isolate and train conversational steering instincts."
+        }
+      ],
+      "explanation": "Playful word games, crosswords, and logic riddles serve as ideal micro-laboratories for AI fluency. Because puzzles feature tight rules, tricky misdirections, and unambiguous target answers, they make flawed reasoning immediately obvious. Practicing on puzzles trains developers to nudge model reasoning step-by-step, test alternative hypotheses, and steer diverging conversations without giving away solutions. The {{opt:b}} option is an amusing security fantasy. The {{opt:a}} option is factually false. These steering reflexes transfer directly to debugging complex production code, making engineers more agile when guiding AI through real-world technical problems."
+    },
+    {
+      "id": "q3",
+      "prompt": "What does it mean to 'gently nudge' an AI assistant during a complex problem-solving session?",
+      "difficulty": "easy",
+      "term_refs": [
+        "nudge",
+        "steering",
+        "self-directed"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Physically pushing the user's laptop across the office desk.",
+          "correct": false,
+          "note": "Incorrect: nudging refers to conversational guidance, not physical movement."
+        },
+        {
+          "id": "b",
+          "text": "Guiding the model with targeted clues, questions, or contextual constraints rather than giving away the complete final answer.",
+          "correct": true,
+          "note": "Correct: nudging steers intermediate reasoning while preserving collaborative exploration."
+        },
+        {
+          "id": "c",
+          "text": "Disconnecting the network ethernet cable every thirty seconds.",
+          "correct": false,
+          "note": "Incorrect: disconnecting network connections interrupts the session."
+        }
+      ],
+      "explanation": "Gently nudging an AI assistant means steering its chain-of-thought reasoning through strategic hints, boundary reminders, and Socratic questions rather than dumping the full solution into the prompt. For instance, prompting 'Remember the constraint on memory limits' forces the model to re-evaluate its algorithm independently, cultivating deeper problem decomposition and self-correction. The {{opt:a}} option takes the physical verb literally. The {{opt:c}} option disrupts connectivity. Masterful nudging transforms AI from a passive copy-paste engine into an active, analytical thinking partner, sharpening both human intuition and automated execution rigor."
+    },
+    {
+      "id": "q4",
+      "prompt": "How does assessing your proficiency across the 4Ds support self-directed professional growth?",
+      "difficulty": "medium",
+      "term_refs": [
+        "proficiency",
+        "self-directed",
+        "resonate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It reveals concrete skill strengths and blind spots, allowing developers to target focused practice sessions on their weakest areas.",
+          "correct": true,
+          "note": "Correct: self-assessment benchmarks current capabilities to direct ongoing practice."
+        },
+        {
+          "id": "b",
+          "text": "It permanently exempts the engineer from learning any new programming languages.",
+          "correct": false,
+          "note": "Incorrect: engineering requires lifelong continuous learning."
+        },
+        {
+          "id": "c",
+          "text": "It guarantees an automatic salary raise from the cloud computing provider.",
+          "correct": false,
+          "note": "Incorrect: self-assessments guide personal learning rather than automated salary increases."
+        }
+      ],
+      "explanation": "Conducting a structured self-assessment across Delegation, Description, Discernment, and Diligence provides an objective roadmap for professional development. Rating yourself from novice to confident across each dimension highlights whether you struggle with scoping tasks, writing precise constraints, spotting logic lapses, or handling data privacy. The {{opt:c}} option is an unrealistic employment claim. The {{opt:b}} option contradicts professional growth. Identifying specific development priorities ensures that self-directed practice yields rapid, measurable gains in day-to-day engineering velocity, helping you focus your practice sessions on high-impact areas."
+    },
+    {
+      "id": "q5",
+      "prompt": "Why is maintaining 'coherence' across multi-turn technical dialogues essential for complex software refactors?",
+      "difficulty": "medium",
+      "term_refs": [
+        "coherence",
+        "cohesive",
+        "steering"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because logical consistency ensures architectural decisions, naming conventions, and constraints remain aligned throughout the codebase.",
+          "correct": true,
+          "note": "Correct: narrative and technical coherence prevents contradictory code changes."
+        },
+        {
+          "id": "b",
+          "text": "Because language models refuse to answer prompts unless every word begins with the same letter.",
+          "correct": false,
+          "note": "Incorrect: models process diverse vocabulary and syntax naturally."
+        },
+        {
+          "id": "c",
+          "text": "Because maintaining coherence causes computer monitors to emit glowing rainbow lights.",
+          "correct": false,
+          "note": "Incorrect: coherence is a cognitive property of text, not hardware illumination."
+        }
+      ],
+      "explanation": "Maintaining narrative and structural coherence during long pair-programming sessions ensures that early architectural constraints and data models are not forgotten as the discussion evolves. If coherence breaks down, the model may introduce contradictory function signatures, clashing variable names, or incompatible schema assumptions across different files. The {{opt:b,c}} options are absurd fantasies. Practicing active steering and process discernment keeps the entire refactor cohesive, ensuring that generated modules integrate seamlessly into the overall software architecture without introducing subtle integration bugs or runtime crashes."
+    },
+    {
+      "id": "q6",
+      "prompt": "How can a developer use AI collaboration to tackle 'thorny' algorithmic challenges effectively?",
+      "difficulty": "medium",
+      "term_refs": [
+        "thorny",
+        "nudge",
+        "steering"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By deleting all algorithms from the computer and writing code in binary punch cards.",
+          "correct": false,
+          "note": "Incorrect: punch cards are obsolete computing media."
+        },
+        {
+          "id": "b",
+          "text": "By pasting the problem into chat and copying the first output directly to production without testing.",
+          "correct": false,
+          "note": "Incorrect: blind copying of complex algorithms risks deploying critical logic bugs."
+        },
+        {
+          "id": "c",
+          "text": "By breaking the problem into sub-hypotheses, exploring tradeoffs iteratively, and nudging the AI to evaluate edge cases step-by-step.",
+          "correct": true,
+          "note": "Correct: structured decomposition and iterative steering resolve thorny problems."
+        }
+      ],
+      "explanation": "Tackling thorny algorithmic problems (such as dynamic programming, graph routing, or concurrency synchronization) requires high-level cognitive pairing. Rather than asking for a single-shot solution, the engineer delegates subtasks, requests chain-of-thought analysis on asymptotic complexity, and nudges the AI to test tricky edge cases like empty arrays or integer overflows. The {{opt:b}} option is an irresponsible anti-pattern. The {{opt:a}} option is a historical retreat. Iterative collaborative analysis enables engineers to deconstruct intimidating technical problems efficiently, producing hardened and well-documented algorithmic solutions."
+    },
+    {
+      "id": "q7",
+      "prompt": "What ensures that a prompt template collection remains a 'cohesive' and sustainable reference system?",
+      "difficulty": "medium",
+      "term_refs": [
+        "cohesive",
+        "placeholder",
+        "recur"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Organizing templates with standardized metadata, searchable tags, clear variable placeholders, and regular updates based on new findings.",
+          "correct": true,
+          "note": "Correct: structured organization and continuous curation maintain library value."
+        },
+        {
+          "id": "b",
+          "text": "Encrypting prompt files so that even the original author can never open them.",
+          "correct": false,
+          "note": "Incorrect: inaccessible files cannot assist daily development work."
+        },
+        {
+          "id": "c",
+          "text": "Printing all prompts onto 10,000 sheets of paper and burying them in the garden.",
+          "correct": false,
+          "note": "Incorrect: burying papers makes templates inaccessible and unusable."
+        }
+      ],
+      "explanation": "A prompt library is only as useful as its organization. To remain cohesive and sustainable over time, templates should follow uniform structure: clear task description, variable placeholders, sample expected outputs, and notes on model-specific parameters. Regularly pruning obsolete prompts and updating patterns based on new discoveries turns the library into an agile knowledge repository. The {{opt:c,b}} options are humorous absurdities. Maintaining a clean prompt library ensures rapid access to battle-tested prompts under deadline pressure, improving code quality and team productivity."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why should engineers choose post-course learning activities that 'resonate' with their specific domain?",
+      "difficulty": "medium",
+      "term_refs": [
+        "resonate",
+        "self-directed",
+        "proficiency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because practicing within relevant technical contexts builds immediate domain utility and sustains long-term learning motivation.",
+          "correct": true,
+          "note": "Correct: relevant practice maximizes engagement and practical skill transfer."
+        },
+        {
+          "id": "b",
+          "text": "Because AI models will self-destruct if asked about unfamiliar hobbies.",
+          "correct": false,
+          "note": "Incorrect: models handle cross-disciplinary topics effortlessly."
+        },
+        {
+          "id": "c",
+          "text": "Because international regulations forbid developers from practicing outside their narrow job titles.",
+          "correct": false,
+          "note": "Incorrect: engineers are free to explore any technical domain."
+        }
+      ],
+      "explanation": "Selecting learning activities that resonate with your daily work ensures that new AI collaboration skills immediately enhance your real-world productivity. A network engineer benefits more from building RouterOS configuration prompt libraries and debugging firewall crosswords than from generic marketing prompts. Contextual relevance fosters intrinsic motivation and anchors abstract framework concepts in tangible engineering realities. The {{opt:c,b}} options are absurd fabrications. Tailoring self-directed practice accelerates domain-specific fluency, turning foundational principles into powerful everyday technical capabilities. Aligning exercises with daily technical tasks makes learning practical and immediately beneficial."
+    },
+    {
+      "id": "q9",
+      "prompt": "An engineer notices an AI assistant fixating on a flawed regex pattern during log parsing. How should she steer it?",
+      "difficulty": "hard",
+      "term_refs": [
+        "steering",
+        "nudge",
+        "tricky"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Accept the broken regex pattern and disable all security logging on the production cluster.",
+          "correct": false,
+          "note": "Incorrect: disabling logging blinds operations to potential security breaches."
+        },
+        {
+          "id": "b",
+          "text": "Reboot the office power generator and restart the terminal session 50 times.",
+          "correct": false,
+          "note": "Incorrect: hardware reboots do not resolve prompt reasoning fixations."
+        },
+        {
+          "id": "c",
+          "text": "Interrupt the fixation, gently nudge the AI with the specific edge-case failure, and prompt it to explore alternative tokenization strategies.",
+          "correct": true,
+          "note": "Correct: active steering breaks cognitive fixation and redirects reasoning."
+        }
+      ],
+      "explanation": "When an AI gets trapped in circular reasoning or fixates on a flawed approach (such as an overly complex regex), the engineer must exercise steering. Rather than repeating the same vague complaint, provide a concrete failing log line and nudge the model: 'Notice how this regex fails on multi-line stack traces; let us evaluate a structural delimiter split instead.' This breaks the deadlock and redirects attention toward viable solutions. The {{opt:a,b}} options are disastrous distractions. Active steering keeps collaborative problem solving on track, ensuring rapid resolution of tricky edge cases."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does integrating self-directed practice into daily workflows transform AI Fluency into a lasting competitive edge?",
+      "difficulty": "hard",
+      "term_refs": [
+        "self-directed",
+        "proficiency",
+        "coherence"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It causes all competing software companies to cease operations overnight.",
+          "correct": false,
+          "note": "Incorrect: fluency is an individual and team capability multiplier."
+        },
+        {
+          "id": "b",
+          "text": "It turns conscious framework rules into intuitive muscle memory, enabling developers to build faster, safer, and higher-quality systems continuously.",
+          "correct": true,
+          "note": "Correct: daily integration elevates engineering quality and long-term velocity."
+        },
+        {
+          "id": "c",
+          "text": "It guarantees that software developers will never need to read code or think critically again.",
+          "correct": false,
+          "note": "Incorrect: AI fluency amplifies critical thinking rather than replacing it."
+        }
+      ],
+      "explanation": "Embedding self-directed AI fluency routines into daily development elevates an engineer from an occasional prompt user to an agile AI architect. By continuously refining prompt libraries, practicing adaptive steering on tricky problems, maintaining strict discernment standards, and upholding ethical diligence, fluent practitioners achieve exponential productivity gains while ensuring software safety and architectural coherence. The {{opt:c}} option describes intellectual abdication. The {{opt:a}} option is unrealistic. Mastering AI fluency transforms collaboration into a durable, lifelong professional advantage, empowering engineers to lead technical innovation with confidence."
+    }
+  ],
+  "speaking_prompts": [
+    "Which post-course activities resonate most with your daily engineering work? How do you assess your current 4D proficiency?",
+    "How do you organize reusable prompt templates with placeholders to streamline recurring infrastructure and coding tasks?",
+    "Why are playful exercises and tricky riddles effective for training conversational steering and chain-of-thought nudging?",
+    "How do you ensure logical coherence and a cohesive theme when collaborating with AI on complex multi-step refactors?",
+    "Describe how you would tackle a thorny algorithmic challenge using self-directed human-AI pair programming."
+  ],
+  "homework": [
+    "Complete your personal AI fluency development plan. Rate your proficiency across the 4Ds and select two priorities for next month.",
+    "Record 60 seconds explaining one reusable template from your prompt library. Verify pronunciation of coherence and placeholder.",
+    "Draft a 3-minute talk skeleton for your teacher demonstrating how you steered an AI through a tricky riddle or thorny coding problem."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

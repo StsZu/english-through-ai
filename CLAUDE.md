@@ -9,6 +9,9 @@ files are written in English. (This overrides the earlier "docs in Ukrainian"
 convention from T-001.) The only Ukrainian that appears is the `ua` field in
 vocabulary/termbank entries — the learner is a Ukrainian speaker.
 
+Still in Ukrainian and pending translation: `scripts/instruction.md`. Do not
+copy its style; if you touch it, translate it.
+
 ## What this project is
 
 This is **not application code** — it is the content repository for the
@@ -32,33 +35,47 @@ the `Questions` section of the report.
 - **Never delete anything.** Only move, create, append. If something looks redundant — raise it in `Questions`.
 - **Never touch `legacy/`** — it is an archive.
 - **Never invent learning content** (texts, terms, quiz questions). Build structure and mechanics with `TODO` placeholders only; filling in content is the student's job — that is the whole point of the course.
-- Do not install dependencies without asking in `Questions` first.
+- Do not install dependencies without asking in `Questions` first. `build_lesson.py` is stdlib-only by decision (T-002) and must stay that way.
 - No external libraries/CDN in lesson HTML under any circumstances.
-
-## Structure
-
-- `docs/` — methodology: `course-idea.md`, `manual-pipeline.md` (weekly runbook for turning a video module into lesson materials), `baseline-protocol.md` (progress measurement and error loop), `conventions.md`
-- `lessons/wNN/` — week folder: `index.html` (generated), `lesson.json` (source of truth), `prep.md`, `agenda.md`, `friction.md`, `audio/`
-- `templates/` — `lesson-template.html`, `lesson.schema.json` (draft-07), `week-scaffold/`
-- `scripts/` — `build_lesson.py`, `new_week.sh`
-- `termbank/termbank.csv` — cumulative master term file
-- `recordings/`, `errors/` — talk recordings and JSON error diagnostics
-- `legacy/` — archive, do not touch
 
 ## Commands
 
 ```bash
-python3 scripts/build_lesson.py w01   # build a lesson: lesson.json → schema validation → index.html
-bash scripts/new_week.sh w02          # create a new week folder from the scaffold (never overwrites)
-open lessons/w01/index.html           # open a lesson (must work from file://, offline)
+python3 scripts/build_lesson.py w01           # lesson.json → validate → index.html + progress block
+python3 scripts/build_lesson.py w01 --quiet   # same, without the progress block
+python3 scripts/build_lesson.py --all         # rebuild every week, one summary line each
+bash scripts/new_week.sh w02                  # scaffold a week folder (never overwrites)
+bash scripts/wpm.sh lessons/w01/source.md 25  # words / wpm / listening-difficulty verdict
+python3 scripts/termbank_sync.py             # lesson.json vocabulary -> termbank/termbank.csv
+python3 scripts/termbank_sync.py --check     # report drift, write nothing
+open lessons/w01/index.html                   # must work from file://, offline
 ```
 
-The build script is stdlib-only — validation is intentionally hand-rolled
-(T-002 decision; `templates/lesson.schema.json` is documentation, not
-executed). On invalid `lesson.json` it must **fail with a clear error**,
-never build silently. `--quiet` suppresses the progress block; `--all`
-rebuilds every week. `scripts/wpm.sh <file> <minutes>` reports words, wpm
-and a listening-difficulty verdict.
+There is no test suite, linter, or CI. Verification is: run the build (it must
+exit 0 with no `error:` lines) and open the resulting `index.html` from
+`file://`.
+
+## Content pipeline (how a week is actually made)
+
+`docs/manual-pipeline.md` is the runbook and is current. In short:
+
+1. `source.md` — raw Coursera transcript + readings, pasted verbatim.
+2. `bash scripts/wpm.sh` on it → note the verdict in `friction.md`.
+3. `source_prompt.md` — the generation prompt. It carries the **learner
+   profile** (tools they use, diagnosed speaking weaknesses from the baseline
+   recording) and is what makes content specific rather than generic. Read it
+   before doing anything content-shaped.
+4. The prompt's JSON output is pasted into `lesson.json` by the student, who
+   edits it — objectives, speaking prompts and homework are written by hand.
+5. `python3 scripts/build_lesson.py wNN` → `index.html`.
+6. Anything annoying in the manual pass goes into that week's `friction.md` —
+   that file is the spec for the future `lessonfactory` automation.
+
+Known gaps are listed at the end of `docs/manual-pipeline.md` — chiefly that
+`source_prompt.md` asks for `pronunciation_focus` and a per-term `example`
+that no consumer reads, and that `reading.b1` runs 40–60 % short of the length
+the prompt asks for from w03 onward. `docs/revision-spec.md` is the audit that
+found these and records what was fixed.
 
 ## Lesson architecture
 
@@ -67,21 +84,63 @@ with no server, no build tooling, no internet. Consequences:
 
 - CSS and JS are inline; vanilla JS, no frameworks (the student must be able to understand the code).
 - Lesson data is embedded in `<script id="lesson-data" type="application/json">` — `fetch()` of an external JSON fails on `file://` due to CORS.
-- `lesson.json` next to `index.html` is the source of truth; edit the JSON, regenerate the HTML with the build script.
-- `localStorage` for progress, keys `etai:wNN:*`.
+- `lesson.json` next to `index.html` is the source of truth. **Never hand-edit `index.html`** — it is generated; edit the JSON and rebuild.
+- `localStorage` keys are namespaced `etai:<week>:<key>` via the `LS()` helper (currently only the homework checklist persists).
 
-Quiz (the most important mechanic; spec updated in T-002): exactly 10
-questions per real lesson (3 easy, 5 medium, 2 hard); exactly 3 options,
-exactly one correct; a short `note` (max 25 words) per option; one
-`explanation` of 80–150 words per question, shown below the question after
-answering — it teaches, not grades. Options lock after answering and the
-correct option is revealed even when not chosen. The build fails on rule
-violations and warns when the question count is not 10 or TODOs remain.
+`templates/lesson-template.html` is the only template. The build substitutes
+the literal token `__LESSON_DATA__` with the JSON payload (`</` escaped so the
+payload cannot terminate the `<script>` block) — if you edit the template, that
+token must survive. The template renders seven sections from the data, in
+order: Header, Objectives, Vocabulary (flip cards + quick quiz), Reading
+(B1/Original toggle with vocabulary terms highlighted), Quiz, Speaking prompts
+(60 s timer each), Homework (persisted checklist).
+
+## Build validation
+
+Validation in `scripts/build_lesson.py` is intentionally hand-rolled — no
+`jsonschema` import. `templates/lesson.schema.json` (draft-07) is **living
+documentation, not executed**; if you change the data format, update both.
+
+**Errors** (build fails, nothing is written):
+
+- a missing top-level key of `week, title, source, duration_min, objectives, vocabulary, reading, audio, quiz, speaking_prompts, homework`
+- `week` in the JSON not matching the week being built
+- an empty `quiz`
+- a question without exactly 3 options, or without exactly one `correct: true`
+- an option with a missing/empty `note`, or a `note` over 25 words
+- an `explanation` that is missing, empty, or outside 80–150 words
+  (measured after `{{opt:...}}` tokens expand)
+- an `explanation` or `note` naming an option by position ("the second
+  option"); options are shuffled at render time, so references use
+  `{{opt:<id>}}` / `{{opt:<id>,<id>}}` tokens instead
+- a `{{opt:X}}` token naming an option id that does not exist
+- a quiz whose correct answer sits in one position more than half the time
+- a `difficulty` that is not `easy` / `medium` / `hard`
+- a `term_refs` entry not present in `vocabulary`
+
+**Warnings** (build still succeeds): quiz length ≠ 10, remaining `TODO`
+markers, a correct-answer spread outside 3–4 per position, and a `reading.b1`
+outside 400–700 words. A real lesson has exactly 10 questions — 3 easy,
+5 medium, 2 hard.
+
+The quiz is the most important mechanic: options are shuffled on every render,
+they lock after answering, the correct option is revealed even when not chosen,
+and the single per-question explanation is shown below the question. It
+teaches, it does not grade.
+
+## Structure
+
+- `docs/` — methodology: `course-idea.md`, `manual-pipeline.md`, `baseline-protocol.md` (progress measurement and error loop), `conventions.md`
+- `lessons/wNN/` — `lesson.json` (source of truth), `index.html` (generated), `source.md`, `source_prompt.md`, `prep.md`, `agenda.md`, `friction.md`, `audio/`
+- `templates/` — `lesson-template.html`, `lesson.schema.json`, `week-scaffold/`
+- `scripts/` — `build_lesson.py`, `termbank_sync.py`, `new_week.sh`, `wpm.sh`
+- `termbank/termbank.csv` — cumulative master term file
+- `recordings/`, `errors/` — talk recordings and JSON error diagnostics
+- `legacy/` — archive, do not touch
 
 ## Conventions
 
 - Weeks: `w01`…`w12`, always two digits. Files: `kebab-case`, except `index.html`.
 - Recordings: `recordings/wNN_talk.m4a`, `recordings/w00_baseline.m4a`; diagnostics: `errors/wNN.json`. Audio files are not committed (large and personal); transcripts (`.txt`, `.json`) are.
 - Commits: `w01: add glossary`, `docs: fix paths`, `feat(template): quiz`.
-- Anything annoying during manual material preparation goes into that week's `friction.md` — it is the spec for future automation (`lessonfactory`).
 - Term definitions: CEFR B1, max 20 words; termbank schema: `week;term;definition_b1;collocation_1;collocation_2;ua;source_sentence;added_at`.

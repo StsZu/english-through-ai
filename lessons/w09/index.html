@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w09",
+  "title": "Deep Dive 2 — Effective Prompting Techniques",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can apply the six foundational prompting techniques to engineer effective instructions.",
+    "By the end of this lesson I can use few-shot prompting, chain-of-thought reasoning, and persona assignment.",
+    "By the end of this lesson I can iterate on prompts collaboratively using the secret weapon technique."
+  ],
+  "vocabulary": [
+    {
+      "term": "prompt engineering",
+      "definition_b1": "the practice of designing clear and effective instructions for AI systems",
+      "collocations": [
+        "master prompt engineering",
+        "apply prompt engineering"
+      ],
+      "ua": "інженерія промптів (мистецтво складання інструкцій для ШІ)",
+      "source_sentence": "You might have heard the term prompt engineering tossed around."
+    },
+    {
+      "term": "emulate",
+      "definition_b1": "to copy or follow the style or behavior of an example",
+      "collocations": [
+        "emulate examples",
+        "emulate patterns"
+      ],
+      "ua": "наслідувати; відтворювати за зразком",
+      "source_sentence": "This is sometimes called few-shot prompting or n-shot prompting in technical circles, where n is the number of examples given, but it's really just about showing the AI examples for it to emulate."
+    },
+    {
+      "term": "few-shot prompting",
+      "definition_b1": "providing one or more sample input-output pairs in the prompt",
+      "collocations": [
+        "use few-shot prompting",
+        "few-shot prompting technique"
+      ],
+      "ua": "промптинг з кількома прикладами (few-shot)",
+      "source_sentence": "This is sometimes called few-shot prompting or n-shot prompting in technical circles, where n is the number of examples given, but it's really just about showing the AI examples for it to emulate."
+    },
+    {
+      "term": "chain-of-thought",
+      "definition_b1": "a prompting method where the AI explains its step-by-step reasoning",
+      "collocations": [
+        "chain-of-thought prompting",
+        "trigger chain-of-thought"
+      ],
+      "ua": "ланцюжок міркувань (покроковий хід думок)",
+      "source_sentence": "Listing out task steps ensures that Claude follows the process you want in order to accomplish its task. This is sometimes called chain-of-thought prompting."
+    },
+    {
+      "term": "go astray",
+      "definition_b1": "to become lost, wander off topic, or make unintended mistakes",
+      "collocations": [
+        "go astray",
+        "prevent going astray"
+      ],
+      "ua": "збитися зі шляху; піти не в той бік",
+      "source_sentence": "As a side benefit, this also allows you to better see where the AI assistant might be going astray and thus where you could hone your description competency further by providing more guidance."
+    },
+    {
+      "term": "hone",
+      "definition_b1": "to sharpen, refine, or improve a skill over time",
+      "collocations": [
+        "hone skills",
+        "hone description competency"
+      ],
+      "ua": "відточувати; вдосконалювати (навички)",
+      "source_sentence": "As a side benefit, this also allows you to better see where the AI assistant might be going astray and thus where you could hone your description competency further by providing more guidance."
+    },
+    {
+      "term": "persona",
+      "definition_b1": "a specific role, personality, or character adopted for an interaction",
+      "collocations": [
+        "adopt a persona",
+        "expert persona"
+      ],
+      "ua": "персона; рольовий образ",
+      "source_sentence": "You can specify a general role or even ask Claude to take on the persona of a specific figure, such as Richard Feynman, when asking for physics explanations."
+    },
+    {
+      "term": "secret weapon",
+      "definition_b1": "a particularly effective method, tool, or advantage that is not widely recognized",
+      "collocations": [
+        "secret weapon",
+        "use as a secret weapon"
+      ],
+      "ua": "секретна зброя (прихована сильна перевага)",
+      "source_sentence": "These six principles, together with the secret weapon of asking Claude for help, form a solid toolkit for applying the description competency to your AI interactions."
+    },
+    {
+      "term": "iterative",
+      "definition_b1": "involving repeated cycles of testing, learning, and improving",
+      "collocations": [
+        "iterative process",
+        "iterative refinement"
+      ],
+      "ua": "ітеративний; покроково повторюваний",
+      "source_sentence": "Effective prompting is iterative and experimental."
+    },
+    {
+      "term": "overload",
+      "definition_b1": "to put too much work, information, or tasks onto someone or something",
+      "collocations": [
+        "overload a prompt",
+        "overload the context"
+      ],
+      "ua": "перевантажувати",
+      "source_sentence": "Common mistakes to avoid are assuming that Claude can read your mind, overloading a single prompt or conversation with multiple unrelated tasks, being too vague about what success looks like, and not providing feedback on previous responses."
+    },
+    {
+      "term": "swift",
+      "definition_b1": "happening very quickly, promptly, or without delay",
+      "collocations": [
+        "swift improvement",
+        "swift progress"
+      ],
+      "ua": "швидкий; стрімкий",
+      "source_sentence": "Iteration and practice here are the keys to swift improvement and mastery."
+    },
+    {
+      "term": "timeless",
+      "definition_b1": "remaining valuable, true, and effective across all eras and generations",
+      "collocations": [
+        "timeless principles",
+        "timeless communication"
+      ],
+      "ua": "вічний; позачасовий; актуальний завжди",
+      "source_sentence": "To recap, effective communication with AI systems like Claude combines timeless human communication principles with AI-specific techniques."
+    }
+  ],
+  "reading": {
+    "b1": "**Prompt engineering** is the practical art of designing clear instructions for AI systems. It puts the Description competency into daily practice. Effective prompting connects **timeless** human communication habits with AI-specific techniques.\n\nSix foundational techniques produce reliable results. First, provide rich context explaining who you are, what you need, and why. Second, use **few-shot prompting** to supply concrete examples for the model to **emulate**. Third, state explicit output constraints such as formats, lengths, and schemas.\n\nFourth, break complex tasks into logical steps using **chain-of-thought** guidance. Fifth, instruct the AI to think through problems before answering. This step-by-step space prevents reasoning from **go astray**. It also allows you to **hone** your instructions when errors occur. Sixth, assign an expert **persona** or specific tone to match your domain needs.\n\nFurthermore, use the **secret weapon**: ask the AI itself to critique and rewrite your prompt. Prompting is an **iterative** and experimental journey. Never **overload** a single prompt with unrelated tasks. With regular practice, developers achieve **swift** improvement and master AI collaboration.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 2486\nWords per minute: 249\nVerdict: >150 split into 3-5 min chunks\n---\n\n# Effective prompting techniques\n\n\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Understand what prompt engineering is and why it matters for productive AI collaboration\n- Apply six foundational prompting techniques to improve your AI interactions\n- Identify common patterns that lead to successful AI interactions\n- Troubleshoot and refine prompts when AI responses don't meet your needs\n\n## Effective Prompting Techniques\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nLet's explore one of the most practical skills when working with AI: crafting effective prompts.\n\nThis might sound technical or complicated, and some guides certainly make it seem that way, but at its heart, it's surprisingly straightforward. Prompting is simply how we apply this course's description competency in practice: clearly communicating what we want, how we want it done, and how we want to interact with our AI assistant throughout the entire process.\n\nThink of prompting like explaining a task to a helpful new colleague who's eager to assist, but needs clear directions and expectation setting to do their best work.\n\nWe'll be using Claude throughout this section, but these tips can be carried over to many other AI systems.\n\nYou might have heard the term prompt engineering tossed around. Prompt engineering is simply the practice of designing effective instructions for AI systems like Claude. It's about crafting your questions and providing context in ways that help AI assistants understand exactly what you want.\n\nWhat's fascinating is that effective prompting blends familiar human communication skills with a few considerations specific to AI. Many principles that make for good human conversation, such as being clear, providing relevant context, and giving concrete examples, also apply when working with AI.\n\nYet, there are differences, such as being more explicit about things humans could naturally infer, accommodating the AI's limited context window, and sometimes, depending on the AI you're working with, using specific formatting that machines can easily process.\n\nAs AI assistants continue to evolve, prompting best practices evolve, too. What works with today's AI systems may be different from what works with tomorrow's.\n\nExperimentation is key to discovering what works best for your specific needs.\n\nIn this video, we'll mainly explore six foundational prompting tips that will go a long way toward helping you effectively communicate and collaborate with Claude and other AI systems. They are: give Claude context, show examples of what good looks like, specify output constraints, break complex tasks into steps, ask Claude to think first, and define Claude's role, style, or tone.\n\nThe first principle is simple but powerful: be specific and clear about what you want, why you want it, and, perhaps most surprisingly, who you are.\n\nLet's take a simple prompt: \"Tell me about climate change.\" How can we improve this by giving Claude more context?\n\nA more specific, context-rich version could look like: \"Explain three major impacts of climate change on agriculture in tropical regions, with examples from the past decade.\"\n\nOur baseline prompt was vague and leaves Claude guessing about our interests, level of knowledge, and the depth of detail we're looking for, such as geography and time span.\n\nWe can even add more context by providing information not just about what we're looking for, but why we're asking and how we'll be using the information that Claude gives us.\n\nNow, our prompt looks like this: \"Explain three major impacts of climate change on agriculture in tropical regions, with examples from the past decade. I'm preparing for a job interview at an agricultural research lab in Indonesia. I have a degree in ecology, but no specific knowledge on climate change. Write a summary of key concepts that would help me speak intelligently in the interview.\"\n\nAll this added context helps tailor Claude's response to your specific situation and knowledge level. This kind of background information is something we naturally provide in human conversations, but might forget to include when talking with Claude.\n\nSometimes showing is better than telling. Providing examples of the kind of output you're looking for can be incredibly effective.\n\nThis is sometimes called few-shot prompting or n-shot prompting in technical circles, where n is the number of examples given, but it's really just about showing the AI examples for it to emulate.\n\nFor instance, take the following prompt: \"Please convert this technical statement to plain language. The platform implements end-to-end encryption protocols to safeguard data integrity.\"\n\nClaude may already be able to do this to your satisfaction, so we definitely recommend you just try first without examples and see where it leads you.\n\nBut let's say you have a very specific style you want Claude to follow, and it's harder to explain than to give examples.\n\nYour refreshed prompt could look something like this: \"Here are two examples of how to convert technical jargon into plain language.\n\nOriginal: The quantum algorithm exhibits quadratic speedup.\nPlain: The new method solves problems roughly twice as fast as previous methods.\n\nOriginal: The interface leverages intuitive design paradigms.\nPlain: The design is easy to understand and use.\n\nNow, please convert this complex technical manual to plain language.\"\n\nWhen providing examples, aim to cover the full diversity of possible prompts, such as examples that cover different cases or styles. This helps Claude better understand the broad range of the pattern you want it to follow.\n\nBeing clear about output constraints, such as the desired format and length of Claude's response, the language you want Claude to code in, or the color of the buttons on the web page you want Claude to design, also helps ensure you get exactly what you need.\n\nHere's an example of clear and detailed description to ensure Claude delivers exactly what you're looking for: \"Create a clean, modern, single-page art portfolio website. Include these main sections: hero, about me, skills, portfolio, projects, experience, and contact. Make the navigation menu sticky and responsive with a hamburger menu on mobile. Use a sunset color palette and add a dark/light mode toggle in the navigation.\"\n\nGuidance like this helps Claude structure its response to match your expectations.\n\nWhen you have a complicated request, breaking it down into smaller steps helps Claude follow your thinking and deliver better results.\n\nThink about it this way. If you ask a friend to do something for you without specifying how, there's a chance that they may not do it the way you intended them to. We've all been there.\n\nListing out task steps ensures that Claude follows the process you want in order to accomplish its task. This is sometimes called chain-of-thought prompting.\n\nFor example, instead of asking Claude to \"analyze this quarterly sales data,\" you might say, \"I'd like to analyze this quarterly sales data. Please approach this by looking through our sales records to identify the top-performing products, comparing current-quarter results to the previous quarter, highlighting any unusual trends or patterns, and then suggesting possible reasons for these trends.\"\n\nBy default, you may not need to do this, especially for tasks that are relatively straightforward.\n\nFurthermore, modern reasoning models or extended thinking models are increasingly capable of performing step-by-step reasoning on their own, but you can still guide this process to ensure it aligns with your needs.\n\nThe more variance there is in ways to execute the task well, or the more that proper task execution relies on experience and knowledge you've gained as a domain expert, the more you should consider taking the time to translate that knowledge into Claude.\n\nRelatedly, sometimes it can be helpful to explicitly give AI assistants like Claude space to work through their process first before executing their task.\n\nThis approach helps Claude produce more thorough and well-considered responses.\n\nFor example, you can add this to your prompt: \"Before answering, please think through this problem carefully. Consider the different factors involved, potential constraints, and various approaches before recommending the best solution.\"\n\nAs I mentioned, modern reasoning or extended thinking models by default think before acting. But if you're working with an AI assistant that does not think first by default, you can still prompt the AI to do so.\n\nI want to note the importance of giving the AI assistant space to think before doing its task, not after, if you want that thinking to increase the quality of the AI's work. Just like how having space to think before you act is different from acting first, then being asked to explain your thinking afterwards.\n\nAs a side benefit, this also allows you to better see where the AI assistant might be going astray and thus where you could hone your description competency further by providing more guidance.\n\nSpecifying how you want Claude to communicate and behave can significantly change how it approaches a task.\n\nBy specifying the level of expected expertise, the perspective you want it to take, or its communication style, you can guide both Claude's interaction with you and the final result of what it produces.\n\nSimply put, who do you want the AI to act as?\n\nFor example, take this prompt: \"Please explain how rainbows form from the perspective of an experienced science teacher speaking to a bright 10-year-old who's interested in science.\"\n\nThis is also a good way to brainstorm or get feedback. You can specify a general role or even ask Claude to take on the persona of a specific figure, such as Richard Feynman, when asking for physics explanations.\n\nHere's another example: \"As a UX design expert, review this website wireframe and suggest three improvements focusing on user navigation and accessibility.\"\n\nPerhaps the most powerful technique is asking Claude to help improve your prompt.\n\nWhen you're not sure how to ask for something or how to improve your prompt, describe to Claude your issue or situation and ask it to make your prompt better or write your prompt for you.\n\n\"I'm trying to get you, Claude, to help me with [goal]. I'm not sure how to phrase my request to get the best results. Can you help me craft an effective prompt for this?\"\n\nHere's where Claude and other AI assistants may vary most in terms of performance. So, we suggest you experiment with different models as part of practicing delegation.\n\nEffective prompting is iterative and experimental. AI systems and best practices are constantly evolving. So, what works today may change tomorrow.\n\nYour first attempt won't always yield the perfect result, and that's expected.\n\nWhen a response isn't quite what you need, try refining your approach by playing around with any of the techniques we mentioned, such as adding more specificity or context, providing examples of your desired output, breaking the task into smaller steps, and trying a different technique or combination of techniques.\n\nYou can also ask for variations, such as, \"Can you give me three different versions of this?\"\n\nYou can request different formats, such as, \"Instead of a paragraph, could you present this in an interactive artifact?\"\n\nNote that artifacts are a unique way that Claude can create outputs that may be easier to understand or more interesting to digest.\n\nYou can also check confidence. For factual questions, you can ask, \"How confident are you about this answer?\"\n\nYou can also reset the conversation entirely. Sometimes starting a fresh conversation gives better results than trying to correct a conversation that's gone off track.\n\nUse each interaction as feedback to improve your next prompt. Over time, you'll develop an intuition for how to communicate effectively with all AI systems.\n\nAs you apply these techniques in practice, here's some guidance to recap.\n\nSome patterns consistently work well: starting with a clear task overview statement, including format specifications and examples, setting explicit constraints or requirements, and providing rich and relevant background information.\n\nCommon mistakes to avoid are assuming that Claude can read your mind, overloading a single prompt or conversation with multiple unrelated tasks, being too vague about what success looks like, and not providing feedback on previous responses.\n\nTo recap, effective communication with AI systems like Claude combines timeless human communication principles with AI-specific techniques.\n\nThe approaches we've covered will serve you well across different AI systems.\n\nThese six principles, together with the secret weapon of asking Claude for help, form a solid toolkit for applying the description competency to your AI interactions.\n\nIteration and practice here are the keys to swift improvement and mastery.\n\nRemember that prompt engineering is an evolving practice. As models improve, some specific techniques become less necessary. However, these principles of good communication are still relevant, even if the way we apply them changes.\n\nMaintain a spirit of experimentation and adapt your approach based on your results.\n\n\n\n\n\nThis video explores practical skills for crafting effective prompts when working with AI assistants like Claude. We explain that prompt engineering is simply the practice of designing effective instructions for AI systems, combining familiar human communication principles with AI-specific considerations. We introduce six foundational techniques: giving context, showing examples of desired outputs, specifying constraints, breaking complex tasks into steps, asking the AI to think first, and defining the AI's role or tone. We also share troubleshooting strategies for when responses aren't quite right and highlight common patterns that lead to successful interactions.\n\n#### Key takeaways\n\n- Effective prompting combines clear communication principles with AI-specific techniques\n- Six foundational prompting techniques:\n  - Give context: Be specific about what you want, why you want it, and relevant background\n  - Show examples: Demonstrate the output style or format you're looking for\n  - Specify constraints: Clearly define format, length, and other output requirements\n  - Break complex tasks into steps: Guide the AI through multi-step reasoning\n  - Ask the AI to think first: Give space for the AI to work through its process\n  - Define the AI's role or tone: Specify how you want the AI to communicate\n- The \"secret weapon\": Ask the AI itself to help improve your prompt\n- Successful prompting is iterative (and perhaps also collaborative with the AI!). Expect to refine your approach based on results\n- Common successful patterns include providing clear task overviews, format specifications, explicit constraints, and relevant background information\n\n## Exercises\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which of the six prompting techniques do you think would most enhance your current AI interactions?\n- Think of a recent AI interaction that didn't meet your needs. Which techniques might have improved the outcome?\n- How does understanding these prompting techniques connect to the Description competency from the AI Fluency Framework?\n\nIf you like, revisit Bad Prompt Makeover from the previous lesson to give these prompting principles a workout.\n\n#### What’s next\n\nIn the next lesson, we'll explore Discernment, the third core AI Fluency competency. Both this Deep Dive and the lesson preceding it focused on how to communicate effectively with AI and how to practice good Description. Discernment addresses the equally important challenge of thoughtfully evaluating what AI produces in response—the other half of the conversation!\n\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is few-shot prompting and why is it effective in technical workflows?",
+      "difficulty": "easy",
+      "term_refs": [
+        "few-shot prompting",
+        "emulate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Taking photographic snapshots of the computer screen with a mobile camera.",
+          "correct": false,
+          "note": "Incorrect: few-shot refers to in-context textual examples, not photography."
+        },
+        {
+          "id": "b",
+          "text": "Providing sample input-output pairs in the prompt for the model to emulate directly.",
+          "correct": true,
+          "note": "Correct: few-shot examples demonstrate target formatting and transformation patterns."
+        },
+        {
+          "id": "c",
+          "text": "Restarting the router hardware five times before opening the terminal.",
+          "correct": false,
+          "note": "Incorrect: hardware reboots are unrelated to prompting methodology."
+        }
+      ],
+      "explanation": "Few-shot prompting involves placing one or more concrete input-output examples directly inside your prompt. This allows the language model to emulate the exact formatting, tone, and transformation logic you desire through in-context learning without requiring fine-tuning. The {{opt:a}} option confuses few-shot prompting with taking mobile photos of a monitor. The {{opt:c}} option is an absurd hardware distraction. In engineering workflows, providing two examples of log transformations guarantees that subsequent parsing follows the required schema accurately, eliminating formatting hallucinations when processing large batches of unstructured text."
+    },
+    {
+      "id": "q2",
+      "prompt": "How does chain-of-thought prompting improve multi-step technical problem solving?",
+      "difficulty": "easy",
+      "term_refs": [
+        "chain-of-thought",
+        "go astray"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It automatically deletes all numbers from mathematical equations.",
+          "correct": false,
+          "note": "Incorrect: chain-of-thought preserves and calculates mathematical steps."
+        },
+        {
+          "id": "b",
+          "text": "It connects twenty physical computers together using copper cables.",
+          "correct": false,
+          "note": "Incorrect: chain-of-thought is a prompting technique, not physical cabling."
+        },
+        {
+          "id": "c",
+          "text": "It guides the model to reason through intermediate steps sequentially, preventing logic from going astray.",
+          "correct": true,
+          "note": "Correct: step-by-step thinking decomposes complex reasoning safely."
+        }
+      ],
+      "explanation": "Chain-of-thought prompting instructs the AI to articulate its intermediate logic step-by-step before producing a final conclusion. Decomposing complex math, architectural analysis, or coding refactors into explicit sequential milestones prevents the model's reasoning from going astray. The {{opt:b}} option describes physical local area network cabling. The {{opt:a}} option is nonsense. By observing the AI's step-by-step reasoning tokens, developers can easily audit the logic and spot subtle calculation errors before deploying code to production. Furthermore, structured reasoning makes it easy to isolate exactly where an algorithm made a wrong assumption."
+    },
+    {
+      "id": "q3",
+      "prompt": "What is the 'secret weapon' technique highlighted in the lesson for crafting better prompts?",
+      "difficulty": "easy",
+      "term_refs": [
+        "secret weapon",
+        "prompt engineering",
+        "hone"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Asking the AI assistant itself to help critique, structure, and refine your prompt.",
+          "correct": true,
+          "note": "Correct: collaborating with the AI to optimize prompts leverages its meta-prompting skills."
+        },
+        {
+          "id": "b",
+          "text": "Using secret military codes hidden in encrypted text files.",
+          "correct": false,
+          "note": "Incorrect: the secret weapon is a conversational prompt-refinement technique."
+        },
+        {
+          "id": "c",
+          "text": "Typing prompts with your eyes closed to improve typing speed.",
+          "correct": false,
+          "note": "Incorrect: typing blind has no impact on prompt effectiveness."
+        }
+      ],
+      "explanation": "The secret weapon technique involves turning prompt engineering into a collaborative dialogue by asking the AI assistant itself to review, structure, and optimize your initial request. Describing your high-level goal and asking 'How can I phrase this prompt to get the best technical result?' prompts the AI to identify missing constraints, suggest useful personas, and format the request for optimal execution. The {{opt:b,c}} options are absurd distractions. This technique helps engineers hone their prompting skills rapidly across unfamiliar domains, discovering edge cases and system prompt patterns they might have overlooked."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why should you avoid 'overloading' a single prompt with multiple unrelated tasks?",
+      "difficulty": "medium",
+      "term_refs": [
+        "overload",
+        "go astray"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because competing instructions dilute attention across the context window, causing skipped requirements or degraded reasoning.",
+          "correct": true,
+          "note": "Correct: modular single-focus prompts produce higher quality outputs."
+        },
+        {
+          "id": "b",
+          "text": "Because overloading a prompt causes physical smoke to rise from the keyboard.",
+          "correct": false,
+          "note": "Incorrect: overloading affects token attention, not physical hardware."
+        },
+        {
+          "id": "c",
+          "text": "Because large language models can only understand one English word per day.",
+          "correct": false,
+          "note": "Incorrect: models process thousands of tokens simultaneously."
+        }
+      ],
+      "explanation": "Overloading a single prompt with diverse, unrelated tasks (such as asking for database optimization, marketing copy, and UI wireframes simultaneously) divides the model's self-attention across conflicting goals. This frequently causes the AI to omit critical constraints, provide superficial answers, or go astray. The {{opt:b}} option is an amusing physical impossibility. The {{opt:c}} option is factually untrue. Experienced engineers break complex projects into discrete, modular prompts, validating each output before moving on to the next task. This sequential modular approach ensures deep analytical rigor and complete compliance with every specified constraint."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does assigning a specific 'persona' improve the depth and tone of an AI response?",
+      "difficulty": "medium",
+      "term_refs": [
+        "persona",
+        "prompt engineering"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It primes the model to adopt domain-specific vocabulary, expertise standards, and appropriate communicative perspective.",
+          "correct": true,
+          "note": "Correct: personas activate specialized linguistic and domain associations."
+        },
+        {
+          "id": "b",
+          "text": "It legally changes the software developer's passport name in government databases.",
+          "correct": false,
+          "note": "Incorrect: persona assignment is purely an in-context conversational role."
+        },
+        {
+          "id": "c",
+          "text": "It forces the AI to speak only in Shakespearean rhyming verse.",
+          "correct": false,
+          "note": "Incorrect: personas can be calibrated for technical, academic, or professional roles."
+        }
+      ],
+      "explanation": "Assigning a persona (such as 'senior network architect' or 'experienced cybersecurity auditor') acts as an attention anchor, priming the language model to activate specialized terminology, professional standards, and relevant analytical frameworks. Rather than delivering generic high-level summaries, a persona-guided prompt yields rigorous, contextually appropriate technical analysis. The {{opt:b}} option is a legal fantasy. The {{opt:c}} option describes a narrow theatrical role rather than professional personas. Persona conditioning ensures the output matches the expected professional level, saving engineers valuable time that would otherwise be spent reformatting overly basic explanations."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why is prompt engineering described as an 'iterative' and experimental practice?",
+      "difficulty": "medium",
+      "term_refs": [
+        "iterative",
+        "hone",
+        "swift"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because software licenses require developers to rewrite code twelve times by law.",
+          "correct": false,
+          "note": "Incorrect: iteration is a natural collaborative workflow, not a legal mandate."
+        },
+        {
+          "id": "b",
+          "text": "Because first drafts often reveal unstated assumptions, requiring cycles of feedback and prompt refinement.",
+          "correct": true,
+          "note": "Correct: iterative feedback loops progressively sharpen output quality."
+        },
+        {
+          "id": "c",
+          "text": "Because AI models permanently lock their weights after the second prompt.",
+          "correct": false,
+          "note": "Incorrect: models maintain fluid conversational interaction across session turns."
+        }
+      ],
+      "explanation": "Prompt engineering is fundamentally an iterative discipline because human intent is rarely articulated perfectly on the first attempt. Evaluating the initial response highlights ambiguous constraints, missing edge cases, or formatting mismatches. By providing feedback, adjusting constraints, and testing different angles, developers hone their instructions and achieve swift improvements. The {{opt:a}} option is an absurd legal claim. The {{opt:c}} option mischaracterizes session dynamics. Embracing an experimental mindset turns initial misalignments into valuable learning opportunities, helping developers build robust prompt templates that can be reused across entire engineering teams."
+    },
+    {
+      "id": "q7",
+      "prompt": "An engineer wants an AI to parse Linux syslog files into JSON. What is the most effective prompt strategy?",
+      "difficulty": "medium",
+      "term_refs": [
+        "few-shot prompting",
+        "emulate",
+        "prompt engineering"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Paste 50,000 raw lines into the chat without explaining the required JSON structure.",
+          "correct": false,
+          "note": "Incorrect: dumping data without schema specifications causes formatting failures."
+        },
+        {
+          "id": "b",
+          "text": "Use few-shot prompting by providing two raw log lines alongside their target JSON representations for the AI to emulate.",
+          "correct": true,
+          "note": "Correct: few-shot demonstration specifies exact schema keys and parsing rules."
+        },
+        {
+          "id": "c",
+          "text": "Submit a one-word prompt saying 'JSON' with no sample logs or explanations.",
+          "correct": false,
+          "note": "Incorrect: single-word prompts lack necessary schema context."
+        }
+      ],
+      "explanation": "The most effective technique for structured data parsing is few-shot prompting. By showing two concrete examples of raw syslog strings paired with the exact JSON object schema you require, the AI immediately recognizes the field mappings (e.g. timestamp, severity, host, message) and replicates the pattern without hallucinated keys. The {{opt:c}} option provides zero context. The {{opt:a}} option overloads the model with raw text while omitting instructions. In production automation, few-shot examples guarantee rigid schema compliance, making the output directly compatible with downstream log ingest pipelines without manual cleaning."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why do 'timeless' communication principles remain essential even as AI models become more intelligent?",
+      "difficulty": "medium",
+      "term_refs": [
+        "timeless",
+        "prompt engineering",
+        "swift"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because prompt engineering tricks will become completely illegal in future operating systems.",
+          "correct": false,
+          "note": "Incorrect: clear communication will always remain a core engineering practice."
+        },
+        {
+          "id": "b",
+          "text": "Because modern AI assistants only understand English written in the seventeenth century.",
+          "correct": false,
+          "note": "Incorrect: models understand modern contemporary languages and idioms."
+        },
+        {
+          "id": "c",
+          "text": "Because clarity of purpose, relevant background context, and clear expectations are fundamental to any successful intellectual collaboration.",
+          "correct": true,
+          "note": "Correct: core communication clarity transcends specific model architectures."
+        }
+      ],
+      "explanation": "While specific prompt hacks and keywords evolve or become obsolete as models advance, timeless human communication principles—clarity, precision, explicit expectations, and structured context—remain permanently vital. An AI model, no matter how powerful, cannot deduce unspoken project goals or unstated business constraints. The {{opt:b,a}} options are absurd exaggerations. Applying timeless communication hygiene enables engineers to achieve swift alignment and predictable results across any current or future AI platform, ensuring that automated systems remain reliable as underlying machine learning models are upgraded."
+    },
+    {
+      "id": "q9",
+      "prompt": "A CLI agent misinterprets a complex migration command because it rushed to output syntax. How can you fix this?",
+      "difficulty": "hard",
+      "term_refs": [
+        "chain-of-thought",
+        "go astray",
+        "hone"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Instruct the agent to think first, evaluate dependencies step-by-step, and verify rollback plans before generating commands.",
+          "correct": true,
+          "note": "Correct: giving space to reason before acting prevents syntactic and logical blunders."
+        },
+        {
+          "id": "b",
+          "text": "Replace all terminal commands with random numbers from a telephone directory.",
+          "correct": false,
+          "note": "Incorrect: random numbers are not valid command-line syntax."
+        },
+        {
+          "id": "c",
+          "text": "Turn off the terminal monitor and execute the unknown command blindly on live servers.",
+          "correct": false,
+          "note": "Incorrect: blind execution of hallucinated commands creates catastrophic outage risks."
+        }
+      ],
+      "explanation": "When an agent rushes to generate CLI syntax without considering system state, prompting it to think first and articulate intermediate reasoning steps prevents disastrous mistakes. Requiring the model to evaluate dependency graphs, check disk space, and prepare rollback commands before generating executable syntax forces it to explore constraints thoroughly. The {{opt:c}} option is an operational nightmare. The {{opt:b}} option is meaningless. Structuring prompts with explicit verification phases allows engineers to hone automated routines safely, ensuring that every command executed against live network hardware has been validated."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does combining context, few-shot examples, constraints, chain-of-thought, and persona create an optimal prompt?",
+      "difficulty": "hard",
+      "term_refs": [
+        "prompt engineering",
+        "few-shot prompting",
+        "persona"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It forces the language model to delete all other open source repositories on the internet.",
+          "correct": false,
+          "note": "Incorrect: prompts operate strictly within their active session boundaries."
+        },
+        {
+          "id": "b",
+          "text": "It permanently removes the need for human software engineers across the tech industry.",
+          "correct": false,
+          "note": "Incorrect: AI collaboration amplifies engineers rather than replacing domain leadership."
+        },
+        {
+          "id": "c",
+          "text": "It constructs an exhaustive collaborative framework that minimizes ambiguity and channels model capability with surgical precision.",
+          "correct": true,
+          "note": "Correct: multi-layered prompt design maximizes accuracy across complex tasks."
+        }
+      ],
+      "explanation": "Integrating the foundational techniques produces an optimal prompt by addressing every potential vector of ambiguity. Context provides background rationale, few-shot examples define exact formatting, constraints enforce technical boundaries, chain-of-thought ensures rigorous reasoning, and persona establishes professional tone. The {{opt:b}} option is a dystopian exaggeration that ignores the necessity of human discernment. The {{opt:a}} option is technically impossible. Mastering this multi-layered prompt engineering toolkit transforms AI from a basic text generator into a precision instrument for software engineering, enabling teams to build reliable automated workflows."
+    }
+  ],
+  "speaking_prompts": [
+    "How do you apply prompt engineering in your daily programming or networking tasks? Which of the six techniques do you rely on most?",
+    "Why is few-shot prompting often more effective than writing long abstract explanations? Describe an example where you showed patterns for the AI to emulate.",
+    "How does chain-of-thought prompting prevent an AI agent from going astray when solving multi-step technical problems?",
+    "Have you ever used the secret weapon of asking an AI to improve your own prompt? How did this iterative refinement help you hone your instructions?",
+    "Why is it a mistake to overload a single prompt with multiple unrelated tasks? How do timeless communication principles apply to AI collaboration?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 9 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record a 60-second explanation of few-shot prompting vs chain-of-thought prompting. Check your pronunciation of iterative and persona.",
+    "Draft a 3-minute talk plan for your teacher demonstrating a prompt makeover using the secret weapon technique on a real technical task."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

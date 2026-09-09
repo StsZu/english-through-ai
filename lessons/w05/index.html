@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w05",
+  "title": "Deep Dive 1 (Part 2) — Capabilities & Limitations",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can analyze current AI capabilities such as task versatility and external tool use.",
+    "By the end of this lesson I can evaluate AI limitations including hallucinations, context windows, and knowledge cutoffs.",
+    "By the end of this lesson I can explain how retrieval-augmented generation and temperature settings affect model reliability."
+  ],
+  "vocabulary": [
+    {
+      "term": "condense",
+      "definition_b1": "to make text or speech shorter by keeping only the most important parts",
+      "collocations": [
+        "condense reports",
+        "condense information"
+      ],
+      "ua": "стискати; скорочувати",
+      "source_sentence": "They're skilled with language in ways that seemed impossible just a few years ago: crafting emails that capture your voice, condensing lengthy reports into clear summaries, translating between languages, and explaining complex topics across countless fields, from microbiology to marketing strategy."
+    },
+    {
+      "term": "knowledge cutoff",
+      "definition_b1": "the specific date after which an AI model has no information about the world",
+      "collocations": [
+        "knowledge cutoff date",
+        "reach the knowledge cutoff"
+      ],
+      "ua": "дата зрізу знань (моделі)",
+      "source_sentence": "LLMs have a knowledge cutoff date based on when they were trained, the point after which they have no innate knowledge of the world."
+    },
+    {
+      "term": "innate",
+      "definition_b1": "existing naturally or built inside from the start",
+      "collocations": [
+        "innate knowledge",
+        "innate ability"
+      ],
+      "ua": "вроджений; закладений від початку",
+      "source_sentence": "LLMs have a knowledge cutoff date based on when they were trained, the point after which they have no innate knowledge of the world."
+    },
+    {
+      "term": "hallucination",
+      "definition_b1": "a situation where an AI confidently generates plausible-sounding but false information",
+      "collocations": [
+        "prevent hallucinations",
+        "produce a hallucination"
+      ],
+      "ua": "галюцинація (неправдива інформація від ШІ)",
+      "source_sentence": "This leads to what is often called a hallucination: AI confidently stating something that sounds plausible but is actually incorrect."
+    },
+    {
+      "term": "plausible",
+      "definition_b1": "seeming likely to be true, believable, or reasonable",
+      "collocations": [
+        "sounds plausible",
+        "plausible explanation"
+      ],
+      "ua": "правдоподібний; переконливий на вигляд",
+      "source_sentence": "This leads to what is often called a hallucination: AI confidently stating something that sounds plausible but is actually incorrect."
+    },
+    {
+      "term": "non-deterministic",
+      "definition_b1": "producing slightly different results each time given the same input",
+      "collocations": [
+        "non-deterministic behavior",
+        "non-deterministic output"
+      ],
+      "ua": "недетермінований (ймовірнісний, не завжди однаковий)",
+      "source_sentence": "Furthermore, unlike traditional software that produces identical outputs given the same inputs, LLMs are somewhat unpredictable by default, also known as non-deterministic."
+    },
+    {
+      "term": "temperature",
+      "definition_b1": "a setting that controls how random or creative an AI output is",
+      "collocations": [
+        "lower the temperature",
+        "temperature setting"
+      ],
+      "ua": "температура (параметр випадковості/креативності)",
+      "source_sentence": "This setting is often referred to as temperature."
+    },
+    {
+      "term": "extended-thinking",
+      "definition_b1": "a model capability that performs step-by-step reasoning before answering",
+      "collocations": [
+        "extended-thinking models",
+        "support extended thinking"
+      ],
+      "ua": "поглиблене мислення / покрокове міркування",
+      "source_sentence": "The good news is that newer reasoning or extended-thinking models, specifically designed to think step by step, are showing strong progress in these areas."
+    },
+    {
+      "term": "retrieval-augmented",
+      "definition_b1": "connecting a language model to external live databases or documents to find facts",
+      "collocations": [
+        "retrieval-augmented generation",
+        "retrieval-augmented system"
+      ],
+      "ua": "доповнений пошуком (RAG)",
+      "source_sentence": "Researchers are working to address current limitations through techniques like retrieval-augmented generation, which connects models to external knowledge and data sources, as well as expanding their ability to use tools and improving their reasoning capabilities."
+    },
+    {
+      "term": "foreseeable",
+      "definition_b1": "able to be predicted or expected in the near future",
+      "collocations": [
+        "foreseeable future",
+        "foreseeable problems"
+      ],
+      "ua": "осяжний; передбачуваний",
+      "source_sentence": "That said, some limitations will likely remain for the foreseeable future, even if we don't know exactly what those limitations will be."
+    },
+    {
+      "term": "leverage",
+      "definition_b1": "to use something to its maximum advantage",
+      "collocations": [
+        "leverage strengths",
+        "leverage capabilities"
+      ],
+      "ua": "ефективно використовувати; задіювати переваги",
+      "source_sentence": "The most effective applications will leverage the complementary strengths of humans and AI."
+    },
+    {
+      "term": "stay abreast of",
+      "definition_b1": "to stay informed about the latest news, changes, or developments",
+      "collocations": [
+        "stay abreast of changes",
+        "stay abreast of trends"
+      ],
+      "ua": "бути в курсі; не відставати від новин/змін",
+      "source_sentence": "They help you stay abreast of these changes and discover new possibilities."
+    }
+  ],
+  "reading": {
+    "b1": "Understanding what **generative AI** can and cannot do helps us collaborate effectively. Large language models like Claude are remarkably versatile. They can **condense** long reports into clear summaries. They translate languages and explain complex topics. They switch between diverse tasks without extra training. They maintain conversational threads and remember earlier points. Furthermore, connecting models to external tools lets them search the web or process files.\n\nHowever, modern AI systems also face important limitations. First, models have a **knowledge cutoff** date. They have no **innate** knowledge of events after training. Second, models can produce a **hallucination**. This happens when an AI generates a **plausible** statement that is factually wrong. Unlike search engines, language models generate words statistically rather than retrieving documents.\n\nAnother constraint is the context window. If interaction exceeds this limit, older information drops out. Furthermore, models are **non-deterministic** by default. Asking the same question twice may give slightly different responses. Developers control this randomness using a **temperature** setting. Lower values produce consistent outputs, while higher values encourage creative brainstorming.\n\nHistorically, models struggled with multi-step logic. Today, newer **extended-thinking** models reason step by step. Researchers also address limitations using **retrieval-augmented** generation to connect models to external data. Nevertheless, some constraints will remain for the **foreseeable** future. Successful workflows **leverage** complementary strengths. Humans provide judgment, creativity, and ethical oversight. AI provides speed, scale, and pattern recognition. Regular practice helps learners **stay abreast of** technological progress.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1433\nWords per minute: 143\nVerdict: 130-150 needs pre-teaching\n---\n\n# w05 — source material\n\nRaw text collected from Coursera. No editing, no cleaning.\nReadings: select the page text and paste it.\nVideos: use the Transcript tab under the player, not Subtitles.\n\nSeparator format:\n\n--- reading: <title> ---\n--- video N: <title> (MM:SS) ---\n\nTotal video duration in this module: ___ min\nWord count (wc -w): ___\nWords per minute: ___\n\n\n\n# Capabilities & limitations\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Identify major capabilities and limitations of current generative AI\n\n## Capabilities & limitations\n\n\n\nLet's now examine what generative AI can and cannot do. Focusing on LLMs such as Claude, think of this as getting to know a new colleague. Understanding their strengths and limitations helps you collaborate more effectively.\n\nTo start, we'll focus on what these systems do remarkably well. You might be amazed at how versatile modern language models can be. They're skilled with language in ways that seemed impossible just a few years ago: crafting emails that capture your voice, condensing lengthy reports into clear summaries, translating between languages, and explaining complex topics across countless fields, from microbiology to marketing strategy.\n\nWhat's particularly notable is how these models can shift between different tasks without needing additional training. The very same system that helps you write poetry or brainstorm ideas for your birthday party can turn around and help you understand quantum computing concepts or analyze quarterly business trends, all through simple conversation.\n\nThese models can also maintain the thread of a conversation, remembering what you discussed earlier and building upon it. If you mention your project deadline in passing, for example, and refer back to it later within the conversation, the AI typically understands what you're talking about, much like a human conversation partner would.\n\nMany modern LLMs can now also reach beyond their own knowledge by connecting to external tools and information sources, allowing them to search the web, process files, or even use other applications to enhance their capabilities. This dramatically expands what they can help with.\n\nHowever, just like any technology, LLMs as they exist today also have certain limitations.\n\nFirst, AI models are bounded by their training data. LLMs have a knowledge cutoff date based on when they were trained, the point after which they have no innate knowledge of the world. For example, a model with a cutoff date of November 2024 means that it wasn't trained on any data after November 2024.\n\nImagine someone who went into a retreat without internet access at a specific date. They wouldn't know about events that happened after they left. Models need tools like web search to learn more about recent developments.\n\nAdditionally, the training process doesn't verify every fact in the training data. This means models can sometimes learn and reproduce inaccuracies that were present in their training data. They can also make mistakes when trying to piece together information they've learned.\n\nThis leads to what is often called a hallucination: AI confidently stating something that sounds plausible but is actually incorrect. Unlike search engines that simply retrieve existing documents, LLMs generate responses based on statistical patterns, sometimes producing hallucinations.\n\nImagine a friend who tells a story with absolute confidence, only to have the details completely wrong. AI can sometimes be like that.\n\nAnother important constraint is the context window we mentioned earlier. As a reminder, that's the amount of information an AI can process at one time. Every LLM has a maximum limit to how much information it can consider during a single interaction.\n\nIf this limit is exceeded, the AI won't be able to remember information that falls outside the window, usually on a first-in, first-out basis. Depending on the size of the model, this can limit its ability to process large documents or remember the entire conversation.\n\nFurthermore, unlike traditional software that produces identical outputs given the same inputs, LLMs are somewhat unpredictable by default, also known as non-deterministic. Ask the same question twice, and you might get slightly different responses each time.\n\nThis variability stems from the nature of how these models generate text. They're making probabilistic decisions about what text should come next based on patterns in their training data and certain settings that developers can tweak.\n\nThis creative variability can be great for brainstorming and generating diverse ideas, but requires awareness when consistency or accuracy are critical. Some LLM interfaces also offer settings to control this randomness when needed. This setting is often referred to as temperature.\n\nAdditionally, while these models are improving rapidly, they've historically shown limitations with complex reasoning tasks, particularly with mathematical or logical problems requiring multiple steps. The good news is that newer reasoning or extended-thinking models, specifically designed to think step by step, are showing strong progress in these areas.\n\nAnd finally, while models like Claude can now access external tools, they may still lack access to specific data sources or specialized tools that would be needed for certain tasks. It's like having a brilliant colleague who can't access your company's internal database. Their ability to help will be limited no matter how smart they are.\n\nIf a model doesn't have access to a piece of data or tool that is needed to answer a question, then it should not come as a surprise that it won't be able to help answer the question.\n\nThe field of generative AI is rapidly evolving. Researchers are working to address current limitations through techniques like retrieval-augmented generation, which connects models to external knowledge and data sources, as well as expanding their ability to use tools and improving their reasoning capabilities.\n\nThat said, some limitations will likely remain for the foreseeable future, even if we don't know exactly what those limitations will be.\n\nUnderstanding what AI can or cannot do is essential for AI fluency and helps you determine when and how to best incorporate these systems effectively into your work and daily life.\n\nThe most effective applications will leverage the complementary strengths of humans and AI. We bring critical thinking, judgment, creativity, and ethical oversight that AI may struggle to replicate, while AI offers speed, scale, pattern recognition, and the ability to process vast amounts of information.\n\nThese complementary strengths will evolve as the technology evolves. That's why continued learning and experimentation are so valuable. They help you stay abreast of these changes and discover new possibilities.\n\nIn these exercises across this course, you'll have a chance to explore these concepts firsthand through conversations with Claude. This direct experience will help you develop an intuitive feel for what generative AI can do, can't do, and how best to work with it.\n\n\n\nThis video examines what generative AI can and cannot do effectively at this point in time. We highlight generative AI's versatility across language tasks, ability to maintain conversational flow, and capacity to switch between diverse tasks without additional training. We also address limitations including knowledge cutoff dates, hallucinations (factually incorrect outputs), context window constraints, and reasoning challenges. We emphasize how the field is evolving rapidly and explain that the most effective applications bring together the complementary strengths of humans and AI working together.\n\n#### Key takeaways\n\n- Generative AI creates new content (text, images, code) rather than just analyzing existing data\n- Modern systems like LLMs were made possible by three key developments:\n  - Algorithmic and architectural breakthroughs (especially the transformer architecture)\n  - Vast amounts of digital training data\n  - Dramatic increases in computational power\n- Generative AI learns through two stages: pre-training (analyzing patterns across billions of examples) and fine-tuning (learning to follow instructions and provide helpful responses)\n- Current capabilities include versatility across tasks, conversational awareness, and the ability to connect with external tools\n- Current limitations include knowledge cutoff dates, potential for hallucinations, context window constraints, and challenges with complex reasoning\n- The most effective applications combine human and AI strengths, with humans providing critical thinking, judgment, creativity, and ethical oversight\n\n## Exercises\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- How does understanding the technical foundations of generative AI (like training data and pre-training/fine-tuning) change how you think about working with these systems?\n- What ethical considerations come to mind after learning about how these systems work and their current limitations?\n\n#### What's next\n\nIn the next lesson, we'll take a closer look at the first of the 4D competencies: Delegation. You'll learn how to make strategic decisions about dividing work between yourself and AI based on understanding both your goals and AI capabilities. This foundation will help you thoughtfully determine when and how to bring AI into your creative and problem-solving processes.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What does it mean when an AI model has a knowledge cutoff date of November 2024?",
+      "difficulty": "easy",
+      "term_refs": [
+        "knowledge cutoff",
+        "innate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The model will stop working permanently on November 2024.",
+          "correct": false,
+          "note": "Incorrect: cutoff date is a past training boundary, not an expiration date."
+        },
+        {
+          "id": "b",
+          "text": "The model deletes all user accounts created after November 2024.",
+          "correct": false,
+          "note": "Incorrect: cutoff refers exclusively to training knowledge limits."
+        },
+        {
+          "id": "c",
+          "text": "The model has no innate training data about world events that occurred after November 2024.",
+          "correct": true,
+          "note": "Correct: training datasets only capture history up to the cutoff date."
+        }
+      ],
+      "explanation": "A knowledge cutoff date represents the point in time after which the AI model has no innate knowledge of world events or newer publications. If a model was trained up to November 2024, it cannot know about software releases or news from 2025 unless it uses external tools like live web search. The {{opt:a}} option confuses a historical training boundary with an expiration deadline. The {{opt:b}} option is completely unrelated to user account management. Understanding knowledge cutoffs prevents engineers from expecting fresh documentation from offline models without search extensions."
+    },
+    {
+      "id": "q2",
+      "prompt": "What is an AI hallucination?",
+      "difficulty": "easy",
+      "term_refs": [
+        "hallucination",
+        "plausible"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "An output that sounds confident and plausible but contains factually incorrect information.",
+          "correct": true,
+          "note": "Correct: hallucinations appear convincing while being factually wrong."
+        },
+        {
+          "id": "b",
+          "text": "A hardware failure where a server screen turns completely green.",
+          "correct": false,
+          "note": "Incorrect: hallucinations are textual factual errors, not monitor glitches."
+        },
+        {
+          "id": "c",
+          "text": "An intentional joke inserted by developers to entertain users.",
+          "correct": false,
+          "note": "Incorrect: hallucinations stem from probabilistic next-token generation."
+        }
+      ],
+      "explanation": "An AI hallucination occurs when a language model generates a statement that sounds confident and linguistically plausible, but is actually factually incorrect or fabricated. Because language models predict statistical word sequences rather than querying a verified truth database, they can construct false citations, non-existent software flags, or incorrect historical dates. The {{opt:b}} option is an irrelevant hardware malfunction. The {{opt:c}} option is wrong because hallucinations are an unintended mathematical byproduct of next-token prediction. Critical discernment is required whenever accuracy is essential."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why are large language models described as non-deterministic by default?",
+      "difficulty": "easy",
+      "term_refs": [
+        "non-deterministic",
+        "temperature"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because they can only run on computers powered by solar panels.",
+          "correct": false,
+          "note": "Incorrect: power source has no effect on software determinism."
+        },
+        {
+          "id": "b",
+          "text": "Because they make probabilistic choices, potentially giving slightly different answers to the same prompt.",
+          "correct": true,
+          "note": "Correct: probability distributions create variable response completions."
+        },
+        {
+          "id": "c",
+          "text": "Because they always return identical byte-for-byte outputs under every setting.",
+          "correct": false,
+          "note": "Incorrect: that would describe deterministic traditional algorithms."
+        }
+      ],
+      "explanation": "Language models are non-deterministic by default because word generation involves sampling from probability distributions. Submitting the exact same prompt multiple times can produce slightly different phrasings or structural choices based on the temperature parameter. The {{opt:a}} option is an absurd distraction about power supplies. The {{opt:c}} option defines deterministic software, such as a traditional compiler or hash function, which always produces identical outputs for identical inputs. When building automated pipelines, developers often set temperature near zero to minimize output variation."
+    },
+    {
+      "id": "q4",
+      "prompt": "How does the temperature setting influence AI outputs in practice?",
+      "difficulty": "medium",
+      "term_refs": [
+        "temperature",
+        "non-deterministic"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Temperature measures the physical Celsius heat of the server CPU.",
+          "correct": false,
+          "note": "Incorrect: in AI APIs, temperature is a mathematical sampling hyperparameter."
+        },
+        {
+          "id": "b",
+          "text": "Lower temperature produces more predictable, focused text, while higher temperature increases creative diversity.",
+          "correct": true,
+          "note": "Correct: temperature adjusts sampling probabilities from narrow to wide."
+        },
+        {
+          "id": "c",
+          "text": "Higher temperature deletes all adjectives from the generated response.",
+          "correct": false,
+          "note": "Incorrect: temperature does not filter specific parts of speech."
+        }
+      ],
+      "explanation": "In language model APIs, temperature is a mathematical parameter controlling the randomness of next-token sampling. A low temperature (e.g., 0.1 or 0.2) flattens token probabilities to select the most probable words, making the output focused, deterministic, and ideal for coding or JSON schemas. A high temperature (e.g., 0.8 or 1.0) broadens selection, encouraging creative brainstorming and diverse ideas. The {{opt:a}} option confuses the algorithmic parameter with physical hardware heat. The {{opt:c}} option is inaccurate because temperature affects probabilistic sampling across all tokens."
+    },
+    {
+      "id": "q5",
+      "prompt": "What is retrieval-augmented generation (RAG) and what limitation does it solve?",
+      "difficulty": "medium",
+      "term_refs": [
+        "retrieval-augmented",
+        "knowledge cutoff",
+        "hallucination"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It connects models to external documents and live data sources to ground answers and overcome knowledge cutoffs.",
+          "correct": true,
+          "note": "Correct: RAG fetches verified facts before generating final text."
+        },
+        {
+          "id": "b",
+          "text": "It converts text models into image editing software automatically.",
+          "correct": false,
+          "note": "Incorrect: RAG is an information retrieval architecture, not an image tool."
+        },
+        {
+          "id": "c",
+          "text": "It completely removes the need for human prompts by predicting thoughts.",
+          "correct": false,
+          "note": "Incorrect: RAG still requires structured queries and user prompts."
+        }
+      ],
+      "explanation": "Retrieval-augmented generation (RAG) is an architecture that queries external knowledge bases, internal company documents, or search engines to retrieve relevant text chunks before generating an answer. By injecting real, verified data directly into the model's context window, RAG helps overcome knowledge cutoffs and significantly reduces hallucinations. The {{opt:c}} option is an impossible sci-fi claim. The {{opt:b}} option mischaracterizes RAG as an image editor. In enterprise environments, RAG allows proprietary documentation and private repositories to be queried accurately without costly model retraining."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why are extended-thinking models better at multi-step math and complex reasoning?",
+      "difficulty": "medium",
+      "term_refs": [
+        "extended-thinking",
+        "plausible"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "They bypass all neural processing and search Google for pre-written math homework.",
+          "correct": false,
+          "note": "Incorrect: reasoning models generate internal thought tokens autonomously."
+        },
+        {
+          "id": "b",
+          "text": "They break down problems into sequential reasoning steps and verify sub-conclusions before producing a final answer.",
+          "correct": true,
+          "note": "Correct: chain-of-thought processing improves logical consistency."
+        },
+        {
+          "id": "c",
+          "text": "They only answer questions that contain fewer than five words.",
+          "correct": false,
+          "note": "Incorrect: extended thinking handles long, complex problem statements."
+        }
+      ],
+      "explanation": "Extended-thinking and reasoning models are trained to generate invisible or visible intermediate chains of thought before delivering the final response. By breaking down complex logic, coding refactors, or mathematical proofs into sequential steps, the model can catch errors, test alternative paths, and avoid premature conclusions. The {{opt:a}} option is false because extended-thinking models reason mathematically through weights rather than simple web copy-pasting. The {{opt:c}} option is inaccurate. This capability represents a significant breakthrough for algorithmic debugging, networking configurations, and system design."
+    },
+    {
+      "id": "q7",
+      "prompt": "An executive wants an AI to summarize a 500-page financial report in one prompt. What constraint might she encounter?",
+      "difficulty": "medium",
+      "term_refs": [
+        "condense",
+        "foreseeable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The context window capacity may be exceeded, causing parts of the report to be dropped or ignored.",
+          "correct": true,
+          "note": "Correct: models have token memory limits for single interactions."
+        },
+        {
+          "id": "b",
+          "text": "The model will permanently convert all dollar figures into ancient Greek coins.",
+          "correct": false,
+          "note": "Incorrect: models maintain currency formats correctly."
+        },
+        {
+          "id": "c",
+          "text": "Financial numbers automatically trigger an irreversible shutdown of the model.",
+          "correct": false,
+          "note": "Incorrect: models process financial text safely within token limits."
+        }
+      ],
+      "explanation": "While modern models can condense long documents into clear executive summaries, extremely large files (like a 500-page report) can challenge context window limits or dilute attention across thousands of tokens. If the document exceeds the active context capacity, older or middle sections may be truncated. The {{opt:c,b}} options are absurd exaggerations. A practical solution is to chunk the document into chapter summaries, process them sequentially, and then synthesize a final overview. This workflow ensures that important financial details are not lost."
+    },
+    {
+      "id": "q8",
+      "prompt": "What is the most effective approach to combining human and AI capabilities in technical workflows?",
+      "difficulty": "medium",
+      "term_refs": [
+        "leverage",
+        "stay abreast of"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Refuse to use AI tools for any task to avoid learning new software workflows.",
+          "correct": false,
+          "note": "Incorrect: rejecting tools forfeits major productivity and learning benefits."
+        },
+        {
+          "id": "b",
+          "text": "Delegate 100% of all decision-making to AI without human review or code testing.",
+          "correct": false,
+          "note": "Incorrect: unmonitored delegation introduces severe operational risks."
+        },
+        {
+          "id": "c",
+          "text": "Leverage AI for rapid drafting, scale, and pattern analysis while reserving judgment and ethical oversight for humans.",
+          "correct": true,
+          "note": "Correct: complementary strengths maximize efficiency and reliability."
+        }
+      ],
+      "explanation": "The most effective technical workflows leverage the complementary strengths of humans and artificial intelligence. AI excels at rapid text condensation, code scaffolding, parsing large datasets, and pattern recognition. Humans supply domain expertise, critical discernment, nuanced creativity, and final ethical responsibility. The {{opt:b}} option is dangerous because AI cannot replace human accountability. The {{opt:a}} option prevents professional growth. Staying abreast of tool capabilities allows engineers to design robust human-in-the-loop systems where automation speeds up work without compromising safety. In software engineering, for example, an agent can draft unit tests while senior developers inspect system architecture and edge cases."
+    },
+    {
+      "id": "q9",
+      "prompt": "A CLI coding assistant invents a non-existent parameter for a MikroTik router command. What caused this error?",
+      "difficulty": "hard",
+      "term_refs": [
+        "hallucination",
+        "plausible",
+        "innate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The router's network cable was physically unplugged during the terminal prompt.",
+          "correct": false,
+          "note": "Incorrect: network physical state does not generate invented syntax."
+        },
+        {
+          "id": "b",
+          "text": "The AI model deliberately chose to destroy the user's networking hardware.",
+          "correct": false,
+          "note": "Incorrect: models have no consciousness or malicious intent."
+        },
+        {
+          "id": "c",
+          "text": "A plausible hallucination caused by probabilistic next-token generation without exact syntax verification.",
+          "correct": true,
+          "note": "Correct: the model generated a plausible-sounding command that does not exist."
+        }
+      ],
+      "explanation": "This error is a classic technical hallucination. The language model combined patterns from general networking documentation and generated a plausible-sounding parameter that looks legitimate but is not supported by RouterOS. Because the model predicts tokens probabilistically rather than testing the command against live hardware, it cannot detect the syntax error internally. The {{opt:a}} option is an unrelated physical cabling issue. The {{opt:b}} option falsely anthropomorphizes the model. Practicing discernment by testing scripts in a lab environment prevents live configuration outages."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why will human discernment remain necessary for the foreseeable future despite advances in AI tools?",
+      "difficulty": "hard",
+      "term_refs": [
+        "foreseeable",
+        "stay abreast of",
+        "leverage"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because statistical generation can still produce subtle inaccuracies, bias, or misaligned recommendations that require human oversight.",
+          "correct": true,
+          "note": "Correct: human judgment remains essential for validating truth and safety."
+        },
+        {
+          "id": "b",
+          "text": "Because all AI development will permanently stop next month by international law.",
+          "correct": false,
+          "note": "Incorrect: AI technology continues to accelerate rapidly."
+        },
+        {
+          "id": "c",
+          "text": "Because language models will lose their ability to process English vocabulary after updates.",
+          "correct": false,
+          "note": "Incorrect: future models expand linguistic and reasoning capabilities."
+        }
+      ],
+      "explanation": "Human discernment will remain indispensable for the foreseeable future because language models generate outputs statistically. Even with breakthroughs like retrieval-augmented generation and extended thinking, models can still misinterpret ambiguous requirements, produce subtle hallucinations, or reflect training data biases. The {{opt:b}} option is factually untrue. The {{opt:c}} option is nonsensical because model capabilities are expanding. Fluent professionals leverage AI for productivity while actively verifying that outputs align with technical standards, business objectives, and ethical norms. Ultimately, responsibility for production code, security policies, and published documentation rests with human engineers, making active review an irreplaceable skill."
+    }
+  ],
+  "speaking_prompts": [
+    "When using AI for coding or writing, how do you verify outputs when a model generates a plausible hallucination? Explain using plausible and hallucination.",
+    "Why is temperature an important setting when you need exact configurations versus creative brainstorming? Explain using temperature and non-deterministic.",
+    "How does a knowledge cutoff limit what an AI can answer about recent tools or APIs? How does retrieval-augmented generation help overcome this?",
+    "Describe a project where you leverage complementary human and AI strengths. What tasks do you condense and what critical judgment do you keep?",
+    "How do you stay abreast of rapid AI changes in your technical field? Why will some limitations remain for the foreseeable future?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 5 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining why LLMs are non-deterministic and how temperature affects predictability. Verify your pronunciation with a speech-to-text tool.",
+    "Draft a 3-minute talk plan for your teacher about managing AI limitations (hallucinations and context limits) in your daily technical work."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

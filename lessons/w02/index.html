@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w02",
+  "title": "The AI Fluency Framework",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can compare Automation, Augmentation, and Agency using practical examples.",
+    "By the end of this lesson I can argue which AI collaboration mode fits a specific task.",
+    "By the end of this lesson I can describe my AI work using accurate -ing endings and complete articles."
+  ],
+  "vocabulary": [
+    {
+      "term": "AI fluency",
+      "definition_b1": "The ability to work with artificial intelligence effectively, safely, and responsibly.",
+      "collocations": [
+        "develop AI fluency",
+        "AI fluency framework"
+      ],
+      "example": "I am developing AI fluency by using CLI agents for real coding tasks.",
+      "source_sentence": "AI fluency isn't just about being a technical expert or memorizing the 10 best prompts for whatever trending task is popular this month.",
+      "ua": "вільне володіння ШІ / ШІ-грамотність"
+    },
+    {
+      "term": "automation",
+      "definition_b1": "Using technology to complete a defined task with little human involvement.",
+      "collocations": [
+        "workflow automation",
+        "use automation"
+      ],
+      "example": "I use automation to collect router data and create a daily report.",
+      "source_sentence": "The first way we interact with AI is through automation, where an AI assistant completes a specific task based on your instructions.",
+      "ua": "автоматизація"
+    },
+    {
+      "term": "augmentation",
+      "definition_b1": "Working with technology as a partner to improve your own thinking or work.",
+      "collocations": [
+        "human augmentation",
+        "use augmentation"
+      ],
+      "example": "I use augmentation when a CLI agent helps me compare two Python approaches.",
+      "source_sentence": "The second approach is augmentation, where you and the AI assistant collaborate and complete a task together.",
+      "ua": "розширення людських можливостей"
+    },
+    {
+      "term": "agency",
+      "definition_b1": "A way for technology to act independently toward a goal you set.",
+      "collocations": [
+        "AI agency",
+        "greater agency"
+      ],
+      "example": "Agency becomes useful when an agent checks my Git repository without detailed instructions.",
+      "source_sentence": "The third mode is agency, where AI works independently on your behalf.",
+      "ua": "автономність / агентність (самостійна діяльність)"
+    },
+    {
+      "term": "versatile",
+      "definition_b1": "Able to do many different kinds of work well.",
+      "collocations": [
+        "versatile tool",
+        "versatile assistant"
+      ],
+      "example": "My Raspberry Pi is a versatile tool for networking and hardware experiments.",
+      "source_sentence": "Many of us now have versatile assistants and virtual collaborators at our fingertips that can help with writing, brainstorming, researching, decision-making, and much more.",
+      "ua": "універсальний; різнобічний"
+    },
+    {
+      "term": "responsibly",
+      "definition_b1": "In a careful way that considers risks, rules, and other people.",
+      "collocations": [
+        "act responsibly",
+        "use responsibly"
+      ],
+      "example": "I should use an AI agent responsibly before allowing it to change router settings.",
+      "source_sentence": "Having these powerful systems doesn't automatically mean we know how to make the most of them or to engage with them responsibly.",
+      "ua": "відповідально"
+    },
+    {
+      "term": "highlight",
+      "definition_b1": "To make an important point easier to notice.",
+      "collocations": [
+        "highlight a difference",
+        "highlight a risk"
+      ],
+      "example": "The test results highlight a problem in my typing platform's scoring logic.",
+      "source_sentence": "All of these moments highlight the gaps between simply having access to AI and truly being fluent with it.",
+      "ua": "виділяти; підкреслювати"
+    },
+    {
+      "term": "reinforce",
+      "definition_b1": "To make an idea, skill, or effect stronger.",
+      "collocations": [
+        "reinforce learning",
+        "reinforce a habit"
+      ],
+      "example": "Daily terminal exercises reinforce the English vocabulary I use while coding.",
+      "source_sentence": "It's about developing a collection of practical skills, knowledge, insights, and values that reinforce each other and adapt as the technology changes.",
+      "ua": "посилювати; зміцнювати"
+    },
+    {
+      "term": "straightforward",
+      "definition_b1": "Simple, clear, and not difficult to understand or complete.",
+      "collocations": [
+        "straightforward task",
+        "straightforward solution"
+      ],
+      "example": "Updating one Git file is straightforward, but debugging several agents is not.",
+      "source_sentence": "This approach works best when solutions aren't straightforward and you need space to explore and experiment.",
+      "ua": "простий; однозначний; прямолінійний"
+    }
+  ],
+  "reading": {
+    "b1": "**AI fluency** is central to the rest of this course. It asks an important question. What does being fluent with **AI** really mean? This question matters because technology is changing very quickly. This change creates both excitement and uncertainty.\n\n**AI** is changing how we communicate, create, learn, and solve problems. This happens at work and in our personal lives. Many people now have versatile assistants and virtual collaborators. These systems can support writing, brainstorming, research, and decision-making. They can also help with many other tasks.\n\nHowever, access to powerful systems is not enough. We must learn how to use them responsibly. Sometimes an **AI** gives an unexpected response. Then we may not know what to do next. Sometimes we cannot explain exactly what we need. This can make the interaction frustrating. We may also worry about protecting information we share.\n\nThese situations show a gap between access and real **AI fluency**. We need more than several useful prompt tricks. We need an approach that remains useful as **AI** evolves.\n\n**AI fluency** is not only technical expertise. It is not memorizing popular prompts either. It combines practical skills, knowledge, insights, and values. These parts reinforce each other as technology changes.\n\nThe goal is effective, efficient, ethical, and safe interaction with **AI**. Effective means getting useful outcomes. Efficient means avoiding wasted time and energy. Ethical use means behaving honestly and responsibly. Safe use also protects privacy and security.\n\nResearch identified three main ways people work with **AI**. They are **Automation**, **Augmentation**, and **Agency**. These modes show why **prompt engineering** alone is not enough.\n\nIn **Automation**, an assistant completes a specific task from your instructions. You could request a document summary. You could ask it to draft an email. It could create an image or plan a trip itinerary. You define the required outcome. Then the **AI** executes the task. This works well when your desired outcome is clear. It becomes harder when you do not know what you want.\n\nIn **Augmentation**, you and the assistant work together. The assistant becomes a thinking and problem-solving partner. Imagine developing a character for a story. You could exchange ideas with the assistant. You might develop backstories and experiment with dialogue. You could then refine the character together.\n\nThe same approach can support an architectural problem in an application. It can also help with a complex research topic. Here, **AI** augments your creativity and thinking. It does not simply perform the work for you. It helps you do your own work better. This is useful when solutions are not straightforward. It gives you room to explore and experiment.\n\nIn **Agency**, **AI** works independently on your behalf. It might categorize incoming emails by topic or urgency. It could also start drafting responses to urgent messages. Another example is an interactive website experience. A game could also use a dynamically interactive character.\n\nWith **Agency**, you do not define every specific action. You establish knowledge and behavior patterns instead. Your role changes from scriptwriter to director. You give the vision instead of every instruction.\n\nNo approach is always better than the others. Each one serves different purposes. One project may even use all three approaches. Many people begin with **Automation**. However, **Augmentation** and **Agency** use unique **AI** capabilities more fully. They often support more creative and effective solutions.\n\nThis changes how we should think about **AI**. It can act as a tool. It can also work as a medium. It may become a partner or co-creator. Sometimes it can play several roles together.\n\nThis shift also changes our own roles. We must adapt and develop new skills. These skills form the **AI fluency framework**. The framework contains four key areas of competence. The rest of the course will explore those areas.",
+    "original": "\n\n## Why do we need AI Fluency?\n\nLet's begin our exploration of the AI fluency framework that is central to our learning over the rest of this course.\n\nWhat does it really mean to be fluent with AI? Why does it matter? We're living in a fascinating moment of technological change, one that brings both excitement and uncertainty.\n\nAI is reshaping how we communicate, create, learn, and solve problems in both our work and personal lives. Many of us now have versatile assistants and virtual collaborators at our fingertips that can help with writing, brainstorming, researching, decision-making, and much more.\n\nBut here's the thing. Having these powerful systems doesn't automatically mean we know how to make the most of them or to engage with them responsibly.\n\nThink about a time when you got an unexpected response from an AI and you weren't sure how to proceed. Or when you struggled to explain exactly what you needed and left the interaction feeling frustrated. Or perhaps you've wondered if the information you're sharing is being properly protected.\n\nAll of these moments highlight the gaps between simply having access to AI and truly being fluent with it. So, how do we move beyond just knowing a few prompt tricks to developing a thoughtful and responsible approach that will continue to serve us well as AI keeps evolving?\n\nWhat exactly does AI fluency look like?\n\nAI fluency isn't just about being a technical expert or memorizing the 10 best prompts for whatever trending task is popular this month. It's about developing a collection of practical skills, knowledge, insights, and values that reinforce each other and adapt as the technology changes.\n\nAt its heart, AI fluency means interacting with AI systems in ways that are effective, efficient, ethical, and safe. In other words, really maximizing what you get out of your interactions with AI without wasting time and energy, and in an honest and responsible way that protects the privacy and security of yourself and others.\n\nThrough our research and personal experiences, we found that there are three main ways people engage with AI. Understanding these modes helps us to see why AI fluency needs to go beyond simple prompt engineering.\n\nThe first way we interact with AI is through automation, where an AI assistant completes a specific task based on your instructions. For example, you might ask an AI to summarize a document for you, or draft an email, or create an image, or plan a trip itinerary.\n\nYou define what needs to be done, and the AI executes it. And it works well when you have a clear outcome in mind. But it can be challenging when you're not quite sure yet what you're actually looking for.\n\nThe second approach is augmentation, where you and the AI assistant collaborate and complete a task together. The AI isn't treated as a machine to automate a task. Instead, it becomes a creative thinking and problem-solving partner.\n\nFor example, imagine you're developing a character for a story and you're feeling stuck. You might explore this through a conversation with the AI assistant, bouncing ideas back and forth, elaborating on backstories, experimenting with dialogue, and otherwise refining that character.\n\nOr perhaps you're working through a difficult architectural problem with an app that you're building. Or maybe you're trying to formulate your thoughts on a complex research topic.\n\nIn these moments, the AI augments your creativity and thinking. It doesn't do work for you, but helps you do your work better. This approach works best when solutions aren't straightforward and you need space to explore and experiment.\n\nThe third mode is agency, where AI works independently on your behalf. For instance, you might set up an AI assistant to categorize incoming emails by topic or urgency and maybe even begin drafting responses to the most urgent ones.\n\nOr you might create an ever-changing interactive experience for visitors to your website or power a dynamically interactive character in a game. The key idea is that rather than defining specific actions, you're establishing the AI's knowledge and behavior patterns.\n\nYou become less like a scriptwriter giving exact directions and more like a director setting a vision.\n\nNone of these approaches are inherently better than the others. They serve different purposes and excel in different situations. In fact, you might even use all three in a single project.\n\nWhile many start with automation, we found that augmentation and agency are approaches that really take advantage of the unique capabilities of AI, and that these modes often lead to the most creative and effective solutions.\n\nUnderstanding these differences helps us recognize that AI isn't just a tool. It's a technology that can act as a tool, but also as a medium, or as a partner or co-creator, and sometimes all of these at once.\n\nAnd this shift from mere tool to powerful collaborator gives technology a new role to play in our creative and problem-solving work. Which means we also have new roles and need to adapt and develop new skills.\n\nThese skills are what we describe in the AI fluency framework. Whichever way you engage with AI, there are four key areas of competence to develop and master. They form the core of the AI fluency framework, which we'll explore over the rest of this course.\n\nThis video explores what it really means to be \"fluent\" with AI and why this matters. We discuss how AI Fluency involves developing practical skills, knowledge, insights, and values that help you interact with AI systems in ways that are effective, efficient, ethical, and safe. We also introduce three ways people engage with AI:\n\n- Automation: The AI completes specific tasks based on your instructions.\n- Augmentation: You and AI collaborate as creative thinking and task execution partners.\n- Agency: You configure AI to work independently on your behalf, establishing its knowledge and behavior patterns rather than just giving it specific tasks."
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "You give an AI a document and ask for a summary with a fixed format. Which mode best describes this?",
+      "difficulty": "easy",
+      "term_refs": [
+        "automation"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "automation",
+          "correct": true,
+          "note": "Correct. The task and expected outcome are clearly defined."
+        },
+        {
+          "id": "b",
+          "text": "augmentation",
+          "correct": false,
+          "note": "Not here. You are not developing the result together."
+        },
+        {
+          "id": "c",
+          "text": "agency",
+          "correct": false,
+          "note": "Not here. The AI is not acting independently over time."
+        }
+      ],
+      "explanation": "Automation is correct because you define a specific task and the AI executes it. The expected outcome is already clear: create a summary in a fixed format. Augmentation would involve working with the AI through discussion and developing the result together. Agency would give the AI more independence and behavior rules instead of one exact task. For example, asking a CLI agent to rename ten known files using one rule is also automation. The important question is not whether AI performs work. The question is how much of the goal, method, and behavior you define."
+    },
+    {
+      "id": "q2",
+      "prompt": "You are unsure how to design a feature, so you discuss several approaches with an AI before choosing one. Which mode fits best?",
+      "difficulty": "easy",
+      "term_refs": [
+        "augmentation",
+        "straightforward"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Agency, because the AI should decide without you",
+          "correct": false,
+          "note": "No. You are actively involved in exploring the solution."
+        },
+        {
+          "id": "b",
+          "text": "Augmentation, because you and AI explore the problem together",
+          "correct": true,
+          "note": "Correct. This is collaborative thinking rather than simple execution."
+        },
+        {
+          "id": "c",
+          "text": "Automation, because every AI interaction is automation",
+          "correct": false,
+          "note": "No. The required solution is not yet clearly defined."
+        }
+      ],
+      "explanation": "Augmentation is correct because you and the AI are developing the solution together. You do not already know the exact output, so the task is not straightforward. The conversation helps you compare ideas and improve your own thinking. Agency is wrong because the AI is not operating independently on your behalf. Automation is also wrong because you have not defined a clear result for the AI to execute. A good software example is architecture work. You might discuss database choices, API design, and trade-offs with an AI before deciding. The AI supports your reasoning, but you remain part of the thinking process."
+    },
+    {
+      "id": "q3",
+      "prompt": "An AI watches incoming messages, classifies them, and starts drafts according to rules you created. Which concept is most important here?",
+      "difficulty": "easy",
+      "term_refs": [
+        "agency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "versatile",
+          "correct": false,
+          "note": "That may describe the AI, but not its working mode."
+        },
+        {
+          "id": "b",
+          "text": "augmentation",
+          "correct": false,
+          "note": "You are not collaborating on each individual message."
+        },
+        {
+          "id": "c",
+          "text": "agency",
+          "correct": true,
+          "note": "Correct. The AI acts independently using established behavior rules."
+        }
+      ],
+      "explanation": "Agency is correct because the AI continues working independently after you establish its knowledge and behavior rules. You are not giving a new instruction for every message. Augmentation would require you to collaborate with the AI during each task. Versatile describes something able to perform many kinds of work, but it does not describe this relationship between you and the AI. For example, an agent could watch GitHub issues, classify them, and prepare draft responses based on project rules. That is closer to agency because the system decides what actions to take within the boundaries you established."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why is access to a powerful AI system not enough to demonstrate AI fluency?",
+      "difficulty": "medium",
+      "term_refs": [
+        "AI fluency",
+        "responsibly"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because effective AI use also requires skills, judgment, safety, and responsible behavior",
+          "correct": true,
+          "note": "Correct. Access alone does not create effective or responsible use."
+        },
+        {
+          "id": "b",
+          "text": "Because fluent users must memorize the most popular prompts",
+          "correct": false,
+          "note": "No. The source specifically argues against this narrow approach."
+        },
+        {
+          "id": "c",
+          "text": "Because only technical experts can become fluent with AI",
+          "correct": false,
+          "note": "No. Technical expertise alone does not define AI fluency."
+        }
+      ],
+      "explanation": "The first answer is correct because AI fluency includes much more than having access to AI. A person must interact effectively, efficiently, ethically, and safely. That requires practical skills, judgment, and responsible behavior. Memorizing popular prompts is too narrow because technology and tasks keep changing. Being a technical expert is also not enough, because responsible decisions and effective collaboration matter too. For example, a person may know advanced prompting but still paste confidential company information into an unsafe service. Strong AI fluency includes deciding whether the tool, information, and method are appropriate before starting the task."
+    },
+    {
+      "id": "q5",
+      "prompt": "A task has no obvious solution, and you need room to test ideas. Which approach does the source suggest?",
+      "difficulty": "medium",
+      "term_refs": [
+        "augmentation",
+        "straightforward"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Use automation and avoid discussion",
+          "correct": false,
+          "note": "No. Automation works best when the desired outcome is clear."
+        },
+        {
+          "id": "b",
+          "text": "Use augmentation to explore and experiment with the AI",
+          "correct": true,
+          "note": "Correct. Collaboration helps when the solution is not straightforward."
+        },
+        {
+          "id": "c",
+          "text": "Avoid AI until you already know the exact answer",
+          "correct": false,
+          "note": "No. Exploration is one of augmentation's useful roles."
+        }
+      ],
+      "explanation": "Augmentation is correct because it works especially well when solutions are not straightforward. In this mode, you use conversation to explore possibilities, test ideas, and refine your thinking. Automation is less suitable when you cannot yet define the outcome clearly. Avoiding AI completely would also miss the value of using it as a thinking partner. For example, when debugging an unfamiliar networking issue, you could describe symptoms, test several hypotheses, and return with new results. The AI does not simply solve one fixed task. Instead, the interaction helps you develop a better solution through several rounds of reasoning and experimentation."
+    },
+    {
+      "id": "q6",
+      "prompt": "Which action best shows responsible use of an AI agent with access to a router?",
+      "difficulty": "medium",
+      "term_refs": [
+        "responsibly",
+        "agency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Give it unlimited access because agents need freedom",
+          "correct": false,
+          "note": "No. Independence should still have clear safety boundaries."
+        },
+        {
+          "id": "b",
+          "text": "Let it change every setting without keeping logs",
+          "correct": false,
+          "note": "No. This creates unnecessary operational and security risks."
+        },
+        {
+          "id": "c",
+          "text": "Define permissions, safe actions, logs, and conditions requiring human approval",
+          "correct": true,
+          "note": "Correct. Agency should operate inside deliberate safety boundaries."
+        }
+      ],
+      "explanation": "The third answer is correct because responsible agency needs boundaries. An AI can act independently, but independence does not mean unlimited authority. Permissions, logs, safe actions, and approval rules protect the system and the user. Unlimited access is risky because an incorrect decision could change important network settings. Removing logs is also poor practice because you lose information needed to understand what happened. A useful design might allow an agent to collect diagnostics automatically while requiring approval before changing firewall rules. This preserves much of the benefit of agency while keeping high-risk actions under human control."
+    },
+    {
+      "id": "q7",
+      "prompt": "What does the source mean when it says skills and values reinforce each other?",
+      "difficulty": "medium",
+      "term_refs": [
+        "reinforce",
+        "AI fluency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Different parts of AI fluency can strengthen each other as your experience grows",
+          "correct": true,
+          "note": "Correct. The parts develop together rather than remaining separate."
+        },
+        {
+          "id": "b",
+          "text": "Once you learn one skill, you no longer need the others",
+          "correct": false,
+          "note": "No. AI fluency depends on several connected abilities."
+        },
+        {
+          "id": "c",
+          "text": "Technical knowledge should replace ethical judgment",
+          "correct": false,
+          "note": "No. Ethical and technical abilities both remain important."
+        }
+      ],
+      "explanation": "The first answer is correct because AI fluency is described as a collection of connected skills, knowledge, insights, and values. They reinforce each other, meaning progress in one area can support progress in another. The second answer is wrong because the framework does not suggest that one skill replaces everything else. The third is wrong because ethical judgment remains part of fluent AI use. For example, learning how an agent accesses files may improve your technical knowledge. That knowledge can also help you make better privacy decisions. In this way, technical understanding and responsible behavior can develop together."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why can a versatile AI assistant still produce poor results for an experienced user?",
+      "difficulty": "medium",
+      "term_refs": [
+        "versatile",
+        "AI fluency",
+        "highlight"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because versatile tools are mainly useful for beginners",
+          "correct": false,
+          "note": "No. Versatility does not depend on the user's experience level."
+        },
+        {
+          "id": "b",
+          "text": "Because many capabilities do not guarantee good instructions, judgment, or collaboration",
+          "correct": true,
+          "note": "Correct. Capability and fluent use are different things."
+        },
+        {
+          "id": "c",
+          "text": "Because AI fluency requires using only one specialized tool",
+          "correct": false,
+          "note": "No. The framework does not require a single specialized tool."
+        }
+      ],
+      "explanation": "The second answer is correct because a versatile system can perform many tasks, but the user still needs good judgment and interaction skills. A powerful tool cannot automatically choose the right goal, provide missing context, or guarantee responsible use. The first answer is wrong because versatile systems can help both beginners and experienced users. The third answer is wrong because AI fluency is about how you engage with AI, not about limiting yourself to one tool. For example, an advanced CLI agent may modify many project files, but unclear requirements can still lead it toward the wrong implementation."
+    },
+    {
+      "id": "q9",
+      "prompt": "A developer begins with automation, then discusses architecture with AI, then lets an agent maintain routine project tasks. What does this example show?",
+      "difficulty": "hard",
+      "term_refs": [
+        "automation",
+        "augmentation",
+        "agency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "A project should switch permanently from weaker modes to stronger modes",
+          "correct": false,
+          "note": "No. The source does not rank the modes as a fixed ladder."
+        },
+        {
+          "id": "b",
+          "text": "Automation becomes unnecessary once agency is available",
+          "correct": false,
+          "note": "No. Different modes can remain useful for different tasks."
+        },
+        {
+          "id": "c",
+          "text": "One project can combine all three modes for different purposes",
+          "correct": true,
+          "note": "Correct. The modes can coexist inside one project."
+        }
+      ],
+      "explanation": "The third answer is correct because the source explicitly treats Automation, Augmentation, and Agency as approaches for different situations. They are not a simple ladder where one replaces another. The first answer is wrong because no mode is inherently better in every situation. The second is wrong because automation remains useful whenever a task has a clear outcome. For example, one software project might automate formatting, use augmentation for architecture decisions, and give an agent responsibility for monitoring routine failures. Good AI fluency includes choosing the right relationship with AI for each part of the work."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why does moving from AI as a simple tool toward AI as a collaborator require new human skills?",
+      "difficulty": "hard",
+      "term_refs": [
+        "AI fluency",
+        "agency",
+        "augmentation"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because humans must learn how to direct, collaborate with, evaluate, and constrain AI",
+          "correct": true,
+          "note": "Correct. More capable AI changes the human role as well."
+        },
+        {
+          "id": "b",
+          "text": "Because humans should stop participating once AI can work independently",
+          "correct": false,
+          "note": "No. Human judgment remains important even with agency."
+        },
+        {
+          "id": "c",
+          "text": "Because augmentation and agency remove the need for responsible decisions",
+          "correct": false,
+          "note": "No. Greater capability increases the importance of responsible choices."
+        }
+      ],
+      "explanation": "The first answer is correct because AI can now play several roles: tool, medium, partner, co-creator, or independent agent. That changes what humans must do. We need skills for giving direction, collaborating, evaluating results, and setting safe boundaries. The second answer is wrong because agency does not remove human responsibility. The third is also wrong because greater AI capability makes responsible decisions more important, not less important. For example, directing an autonomous coding agent requires deciding what it may edit, how results will be tested, and which changes need approval. The human role changes, but it does not disappear."
+    }
+  ],
+  "speaking_prompts": [
+    "Your CLI agent can either execute a fixed Git task or discuss possible solutions with you. Which mode would you choose, and why? Use automation, augmentation, and straightforward.",
+    "Imagine an AI agent manages alerts from your MikroTik router independently. What decisions should it make alone, and what should require you? Use agency, responsibly, and highlight.",
+    "Do you agree that augmentation can produce better software than automation when requirements are unclear? Give one concrete example. Use augmentation, automation, and reinforce.",
+    "Your typing platform needs new exercises every week. Would you use automation, agency, or both? Defend your choice with a concrete workflow. Use agency, automation, and versatile.",
+    "Think about preparing for an international drone certification. How could AI fluency improve your preparation without replacing your own learning? Use AI fluency, responsibly, and reinforce."
+  ],
+  "homework": [
+    "Spend 12 minutes with the W02 AI Fluency vocabulary deck. Produce one new spoken sentence for each of the nine terms.",
+    "Record six sentences containing automation, augmentation, and evolving. Transcribe them with a speech-to-text tool and check every target word and final -ing ending.",
+    "Record a 90-second explanation of one real project where you could combine Automation, Augmentation, and Agency."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

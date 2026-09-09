@@ -103,11 +103,6 @@
     font-size: 0.8em; line-height: 1.4; z-index: 50;
   }
 
-  /* ---------- audio ---------- */
-  #sec-audio figure { margin: 0 0 20px; }
-  #sec-audio figcaption { margin-bottom: 6px; font-weight: 600; }
-  #sec-audio audio { width: 100%; }
-
   /* ---------- quiz ---------- */
   .quiz-progress { color: var(--muted); margin-bottom: 8px; }
   .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
@@ -145,7 +140,7 @@
 
   /* ---------- speaking ---------- */
   .speaking-item { margin: 28px 0; }
-  .speaking-item .prompt-text { font-size: 1.5em; font-weight: 600; line-height: 1.35; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
   .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
   .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
   .timer-display.running { color: var(--accent); font-weight: 700; }
@@ -164,9 +159,12 @@
   body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
   body.presentation section.active { display: block; }
 
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
   /* ---------- print ---------- */
   @media print {
-    #nav, #progress-bar, .timer, .btn-primary, .toggle { display: none !important; }
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
     body { font-size: 12pt; background: #fff; }
     section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
     /* reading expanded: both versions visible with their labels */
@@ -213,6 +211,27 @@ const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g
 const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
 
 /* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
 function mdToHtml(md) {
@@ -279,8 +298,9 @@ const addSection = (id, title, node) => {
   addSection("objectives", "Objectives", ul);
 }
 
-/* 3. Vocabulary — flip cards */
+/* 3. Vocabulary — flip cards + quick quiz */
 {
+  const wrap = el("div", {});
   const grid = el("div", { id: "vocab-grid" });
   data.vocabulary.forEach(v => {
     const back = el("div", { class: "card-face card-back" },
@@ -298,7 +318,76 @@ const addSection = (id, title, node) => {
     card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
     grid.append(card);
   });
-  addSection("vocabulary", "Vocabulary", grid);
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
 }
 
 /* 4. Reading — B1 / Original toggle, terms highlighted */
@@ -327,28 +416,7 @@ const addSection = (id, title, node) => {
   addSection("reading", "Reading", wrap);
 }
 
-/* 5. Audio — local files + external links */
-{
-  const wrap = el("div", {});
-  const links = el("ul", {});
-  data.audio.forEach(a => {
-    if (a.src) {
-      wrap.append(el("figure", {},
-        el("figcaption", {}, a.label),
-        el("audio", { controls: "", preload: "none", src: a.src })));
-    } else if (a.url) {
-      links.append(el("li", {}, el("a", { href: a.url, target: "_blank", rel: "noopener" }, a.label)));
-    } else {
-      wrap.append(el("p", { class: "todo" }, a.label));
-    }
-  });
-  if (links.children.length) {
-    wrap.append(el("h3", {}, "External links (audio not downloaded)"), links);
-  }
-  addSection("audio", "Audio", wrap);
-}
-
-/* 6. Quiz */
+/* 5. Quiz */
 {
   const app = el("div", { id: "quiz-app" });
   const note = el("p", { class: "quiz-print-note" },
@@ -362,17 +430,21 @@ const addSection = (id, title, node) => {
       el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
       el("p", { class: "quiz-prompt" }, q.prompt)
     );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
     const rows = [];
-    q.options.forEach(opt => {
+    order.forEach(opt => {
       const btn = el("button", { class: "quiz-option" }, opt.text);
-      const note = el("p", { class: "option-note", hidden: "" }, opt.note);
-      btn.addEventListener("click", () => answer(q, opt, rows));
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
       rows.push({ opt, btn, note });
       app.append(btn, note);
     });
   }
 
-  function answer(q, chosen, rows) {
+  function answer(q, chosen, rows, order) {
     /* Lock all options: no re-selection — that would spoil the exercise. */
     rows.forEach(({ opt, btn, note }) => {
       btn.disabled = true;
@@ -388,7 +460,7 @@ const addSection = (id, title, node) => {
     const exp = el("div", { class: "quiz-explanation" },
       el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
         chosen.correct ? "Correct" : "Not quite"),
-      q.explanation);
+      resolveOptionRefs(q.explanation, order));
     const next = el("button", { class: "btn-primary" },
       state.i + 1 < data.quiz.length ? "Next" : "Finish");
     next.addEventListener("click", () => {
@@ -418,7 +490,7 @@ const addSection = (id, title, node) => {
   addSection("quiz", "Quiz", holder);
 }
 
-/* 7. Speaking prompts — big type, 60 s timer each */
+/* 6. Speaking prompts — big type, 60 s timer each */
 {
   const wrap = el("div", {});
   data.speaking_prompts.forEach(p => {
@@ -447,7 +519,7 @@ const addSection = (id, title, node) => {
   addSection("speaking", "Speaking", wrap);
 }
 
-/* 8. Homework — checklist persisted to localStorage */
+/* 7. Homework — checklist persisted to localStorage */
 {
   const wrap = el("div", {});
   let saved = [];

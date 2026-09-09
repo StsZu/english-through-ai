@@ -1,0 +1,460 @@
+{
+  "week": "w11",
+  "title": "The Description-Discernment Loop",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can execute a multi-step technical project using iterative Description-Discernment feedback loops.",
+    "By the end of this lesson I can integrate domain expertise, refine intermediate drafts, and discard flawed outputs.",
+    "By the end of this lesson I can establish explicit expectations and take full responsibility for AI-assisted deliverables."
+  ],
+  "vocabulary": [
+    {
+      "term": "feedback loop",
+      "definition_b1": "a continuous cycle where output evaluations are used to adjust future inputs",
+      "collocations": [
+        "productive feedback loop",
+        "continuous feedback loop"
+      ],
+      "ua": "цикл зворотного зв'язку",
+      "source_sentence": "Engage in productive Description-Discernment feedback loops"
+    },
+    {
+      "term": "exceed",
+      "definition_b1": "to be greater, larger, or better than an expected amount or limit",
+      "collocations": [
+        "exceed expectations",
+        "exceed results"
+      ],
+      "ua": "перевершувати; перевищувати",
+      "source_sentence": "Create results through human-AI collaboration that exceed what either could achieve alone"
+    },
+    {
+      "term": "pull up",
+      "definition_b1": "to open, retrieve, or display a file or document on a screen",
+      "collocations": [
+        "pull up a plan",
+        "pull up files"
+      ],
+      "ua": "відкрити; підтягнути (файл/документ на екрані)",
+      "source_sentence": "Pull up the project plan you created in Lesson 5"
+    },
+    {
+      "term": "dive into",
+      "definition_b1": "to start doing something enthusiastically or energetically without delay",
+      "collocations": [
+        "dive into execution",
+        "dive into the project"
+      ],
+      "ua": "зануритися у (виконання/роботу)",
+      "source_sentence": "Before diving into execution, plan how you'll approach Description:"
+    },
+    {
+      "term": "expectation",
+      "definition_b1": "a belief about what will happen or what someone should achieve",
+      "collocations": [
+        "establish expectations",
+        "meet expectations"
+      ],
+      "ua": "очікування",
+      "source_sentence": "Discuss these questions with Claude to establish clear expectations for your collaboration."
+    },
+    {
+      "term": "refine",
+      "definition_b1": "to improve something by making small and precise changes",
+      "collocations": [
+        "refine your plan",
+        "refine outputs"
+      ],
+      "ua": "вдосконалювати; доопрацьовувати",
+      "source_sentence": "Feel free to refine your plan based on what you've learned since then"
+    },
+    {
+      "term": "integrate",
+      "definition_b1": "to combine two or more things effectively to create a whole",
+      "collocations": [
+        "integrate expertise",
+        "integrate systems"
+      ],
+      "ua": "інтегрувати; поєднувати",
+      "source_sentence": "Integrate your own expertise and judgment:"
+    },
+    {
+      "term": "discard",
+      "definition_b1": "to get rid of something that is no longer useful or needed",
+      "collocations": [
+        "discard ideas",
+        "modify or discard"
+      ],
+      "ua": "відкидати; позбуватися непотрібного",
+      "source_sentence": "Make the final decisions about what to keep, modify, or discard"
+    },
+    {
+      "term": "take responsibility",
+      "definition_b1": "to accept personal accountability for an action, decision, or final outcome",
+      "collocations": [
+        "take responsibility",
+        "take full responsibility"
+      ],
+      "ua": "брати на себе відповідальність",
+      "source_sentence": "Take responsibility for the final output"
+    },
+    {
+      "term": "along the way",
+      "definition_b1": "during the course of a process, journey, or period of time",
+      "collocations": [
+        "learn along the way",
+        "adjustments along the way"
+      ],
+      "ua": "по ходу справи; у процесі (роботи)",
+      "source_sentence": "What adjustments did you make along the way?"
+    },
+    {
+      "term": "accountable",
+      "definition_b1": "responsible for explaining one's decisions and bearing the consequences",
+      "collocations": [
+        "hold accountable",
+        "remain accountable"
+      ],
+      "ua": "підзвітний; відповідальний",
+      "source_sentence": "You'll learn how to ensure your AI collaborations are responsible, transparent, and accountable."
+    },
+    {
+      "term": "diligence",
+      "definition_b1": "careful, thorough, and persistent effort to ensure quality, safety, and ethics",
+      "collocations": [
+        "exercise diligence",
+        "due diligence"
+      ],
+      "ua": "сумлінність; належна обачність / перевірка",
+      "source_sentence": "In the next lesson, we'll explore the final competency in the AI Fluency Framework: Diligence."
+    }
+  ],
+  "reading": {
+    "b1": "In this hands-on workshop, you apply Description and Discernment to complete your practical project. Human-AI collaboration allows you to create deliverables that **exceed** what either partner could achieve alone. First, **pull up** your project plan from Lesson 5. Review your delegation choices and **refine** your timeline.\n\nNext, prepare your description strategy. Before you **dive into** task execution, establish clear **expectation**s with Claude across Product, Process, and Performance. Setting explicit rules upfront prevents misunderstandings.\n\nThen, execute each subtask using a four-step **feedback loop**. First, describe your requirements clearly. Second, discern the quality of the generated output and reasoning. Third, **refine** your prompts with concrete feedback until satisfied. Fourth, **integrate** your unique domain expertise. You decide what code to modify, keep, or **discard**. You must **take responsibility** for the final production deliverable.\n\nFinally, reflect on adjustments made **along the way**. This iterative practice prepares you for the fourth competency: **diligence**. You ensure workflows remain ethical, transparent, and **accountable**.",
+    "original": "---\nTotal video duration in this module: 30 min\nWord count (wc -w): 562\nWords per minute: 19\nVerdict: <130 comfortable\n---\n\n# The Description-Discernment loop\n\n*Estimated Time: 30 - 60 minutes*\n\nBy the end of this lesson, you'll be able to:\n\n- Apply Description and Discernment skills to a real project\n- Engage in productive Description-Discernment feedback loops\n- Create results through human-AI collaboration that exceed what either could achieve alone\n\n## Exercises\n\n### Exercise: Project execution with description-discernment loops\n\nNow it's time to put everything you've learned into practice by working on the project you planned in Lesson 5, using the Description and Discernment skills you've been developing.\n\n#### Step 1: Review your project plan\n\n- Pull up the project plan you created in Lesson 5\n- Quickly review your delegation decisions about which tasks would benefit from human expertise, AI capabilities, or collaboration\n- Feel free to refine your plan based on what you've learned since then\n\n#### Step 2: Prepare your description approach\n\nStart a conversation with Claude and explain the project you'll be working on together. Before diving into execution, plan how you'll approach Description:\n\n- **Product Description**: What specific outputs do you need from Claude for each task? What format, style, length, and level of detail are you looking for?\n- **Process Description**: How should Claude approach each task? Are there specific methods, frameworks, or steps you want it to follow?\n- **Performance Description**: What kind of collaborative behavior do you want from Claude during this project? Should it be concise or detailed, challenging or supportive, focused on ideas or analysis?\n\nDiscuss these questions with Claude to establish clear expectations for your collaboration.\n\n#### Step 3: Execute your project using description-discernment loops\n\nNow, work through your planned project tasks with Claude. For each task:\n\n1. **Describe** what you need clearly, using the Description skills you've learned:\n   1. Be specific about what you want (Product)\n   2. Guide how Claude should approach or think about the task (Process)\n   3. Specify how you want Claude to engage with you during the process (Performance)\n2. **Discern** the quality of what you receive:\n   1. Evaluate the output itself (Product Discernment)\n   2. Assess how Claude approached the task (Process Discernment)\n   3. Consider if Claude's behavior is most helpful for what you need (Performance Discernment)\n3. **Refine** based on your discernment:\n   1. Provide feedback on what worked and what didn't\n   2. Clarify or adjust your description as needed\n   3. Request iterations until you're satisfied with the result\n4. **Integrate** your own expertise and judgment:\n   1. Add your unique perspective, creativity, or domain knowledge\n   2. Make the final decisions about what to keep, modify, or discard\n   3. Take responsibility for the final output\n\nContinue this Description-Discernment loop for each task in your project until completion.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- What patterns did you notice in the types of descriptions that led to the best outcomes?\n- Which required more effort from you: Description or Discernment? Why do you think that was the case?\n- How did your actual project execution compare to your initial plan from Lesson 5? What adjustments did you make along the way?\n\n#### What's next\n\nIn the next lesson, we'll explore the final competency in the AI Fluency Framework: Diligence. While Delegation, Description, and Discernment focus primarily on effectiveness and efficiency, Diligence addresses the ethical and safety aspects of working with AI. You'll learn how to ensure your AI collaborations are responsible, transparent, and accountable.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary objective of engaging in Description-Discernment feedback loops?",
+      "difficulty": "easy",
+      "term_refs": [
+        "feedback loop",
+        "exceed"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To iteratively guide, evaluate, and refine AI outputs so the final result exceeds what either human or AI could produce alone.",
+          "correct": true,
+          "note": "Correct: the continuous loop elevates quality beyond individual capabilities."
+        },
+        {
+          "id": "b",
+          "text": "To ensure that software code is never tested or reviewed by human engineers.",
+          "correct": false,
+          "note": "Incorrect: feedback loops explicitly require active human evaluation."
+        },
+        {
+          "id": "c",
+          "text": "To permanently disable all network routers in the office building.",
+          "correct": false,
+          "note": "Incorrect: feedback loops are collaborative design workflows, not network shutdowns."
+        }
+      ],
+      "explanation": "Engaging in Description-Discernment feedback loops transforms prompt interactions into a continuous quality improvement cycle. By clearly describing expectations, critically discerning intermediate outputs, and refining instructions iteratively, developers create solutions whose speed, nuance, and structural polish exceed what human or machine could achieve alone. The {{opt:c}} option is an absurd network disruption. The {{opt:b}} option contradicts the core principle of human discernment. This disciplined feedback cadence ensures that final technical deliverables meet production standards without costly rework, combining computational speed with nuanced human judgment."
+    },
+    {
+      "id": "q2",
+      "prompt": "Why should you establish clear expectations before diving into task execution in Step 2?",
+      "difficulty": "easy",
+      "term_refs": [
+        "expectation",
+        "dive into"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To delete the user operating system and install a fresh kernel.",
+          "correct": false,
+          "note": "Incorrect: project execution operates within standard application environments."
+        },
+        {
+          "id": "b",
+          "text": "To align on deliverables (Product), methodology (Process), and interaction style (Performance) before generating content.",
+          "correct": true,
+          "note": "Correct: establishing expectations upfront aligns collaborative posture."
+        },
+        {
+          "id": "c",
+          "text": "To purchase physical flight tickets to a tropical island.",
+          "correct": false,
+          "note": "Incorrect: establishing expectations is a conversational framing step, not travel booking."
+        }
+      ],
+      "explanation": "Establishing clear expectations across Product, Process, and Performance before diving into execution sets the collaborative ground rules. Defining the required file formats, step-by-step reasoning approaches, and desired communication tone upfront prevents conversational drift and eliminates frustrating misunderstandings. The {{opt:c}} option is a whimsical travel distraction. The {{opt:a}} option describes extreme OS reinstallation. Aligning on expectations early ensures that the AI assistant acts as a focused, disciplined partner throughout multi-step project workflows, saving developers time that would otherwise be spent re-prompting ambiguous drafts."
+    },
+    {
+      "id": "q3",
+      "prompt": "What does it mean to 'integrate your own expertise and judgment' during Step 3 of the loop?",
+      "difficulty": "easy",
+      "term_refs": [
+        "integrate",
+        "discard",
+        "take responsibility"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Accepting 100% of the AI's output without reading a single word of text.",
+          "correct": false,
+          "note": "Incorrect: blind acceptance abdicates essential human responsibility."
+        },
+        {
+          "id": "b",
+          "text": "Copying and pasting random text snippets from an encyclopedia.",
+          "correct": false,
+          "note": "Incorrect: integration requires deliberate domain-specific curation."
+        },
+        {
+          "id": "c",
+          "text": "Applying domain knowledge to decide what generated content to keep, modify, or discard, while taking full responsibility for the result.",
+          "correct": true,
+          "note": "Correct: human judgment filters AI drafts and owns the final outcome."
+        }
+      ],
+      "explanation": "Integrating human expertise is the decisive phase of the collaboration loop. An AI model can draft boilerplate code or prose, but only the human engineer possesses the contextual insight to verify security, evaluate edge cases, and decide what to modify or discard. Taking personal responsibility for the final artifact ensures that automation never compromises safety or professional ethics. The {{opt:a}} option describes dangerous passivity. The {{opt:b}} option lacks domain coherence. Human curation remains irreplaceable in production engineering, ensuring that deployed code adheres to strict architectural and security standards."
+    },
+    {
+      "id": "q4",
+      "prompt": "A developer reviews an AI-generated database migration script and finds a redundant table join. What should she do?",
+      "difficulty": "medium",
+      "term_refs": [
+        "refine",
+        "discard",
+        "feedback loop"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Deploy the flawed migration immediately to the main production database cluster.",
+          "correct": false,
+          "note": "Incorrect: deploying unoptimized queries risks severe database latency."
+        },
+        {
+          "id": "b",
+          "text": "Exercise discernment, discard the inefficient join, and refine the prompt to instruct the AI to optimize query execution.",
+          "correct": true,
+          "note": "Correct: identifies inefficiency and guides iterative query refinement."
+        },
+        {
+          "id": "c",
+          "text": "Shut down the entire company database servers permanently.",
+          "correct": false,
+          "note": "Incorrect: prompt refinement resolves query issues without server shutdown."
+        }
+      ],
+      "explanation": "When discernment identifies a redundant join or performance bottleneck in generated SQL, the engineer should discard the flawed clause and provide precise feedback through the loop. Stating 'The join on table B is redundant; rewrite the query using an indexed subquery' guides the AI to synthesize an optimized schema. The {{opt:a}} option risks severe database performance degradation in production. The {{opt:c}} option is an absurd overreaction. Closing the feedback loop ensures database scripts are performant, robust, and clean, preventing slow query execution and high server CPU loads."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does reflecting on adjustments made 'along the way' improve an engineer's long-term AI fluency?",
+      "difficulty": "medium",
+      "term_refs": [
+        "along the way",
+        "refine",
+        "pull up"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It highlights recurring communication patterns and prompt bottlenecks, allowing developers to refine their future workflows.",
+          "correct": true,
+          "note": "Correct: meta-reflection turns project friction into durable collaboration skills."
+        },
+        {
+          "id": "b",
+          "text": "It increases the physical clock speed of the user's laptop processor.",
+          "correct": false,
+          "note": "Incorrect: reflection builds human cognitive skills, not hardware clock rates."
+        },
+        {
+          "id": "c",
+          "text": "It legally excuses developers from writing software documentation.",
+          "correct": false,
+          "note": "Incorrect: documentation remains an essential software engineering deliverable."
+        }
+      ],
+      "explanation": "Reflecting on adjustments made along the way provides valuable meta-cognitive insights into your prompting habits. Reviewing where prompts went off track, which descriptions yielded rapid breakthroughs, and why certain tasks required multiple discernment cycles allows engineers to refine their prompt templates for future projects. The {{opt:b}} option is an absurd hardware distraction. The {{opt:c}} option is a false legal assertion. Deliberate reflection converts individual project experiences into durable, high-leverage AI collaboration instincts, helping engineers develop an intuitive understanding of model strengths and limitations."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why is 'taking responsibility' for AI outputs a critical professional standard in engineering?",
+      "difficulty": "medium",
+      "term_refs": [
+        "take responsibility",
+        "accountable",
+        "diligence"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models will pay financial penalties directly from their bank accounts.",
+          "correct": false,
+          "note": "Incorrect: AI models do not possess bank accounts or legal liability."
+        },
+        {
+          "id": "b",
+          "text": "Because AI assistants are tools without legal or ethical agency; the human engineer remains strictly accountable for system reliability.",
+          "correct": true,
+          "note": "Correct: human professionals bear legal and ethical accountability for deployed code."
+        },
+        {
+          "id": "c",
+          "text": "Because software licenses assign 100% of all legal liability to cloud data center cooling fans.",
+          "correct": false,
+          "note": "Incorrect: cooling fans are mechanical components without legal personhood."
+        }
+      ],
+      "explanation": "Taking responsibility is the bedrock of professional engineering ethics. Language models operate as cognitive amplifiers, but they lack legal personhood, moral agency, and operational accountability. When an AI-assisted script causes a network outage, data breach, or calculation error, the engineer who authorized the deployment remains solely accountable. The {{opt:c,a}} options are humorous legal impossibilities. Exercising diligence and thorough human oversight ensures that AI speed is always paired with uncompromising professional accountability, protecting organizations from liability and ensuring technical integrity."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does the four-step loop (Describe, Discern, Refine, Integrate) bridge the gap between initial plan and final artifact?",
+      "difficulty": "medium",
+      "term_refs": [
+        "feedback loop",
+        "refine",
+        "integrate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It compresses entire computer hard drives into single-byte files.",
+          "correct": false,
+          "note": "Incorrect: the loop governs cognitive collaboration, not extreme compression."
+        },
+        {
+          "id": "b",
+          "text": "It eliminates the need for human software developers in all technology companies.",
+          "correct": false,
+          "note": "Incorrect: the loop relies directly on human judgment and domain integration."
+        },
+        {
+          "id": "c",
+          "text": "It converts high-level project intentions into verified, production-ready deliverables through progressive conversational refinement.",
+          "correct": true,
+          "note": "Correct: iterative cycles progressively shape raw concepts into finished products."
+        }
+      ],
+      "explanation": "The four-step execution loop bridges the gap between abstract delegation plans and finished artifacts through disciplined iteration. In Step 1 you describe requirements, in Step 2 you discern output quality, in Step 3 you refine prompts based on flaws, and in Step 4 you integrate domain judgment. This structured cycle prevents monolithic failures by breaking implementation into manageable, verifiable increments. The {{opt:b,a}} options are nonsensical claims. Progressive refinement guarantees that final deliverables align with rigorous technical standards, transforming ambitious ideas into solid production systems."
+    },
+    {
+      "id": "q8",
+      "prompt": "An architect pulls up an old cloud deployment plan and notices a new security standard. How should she proceed?",
+      "difficulty": "medium",
+      "term_refs": [
+        "pull up",
+        "refine",
+        "integrate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Pull up the plan, refine the delegation constraints to incorporate the new security policy, and integrate updated IAM rules.",
+          "correct": true,
+          "note": "Correct: updates delegation plan with fresh security requirements before execution."
+        },
+        {
+          "id": "b",
+          "text": "Cancel all cloud hosting contracts across the entire enterprise.",
+          "correct": false,
+          "note": "Incorrect: updating configuration scripts resolves security compliance smoothly."
+        },
+        {
+          "id": "c",
+          "text": "Ignore the new security policy and execute outdated scripts blindly on live servers.",
+          "correct": false,
+          "note": "Incorrect: ignoring security standards introduces severe organizational vulnerabilities."
+        }
+      ],
+      "explanation": "Before executing multi-step workflows, pulling up previous plans allows engineers to refine assumptions based on new information. When security policies change, updating the process description ensures the AI assistant generates compliant IAM policies and encryption configurations. The {{opt:c}} option is an irresponsible security risk. The {{opt:b}} option is a drastic overreaction. By integrating updated standards into the initial prompt description, the architect ensures that all generated infrastructure code conforms to current organizational benchmarks, preventing security vulnerabilities and compliance audit failures."
+    },
+    {
+      "id": "q9",
+      "prompt": "A CLI agent generates a complex deployment pipeline that includes deprecated API calls. How does the feedback loop resolve this?",
+      "difficulty": "hard",
+      "term_refs": [
+        "feedback loop",
+        "refine",
+        "discard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Run the deprecated pipeline on live production servers to see if it causes a crash.",
+          "correct": false,
+          "note": "Incorrect: running known deprecated code on production risks severe outages."
+        },
+        {
+          "id": "b",
+          "text": "Delete the entire codebase and switch to managing infrastructure on paper notebooks.",
+          "correct": false,
+          "note": "Incorrect: prompt refinement cleanly updates API versions without abandoning software."
+        },
+        {
+          "id": "c",
+          "text": "Discern the deprecated APIs, discard the outdated functions, and refine the prompt with explicit modern library versions.",
+          "correct": true,
+          "note": "Correct: spots obsolete syntax, rejects it, and provides updated version constraints."
+        }
+      ],
+      "explanation": "In this scenario, Discernment immediately spots the model's knowledge cutoff shortcoming: synthesizing deprecated API calls. Through the feedback loop, the engineer discards the obsolete syntax and refines the prompt by specifying modern API versions and linking to current documentation. The AI assistant then regenerates compliant code using up-to-date syntax. The {{opt:a}} option invites critical production downtime. The {{opt:b}} option is an absurd retreat from technology. Iterative refinement reliably bridges model knowledge gaps, ensuring that all deployed software leverages current framework features and security patches."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does mastering the Description-Discernment loop directly prepare an engineer for the final 4D competency: Diligence?",
+      "difficulty": "hard",
+      "term_refs": [
+        "diligence",
+        "accountable",
+        "take responsibility"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It instills the rigorous habit of active inspection, verification, and human accountability required for ethical, transparent AI deployment.",
+          "correct": true,
+          "note": "Correct: Description-Discernment builds the quality discipline that Diligence scales to ethics and safety."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that software will never have to be tested or maintained again in the future.",
+          "correct": false,
+          "note": "Incorrect: testing and maintenance remain lifelong engineering responsibilities."
+        },
+        {
+          "id": "c",
+          "text": "It automatically translates all program code into ancient Latin scripts.",
+          "correct": false,
+          "note": "Incorrect: the 4D framework enhances technical engineering workflows in modern languages."
+        }
+      ],
+      "explanation": "The Description-Discernment loop serves as the practical proving ground for Diligence. While Delegation, Description, and Discernment focus primarily on speed, precision, and technical correctness, Diligence expands this discipline to ethics, data privacy, bias prevention, and transparency. Developing the muscle memory of active inspection and taking personal responsibility for outputs ensures that AI-driven automation remains safe, accountable, and legally sound. The {{opt:b,c}} options are absurd. Practicing continuous verification is the hallmark of true AI fluency, empowering developers to deploy automated systems with complete confidence."
+    }
+  ],
+  "speaking_prompts": [
+    "How do Description-Discernment feedback loops help you achieve results that exceed what you or an AI could create alone?",
+    "When you pull up a technical plan and dive into execution, how do you establish clear expectations across product, process, and performance?",
+    "Describe a scenario where discernment prompted you to refine instructions or discard flawed suggestions along the way.",
+    "Why is it vital that the human engineer integrates domain judgment and takes full responsibility for the final production output?",
+    "How does practicing diligence prepare you to keep automated CLI workflows transparent, safe, and accountable?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 11 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining how you execute the 4-step loop (Describe, Discern, Refine, Integrate). Check your pronunciation of accountable and diligence.",
+    "Draft a 3-minute talk skeleton for your teacher presenting your completed course project and analyzing the feedback loops you used."
+  ]
+}

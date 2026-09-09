@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w10",
+  "title": "A Closer Look at Discernment",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can critically evaluate AI outputs, processes, and behaviors across the three types of Discernment.",
+    "By the end of this lesson I can detect logical errors, attention lapses, and circular reasoning in AI generated code and text.",
+    "By the end of this lesson I can provide structured feedback to close the Description-Discernment quality loop."
+  ],
+  "vocabulary": [
+    {
+      "term": "discernment",
+      "definition_b1": "the ability to judge well and evaluate quality critically",
+      "collocations": [
+        "develop discernment",
+        "exercise discernment"
+      ],
+      "ua": "проникливість; критична оцінка / судження",
+      "source_sentence": "Discernment is specifically about evaluating AI outputs, processes, and behaviors—essentially, your quality control system for AI collaboration."
+    },
+    {
+      "term": "shortcoming",
+      "definition_b1": "a fault, defect, or failure to meet a certain standard",
+      "collocations": [
+        "typical shortcomings",
+        "identify shortcomings"
+      ],
+      "ua": "недолік; слабке місце",
+      "source_sentence": "Doing this well requires both domain expertise—in other words, knowing enough to judge quality—and an understanding of how AI systems work, including their typical shortcomings."
+    },
+    {
+      "term": "safeguard",
+      "definition_b1": "a protection against something undesirable, harmful, or risky",
+      "collocations": [
+        "essential safeguard",
+        "act as a safeguard"
+      ],
+      "ua": "запобіжник; гарантія захисту",
+      "source_sentence": "Your capacity for discernment acts as an essential safeguard."
+    },
+    {
+      "term": "product discernment",
+      "definition_b1": "the ability to critically judge the factual accuracy and value of AI output",
+      "collocations": [
+        "apply product discernment",
+        "practice product discernment"
+      ],
+      "ua": "оцінка продукту / результату (наскільки якісним є вихідний матеріал)",
+      "source_sentence": "We call this first concept product discernment: the ability to judge the accuracy and value of AI-created output."
+    },
+    {
+      "term": "lapse",
+      "definition_b1": "a temporary failure in concentration, memory, or quality",
+      "collocations": [
+        "lapse in attention",
+        "memory lapse"
+      ],
+      "ua": "провал (уваги/пам'яті); тимчасова помилка",
+      "source_sentence": "Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning."
+    },
+    {
+      "term": "circular reasoning",
+      "definition_b1": "a logical error where an argument repeats its premise as the conclusion",
+      "collocations": [
+        "trap in circular reasoning",
+        "avoid circular reasoning"
+      ],
+      "ua": "замкнене коло в міркуваннях (хибна тавтологічна логіка)",
+      "source_sentence": "Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning."
+    },
+    {
+      "term": "process discernment",
+      "definition_b1": "the ability to evaluate the steps, logic, and methodology the AI used",
+      "collocations": [
+        "require process discernment",
+        "maintain process discernment"
+      ],
+      "ua": "оцінка процесу (перевірка логіки та кроків ШІ)",
+      "source_sentence": "We call this kind of recognition process discernment: the ability to judge the quality and effectiveness of the AI's process."
+    },
+    {
+      "term": "in sync",
+      "definition_b1": "working together harmoniously and sharing the same understanding",
+      "collocations": [
+        "think in sync",
+        "stay in sync"
+      ],
+      "ua": "синхронно; узгоджено",
+      "source_sentence": "It's needed to ensure you and the AI are thinking in sync throughout the process, guiding the AI toward your vision for success."
+    },
+    {
+      "term": "performance discernment",
+      "definition_b1": "evaluating the behavioral quality and communication style of an AI interaction",
+      "collocations": [
+        "exercise performance discernment",
+        "improve performance discernment"
+      ],
+      "ua": "оцінка стилю взаємодії (наскільки зручно й ефективно ведеться діалог)",
+      "source_sentence": "We call this performance discernment: the ability to judge the quality of the human-AI interaction, which helps you shape more productive working engagement with AI systems."
+    },
+    {
+      "term": "revisit",
+      "definition_b1": "to return to a topic, decision, or plan to re-examine or change it",
+      "collocations": [
+        "revisit decisions",
+        "revisit assumptions"
+      ],
+      "ua": "переглядати; повертатися до розгляду",
+      "source_sentence": "If you like, revisit Bad Prompt Makeover from the previous lesson to give these prompting principles a workout."
+    },
+    {
+      "term": "oversight",
+      "definition_b1": "the responsibility of watching over something to ensure it is done correctly",
+      "collocations": [
+        "human oversight",
+        "maintain oversight"
+      ],
+      "ua": "нагляд; контроль",
+      "source_sentence": "Even the most advanced AI systems benefit from human judgment and oversight"
+    },
+    {
+      "term": "flip side",
+      "definition_b1": "the opposite, reverse, or complementary aspect of a situation",
+      "collocations": [
+        "flip side of",
+        "on the flip side"
+      ],
+      "ua": "зворотний бік (медалі); доповняльна сторона",
+      "source_sentence": "It's kind of the flip side of description. If description is about clearly communicating what you want, discernment is about deciding whether what you get back actually meets your needs."
+    }
+  ],
+  "reading": {
+    "b1": "**Discernment** is the third core competency of AI fluency. It acts as your quality control system during collaboration. It is the **flip side** of description. Description communicates what you want. **Discernment** evaluates whether what you receive meets your standards. Understanding typical AI **shortcoming**s makes human judgment an essential **safeguard**.\n\nDiscernment includes three distinct dimensions. First is **product discernment**. This evaluates the final deliverable. You verify factual accuracy, coherence, structure, and domain value. You ensure outputs solve real problems.\n\nSecond is **process discernment**. This evaluates how the AI arrived at the solution. You watch for logical bugs, a **lapse** in attention, or **circular reasoning**. In multi-step projects, checking methodology ensures human and machine think **in sync**.\n\nThird is **performance discernment**. This evaluates the collaborative interaction itself. You assess whether communication is too verbose or too brief. You check if the AI responds constructively to feedback.\n\nFinally, discernment drives actionable improvements. When you spot issues, provide clear feedback to refine your prompts. If quality problems persist, **revisit** your delegation choices. Maintaining active human **oversight** ensures AI collaboration remains reliable, safe, and productive.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1558\nWords per minute: 156\nVerdict: >150 split into 3-5 min chunks\n---\n\n# A closer look at Discernment\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Understand how to evaluate AI outputs and processes thoughtfully\n- Develop critical thinking skills for your AI interactions\n- Learn to identify and address quality concerns in your AI interactions\n\n## A Closer Look at Discernment\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\n## Introduction\n\nIn this video, we'll dig deeper into the AI fluency competency of discernment. AI fluency means working with AI effectively, efficiently, ethically, and safely.\n\n## What Is Discernment?\n\nDiscernment is specifically about evaluating AI outputs, processes, and behaviors—essentially, your quality control system for AI collaboration.\n\nDiscernment is your ability to critically evaluate what AI produces, how it produces it, and how it behaves. It's kind of the flip side of description. If description is about clearly communicating what you want, discernment is about deciding whether what you get back actually meets your needs.\n\nDeveloping your discernment helps you identify when AI outputs are valuable versus problematic, recognize strengths and limitations, and determine when outputs are ready to use or need more work.\n\nDoing this well requires both domain expertise—in other words, knowing enough to judge quality—and an understanding of how AI systems work, including their typical shortcomings.\n\nRemember, even the most advanced AI systems can make reasoning errors, produce factual mistakes, or act in unexpected ways. Your capacity for discernment acts as an essential safeguard.\n\nThe most straightforward form of discernment is evaluating the quality of what the AI actually produces. When reviewing AI-generated content, ask yourself questions like: Is this factually accurate? Is it appropriate for my audience and purpose? Is it coherent and well-structured? Does it meet my requirements? And does it add value or solve the problem I intended?\n\nWe call this first concept product discernment: the ability to judge the accuracy and value of AI-created output.\n\n## Process Discernment\n\nWhen interacting with AI, you need to assess not just what the AI produces, but how it got there. Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning.\n\nFor example, imagine you're working with AI to expand on one of five outline options it offered for a document. After several rounds of back-and-forth ideation together, you notice elements of rejected ideas being reinserted by AI.\n\nWe call this kind of recognition process discernment: the ability to judge the quality and effectiveness of the AI's process. It's needed to ensure you and the AI are thinking in sync throughout the process, guiding the AI toward your vision for success.\n\nIt becomes especially important for complex tasks where the correct answer isn't immediately obvious. In these situations, having trust in the process is everything.\n\n## Performance Discernment\n\nIt's also often valuable to evaluate and guide how the AI behaves during your interaction. We call this performance discernment.\n\nThe difference between process and performance is maybe a bit subtle. You can think of process as the work the AI is doing, while performance is how well it is interacting with you while it does the work.\n\nWhen evaluating an AI assistant's performance, you can ask yourself: Is there a better way for the AI to communicate with you for greater ease and productivity going forward? Is it providing the information you need in a helpful way? Does it respond well to your feedback and direction? And is the interaction efficient or unnecessarily complex?\n\nFor example, is the AI asking too many questions when you need concise answers, or is it too brief when you need comprehensive information?\n\nWe call this performance discernment: the ability to judge the quality of the human-AI interaction, which helps you shape more productive working engagement with AI systems.\n\n## Feedback Discernment\n\nOf course, discernment doesn't end with evaluation. You also need to provide feedback in order to improve what an AI delivers going forward.\n\nWhen you identify problems in AI outputs, effective feedback includes specifying what the problem is, clearly explaining why it is a problem, providing concrete suggestions for improvement, and revising your instructions or examples.\n\nIn other words, when discernment flags a problem, better description is often the solution. But this isn't always the case. Sometimes you may need to rethink your delegation decisions because you might be using the wrong tool or approaching the problem in entirely the wrong way.\n\n## Recap\n\nTo recap, product, process, and performance discernment combine to form the discernment competency.\n\nDiscernment works hand in hand with description. While description focuses on communicating your needs to AI, discernment evaluates how well those needs were met.\n\nTogether, they form a continuous loop of instruction and evaluation that drives quality.\n\nBy developing your discernment skills, you ensure that your AI collaboration remains guided by human judgment, a critical element of truly effective AI fluency.\n\n===\n\n\n\nThis video explores Discernment, the AI Fluency competency focused on thoughtfully evaluating AI outputs, processes, and behaviors. We explain that Discernment is the flip side of Description. While Description helps you communicate your intentions clearly, Discernment helps you evaluate whether what you receive meets your needs. The video introduces three types of Discernment:\n\n- Product Discernment: Evaluating the quality of AI outputs\n- Process Discernment: Assessing how the AI approached the task\n- Performance Discernment: Evaluating how the AI behaved during the interaction itself\n\nTogether, these skills help ensure that your AI collaboration remains guided by thoughtful human judgment.\n\n#### Key takeaways\n\n- Discernment is your ability to thoughtfully evaluate what AI produces, how it produces it, and how it behaves\n- Product Discernment focuses on evaluating the quality of actual outputs (accuracy, appropriateness, coherence, relevance)\n- Process Discernment involves assessing how the AI arrived at its output, looking for logical errors, attention gaps, or inappropriate reasoning\n- Performance Discernment evaluates how the AI behaves within the collaboration process itself, considering whether its communication style is effective for your needs\n- Discernment works hand-in-hand with Description in a continuous feedback loop\n- Even the most advanced AI systems benefit from human judgment and oversight\n\n## Exercises\n\n### Expert Discernment: Evaluating AI Responses in Your Domain\n\n#### Activity Goal\n\nPractice Product, Process, and Performance Discernment by evaluating AI-generated content in a domain where you have expertise, recognizing how your knowledge enhances your ability to critically assess AI outputs.\n\n#### Instructions\n\n**Step 1: Return to Your Area of Expertise**\n\nRecall the topic you discussed with Claude in the earlier exercise (Lesson 2, Exercise 2: \"Explore something you love\"). This was a topic where you had strong knowledge and passion.\n\n**Step 2: Ask for Multiple Explanations**\n\nStart a new conversation with Claude and ask it to generate three different explanations or analyses about a specific aspect of your expert topic. For example:\n\n- If your topic was photography, you might ask for three different explanations of depth of field\n- If your topic was cooking, you might ask for three different analyses of fermentation techniques\n- If your topic was history, you might ask for three different perspectives on a specific historical event\n\n**Step 3: Apply Your Expert Discernment**\n\nDrawing on your expertise, carefully evaluate each explanation provided by Claude:\n\n**Product Discernment:**\n\n- Which explanation contains the most accurate information?\n- Are there any factual errors or misconceptions?\n- Is the level of detail appropriate for someone learning about this topic?\n\n**Process Discernment:**\n\n- Does Claude follow logical reasoning in each explanation?\n- Are there gaps in its analysis or thinking process?\n- Does Claude make appropriate connections between concepts?\n\n**Performance Discernment:**\n\n- Was Claude attentive to your specific question and responsive to feedback and direction?\n- Is terminology used appropriately for the topic?\n- How does the tone and style affect the clarity of the explanation?\n\n**Step 4: Provide Feedback and Refinement**\n\nBased on your evaluation:\n\n1. Identify the strongest explanation and specifically tell Claude specifically why it's effective\n2. Identify the weakest explanation and provide specific feedback on what makes it problematic\n3. Work with Claude to create an improved version that addresses the issues you identified\n\n**Step 5: Reflection**\n\nDiscuss with Claude (in the same chat):\n\n- What specific knowledge did you have that allowed you to identify strengths or weaknesses?\n- How might someone without your expertise struggle to discern the quality of these explanations?\n- What does this experience teach you about the relationship between domain knowledge and effective Discernment?\n\n**For a more playful Discernment workout, you might want to try some of the “Game Night” suggestions in the final lesson (\"Additional Activities\").**\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which type of Discernment (Product, Process, or Performance) do you find most challenging to apply, and why?\n- How does Discernment complement Description? How do they work together?\n- What signals or patterns might indicate that an AI output requires closer scrutiny?\n\n#### What’s next\n\nIn the next lesson, you'll have the opportunity to apply both Description and Discernment skills to your overarching course project. You'll put into practice what you've learned about effectively communicating with AI and critically evaluating its outputs to produce results that leverage the best of both human and AI capabilities.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "Why is Discernment described as the 'flip side' of Description?",
+      "difficulty": "easy",
+      "term_refs": [
+        "discernment",
+        "flip side"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because Discernment requires flipping your computer upside down during chat sessions.",
+          "correct": false,
+          "note": "Incorrect: flip side is an idiom for complementary aspects, not physical hardware rotation."
+        },
+        {
+          "id": "b",
+          "text": "Because Description is only used on weekends and Discernment on weekdays.",
+          "correct": false,
+          "note": "Incorrect: both competencies operate continuously together in real time."
+        },
+        {
+          "id": "c",
+          "text": "While Description communicates your intentions to the AI, Discernment evaluates whether the response actually meets your standards.",
+          "correct": true,
+          "note": "Correct: Description instructs, while Discernment evaluates output quality."
+        }
+      ],
+      "explanation": "Discernment is the complementary flip side of Description because prompt writing and output evaluation form a tight iterative loop. Description allows you to articulate requirements clearly, while Discernment gives you the critical judgment to verify whether the AI's deliverable satisfies factual, structural, and security constraints. The {{opt:a}} option takes the idiom absurdly literally. The {{opt:b}} option is nonsensical. Operating both competencies simultaneously ensures that AI collaboration remains purposeful, preventing unverified outputs from contaminating production systems. In real workflows, this continuous loop catches misunderstandings before they turn into costly errors."
+    },
+    {
+      "id": "q2",
+      "prompt": "What is the primary focus of 'Product Discernment' when reviewing an AI deliverable?",
+      "difficulty": "easy",
+      "term_refs": [
+        "product discernment",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Judging the factual accuracy, structural coherence, audience appropriateness, and real value of the created output.",
+          "correct": true,
+          "note": "Correct: Product Discernment audits the quality and validity of the final artifact."
+        },
+        {
+          "id": "b",
+          "text": "Calculating the shipping delivery cost of physical consumer goods.",
+          "correct": false,
+          "note": "Incorrect: Product Discernment evaluates AI-generated artifacts, not retail logistics."
+        },
+        {
+          "id": "c",
+          "text": "Deleting all code files whenever an automated test passes successfully.",
+          "correct": false,
+          "note": "Incorrect: passing tests validate quality rather than prompting deletion."
+        }
+      ],
+      "explanation": "Product Discernment is the systematic inspection of the artifact generated by an AI assistant. When evaluating text, scripts, or diagrams, you verify whether the facts are accurate, whether the structure is logical, and whether the deliverable solves the intended problem safely. The {{opt:b}} option confuses AI deliverables with physical parcel shipping. The {{opt:c}} option is counterproductive. Practicing rigorous product discernment acts as an essential safeguard against silent hallucinations, ensuring that only verified solutions are deployed to production. This verification is especially critical when dealing with database migrations or API keys."
+    },
+    {
+      "id": "q3",
+      "prompt": "What is 'circular reasoning' in the context of Process Discernment?",
+      "difficulty": "easy",
+      "term_refs": [
+        "circular reasoning",
+        "process discernment",
+        "lapse"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "A computer graphics algorithm designed to draw round circles on screen.",
+          "correct": false,
+          "note": "Incorrect: circular reasoning is a logical fallacy, not a graphic drawing method."
+        },
+        {
+          "id": "b",
+          "text": "A logical flaw where the AI's argument assumes what it is trying to prove, repeating premises without real proof.",
+          "correct": true,
+          "note": "Correct: circular logic offers tautological explanations instead of valid derivation."
+        },
+        {
+          "id": "c",
+          "text": "A routing protocol that forwards network packets in an infinite physical loop.",
+          "correct": false,
+          "note": "Incorrect: that describes a network routing loop rather than argumentative fallacy."
+        }
+      ],
+      "explanation": "Circular reasoning is a logical fallacy where an AI attempts to justify a claim by restating the claim in different words rather than providing independent evidence or derivation. In complex multi-step reasoning, models can become trapped in circular logic, presenting self-referential statements as valid explanations. The {{opt:a}} option describes computer geometry rendering. The {{opt:c}} option confuses logical fallacies with networking packet loops. Process discernment allows engineers to spot circular reasoning early and force the model to explore alternate deduction paths, ensuring that proofs and architectural conclusions rest on solid empirical foundations."
+    },
+    {
+      "id": "q4",
+      "prompt": "How does 'Process Discernment' differ from 'Product Discernment'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "process discernment",
+        "product discernment",
+        "in sync"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Product Discernment evaluates what was produced, while Process Discernment assesses the reasoning steps and methodology used.",
+          "correct": true,
+          "note": "Correct: differentiates artifact quality from execution methodology."
+        },
+        {
+          "id": "b",
+          "text": "Process Discernment completely forbids human beings from inspecting source code.",
+          "correct": false,
+          "note": "Incorrect: Process Discernment encourages active human inspection of reasoning."
+        },
+        {
+          "id": "c",
+          "text": "Product Discernment is for mobile phones and Process Discernment is for desktop towers.",
+          "correct": false,
+          "note": "Incorrect: both discernment skills apply across all computing devices."
+        }
+      ],
+      "explanation": "The distinction between Product and Process Discernment is central to quality control. Product Discernment reviews the final artifact (e.g. 'Is this SQL query correct?'), whereas Process Discernment evaluates the intermediate journey (e.g. 'Did the AI analyze foreign key relationships before creating indexes?'). The {{opt:c}} option is an absurd hardware classification. The {{opt:b}} option contradicts the core principle of human review. By evaluating methodology, engineers ensure human and AI stay in sync throughout complex refactors, catching flawed algorithmic logic before buggy code is committed to version control repositories."
+    },
+    {
+      "id": "q5",
+      "prompt": "What does an engineer evaluate when practicing 'Performance Discernment'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "performance discernment",
+        "shortcoming"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The physical speed of typing on a mechanical keyboard in words per minute.",
+          "correct": false,
+          "note": "Incorrect: human typing speed is unrelated to evaluating AI conversational performance."
+        },
+        {
+          "id": "b",
+          "text": "The price of graphic cards sold on secondary auction websites.",
+          "correct": false,
+          "note": "Incorrect: Performance Discernment evaluates interaction dynamics, not hardware auctions."
+        },
+        {
+          "id": "c",
+          "text": "The collaborative efficiency, tone, verbosity, and responsiveness of the AI interaction itself.",
+          "correct": true,
+          "note": "Correct: Performance Discernment evaluates conversational usability and interaction style."
+        }
+      ],
+      "explanation": "Performance Discernment focuses on the ergonomics and effectiveness of the human-AI interaction. You observe whether the model is providing excessive filler, asking too many questions, being overly terse, or failing to adapt to feedback. The {{opt:b,a}} options confuse conversational assessment with hardware trading and typing speed. Evaluating performance allows you to give behavioral steering instructions (e.g. 'Be more concise' or 'Explain your logic before writing code'), making collaboration smoother and more productive. Fine-tuning the conversational rhythm keeps developer momentum high during long debugging sessions."
+    },
+    {
+      "id": "q6",
+      "prompt": "An AI assistant reinserts a rejected architecture approach after several turns. What caused this process lapse?",
+      "difficulty": "medium",
+      "term_refs": [
+        "lapse",
+        "process discernment",
+        "in sync"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "An attention lapse where the model lost track of earlier conversational decisions across a long context window.",
+          "correct": true,
+          "note": "Correct: extended context dilution often leads to reintroducing rejected ideas."
+        },
+        {
+          "id": "b",
+          "text": "The AI model intentionally rebelled against the engineer's authority.",
+          "correct": false,
+          "note": "Incorrect: models operate probabilistically without personal malice or rebellion."
+        },
+        {
+          "id": "c",
+          "text": "The computer monitor overheated and altered the network firewall settings.",
+          "correct": false,
+          "note": "Incorrect: monitor temperature cannot alter conversational state or network rules."
+        }
+      ],
+      "explanation": "Reinserting rejected ideas is a classic attention lapse in long multi-turn sessions. As conversation length grows, earlier negative constraints can be diluted across the context window, causing the model to resynthesize discarded patterns. The {{opt:c}} option is an unrelated thermal distraction. The {{opt:b}} option falsely attributes conscious rebellion to mathematical models. Applying process discernment allows engineers to catch these lapses immediately, prompting a context reset or explicit reminder to keep collaboration in sync, preventing discarded architecture proposals from resurfacing in production plans."
+    },
+    {
+      "id": "q7",
+      "prompt": "When discernment identifies a serious shortcoming in an AI response, what is the best immediate step?",
+      "difficulty": "medium",
+      "term_refs": [
+        "shortcoming",
+        "revisit",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Accept the broken output immediately and deploy it to live customer servers.",
+          "correct": false,
+          "note": "Incorrect: deploying unverified errors creates catastrophic production failures."
+        },
+        {
+          "id": "b",
+          "text": "Provide targeted feedback explaining the error, refine your Description prompt, or revisit delegation choices if the tool is unsuitable.",
+          "correct": true,
+          "note": "Correct: combines prompt refinement with strategic delegation review."
+        },
+        {
+          "id": "c",
+          "text": "Throw the computer out of the office window and change professions.",
+          "correct": false,
+          "note": "Incorrect: errors are natural feedback signals for iterative refinement."
+        }
+      ],
+      "explanation": "When discernment flags an error, the professional response is to diagnose the root cause and provide structured feedback. Clearly state what is wrong, explain why it fails domain standards, and supply refined prompt constraints. If the model consistently fails due to reasoning limits, revisit your delegation strategy and choose a more capable model or human execution. The {{opt:a}} option is an operational disaster. The {{opt:c}} option is an absurd overreaction. Closing the loop with better description resolves shortcomings reliably, helping developers build resilient prompts that handle edge cases effectively."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why is deep domain expertise required to exercise effective Discernment?",
+      "difficulty": "medium",
+      "term_refs": [
+        "discernment",
+        "oversight",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because software engineering licenses are legally required to view markdown text.",
+          "correct": false,
+          "note": "Incorrect: markdown viewing is open and unrestricted by law."
+        },
+        {
+          "id": "b",
+          "text": "Because AI models refuse to answer prompts unless the user proves they have a PhD.",
+          "correct": false,
+          "note": "Incorrect: language models respond to all prompt queries regardless of academic degrees."
+        },
+        {
+          "id": "c",
+          "text": "Because without domain knowledge, a user cannot distinguish plausible-sounding hallucinations from robust, secure engineering solutions.",
+          "correct": true,
+          "note": "Correct: domain expertise enables accurate technical auditing and quality control."
+        }
+      ],
+      "explanation": "Domain expertise is the cornerstone of Discernment because large language models write with high fluency and confidence, even when generating incorrect assertions. Without deep subject knowledge in networking, security, or algorithms, an inexperienced user will mistake plausible hallucinations for production-ready code. The {{opt:a}} option is a legal fabrication. The {{opt:b}} option is false. Human oversight grounded in real domain mastery acts as the primary safeguard protecting systems from subtle technical vulnerabilities, ensuring that critical configurations conform strictly to industry best practices."
+    },
+    {
+      "id": "q9",
+      "prompt": "An AI suggests adding an unencrypted telnet port to a router firewall. How does Discernment protect infrastructure?",
+      "difficulty": "hard",
+      "term_refs": [
+        "safeguard",
+        "oversight",
+        "discernment"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The router hardware will automatically melt its plastic case to protect data.",
+          "correct": false,
+          "note": "Incorrect: hardware does not melt intentionally as a security mechanism."
+        },
+        {
+          "id": "b",
+          "text": "Product Discernment recognizes the insecure telnet protocol, triggering human oversight to reject the rule and mandate SSH.",
+          "correct": true,
+          "note": "Correct: security auditing catches unsafe recommendations before deployment."
+        },
+        {
+          "id": "c",
+          "text": "The AI assistant will call emergency services to report a security violation.",
+          "correct": false,
+          "note": "Incorrect: language models do not place emergency telephone calls."
+        }
+      ],
+      "explanation": "In this scenario, Product Discernment enables the network engineer to immediately spot a critical security flaw: opening unencrypted Telnet port 23 exposes credentials to cleartext sniffing. Through vigilant human oversight, the engineer rejects the AI draft, maintains security safeguards, and prompts the assistant to implement encrypted SSH on port 22 with key-based authentication. The {{opt:a,c}} options are absurd fantasies. Active discernment prevents AI-generated recommendations from creating severe network vulnerabilities, ensuring that only hardened, encrypted management protocols are exposed across corporate firewalls."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does maintaining an active Description-Discernment loop prevent project failure across long AI workflows?",
+      "difficulty": "hard",
+      "term_refs": [
+        "discernment",
+        "in sync",
+        "oversight"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It creates a continuous cadence of clear specification, immediate verification, and timely course correction at every milestone.",
+          "correct": true,
+          "note": "Correct: the iterative loop catches misunderstandings before they compound into major failures."
+        },
+        {
+          "id": "b",
+          "text": "It automatically rewrites all internet databases into encrypted binary strings.",
+          "correct": false,
+          "note": "Incorrect: the loop operates strictly within the active project workspace."
+        },
+        {
+          "id": "c",
+          "text": "It completely eliminates the need for computer monitors and input keyboards.",
+          "correct": false,
+          "note": "Incorrect: collaboration requires standard computing interfaces."
+        }
+      ],
+      "explanation": "The Description-Discernment loop ensures long-term project success by maintaining continuous quality control. Clear description articulates requirements at each milestone, while vigilant discernment immediately verifies deliverables against domain standards before proceeding. This iterative cadence prevents minor misunderstandings from compounding into disastrous architectural failures, keeping human and machine in sync throughout complex engineering initiatives. The {{opt:c,b}} options are nonsensical. This disciplined feedback loop embodies the essence of professional AI fluency, allowing engineering teams to build scalable, reliable software with confidence."
+    }
+  ],
+  "speaking_prompts": [
+    "Why is Discernment considered the flip side of Description? How do they form a continuous feedback loop in your technical work?",
+    "How do you apply product discernment to catch subtle hallucinations or syntax shortcomings in code generated by an AI assistant?",
+    "Describe an experience where an AI model experienced a lapse in attention or fell into circular reasoning. How did process discernment help you fix it?",
+    "When evaluating an interactive session, how does performance discernment help you adjust the AI's communication style and verbosity?",
+    "Why is human oversight an irreplaceable safeguard in production systems? When should poor AI results cause you to revisit delegation decisions?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 10 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the difference between Process Discernment and Performance Discernment. Verify pronunciation using speech recognition.",
+    "Draft a 3-minute talk skeleton for your teacher analyzing how you apply discernment and human oversight to code or configuration reviews."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

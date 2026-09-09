@@ -1,206 +1,241 @@
-# Manual Pipeline — щотижневий рунбук
+# Manual Pipeline — weekly runbook
 
-Мета: з одного модуля відео зробити комплект матеріалів для уроку.
-Робиться вручну доти, доки не буде написаний `lessonfactory` (зустріч №10).
+Goal: turn one video module into a complete lesson the student can present
+from a single HTML file. Done by hand until `lessonfactory` is written
+(meeting #10).
 
-**Головне правило:** усе, що дратує під час ручного проходу, записується
-в `friction.md`. Цей файл — технічне завдання для автоматизації.
+**The main rule:** everything that is annoying during the manual pass goes
+into that week's `friction.md`. That file is the specification for the
+automation.
 
-Очікуваний час: 30–40 хв на модуль.
+Expected time: 30–40 minutes per module, not counting watching the module
+itself (that is `prep.md`, day 1).
 
 ---
 
-## Крок 0. Папка тижня
+## Step 0. Week folder
+
+```bash
+bash scripts/new_week.sh w02
+```
+
+Copies `templates/week-scaffold/` into `lessons/w02/` and substitutes the week
+number. Never overwrites an existing file — running it twice is safe.
+
+You get:
 
 ```
 lessons/wNN/
-├── source.md              # сирий матеріал з Coursera (транскрипти + readings)
-├── transcript_b1.md       # адаптована версія для читання
-├── terms.json             # витягнуті терміни
-├── glossary.md            # людиночитний глосарій
-├── worksheet.md           # вправи + ключі
-├── anki.csv               # імпорт у Anki
-├── talk.md                # план 3-хвилинного виступу
-└── friction.md            # що бісило
+├── lesson.json     # source of truth, pre-filled with TODO placeholders
+├── source.md       # raw material from Coursera
+├── prep.md         # the student's 3-day preparation plan
+├── agenda.md       # sent to the teacher a day before the lesson
+├── friction.md     # what was annoying
+└── audio/          # mp3 files, not committed to git
 ```
 
-```bash
-mkdir -p lessons/w01 && touch lessons/w01/friction.md
-```
+`index.html` is **generated** by the build (step 5). Never edit it by hand.
+
+`source_prompt.md` is not in the scaffold yet — copy it from a previous week
+and update it for the new module.
 
 ---
 
-## Крок 1. Транскрипт (10 хв)
+## Step 1. Raw material → `source.md` (10 min)
 
-1. Coursera → відео → вкладка **Transcript** (не Subtitles).
-2. Виділити все → скопіювати.
-3. Вставити в `source.md` (readings — виділити текст сторінки і вставити).
-4. Для кожного наступного відео модуля додати розділювач:
+1. Coursera → video → the **Transcript** tab (not Subtitles).
+2. Select all, copy, paste into `lessons/wNN/source.md`.
+3. Readings: select the page text and paste it in the same way.
+4. Separate each item with a header line, so the origin of every sentence
+   stays traceable:
 
 ```
---- video 2: <назва> (MM:SS) ---
+--- reading: Introduction to AI Fluency ---
+--- video 2: The Four Competencies (07:42) ---
 ```
 
-Записати сумарну тривалість модуля у хвилинах — знадобиться на кроці 2.
+Paste verbatim. Do not clean it up: `reading.original` in the lesson is the
+uncleaned text, and the gap between it and the B1 version *is* the teaching
+material.
+
+Write down the total running time of the module in minutes — step 2 needs it.
 
 ---
 
-## Крок 2. Швидкість мовлення (2 хв)
+## Step 2. Speech rate (2 min)
 
 ```bash
-bash scripts/wpm.sh lessons/w01/source.md <хвилини>
+bash scripts/wpm.sh lessons/wNN/source.md <minutes>
 ```
 
-`wpm = слова / хвилини`
+`wpm = words / minutes`
 
-| wpm | Висновок для B1 |
+| wpm | Verdict for B1 |
 |---|---|
-| < 130 | комфортно, можна слухати без пауз |
-| 130–150 | нормально, але потрібен pre-teaching лексики |
-| > 150 | різати на фрагменти по 3–5 хв, слухати двічі |
+| < 130 | comfortable, listen without pausing |
+| 130–150 | fine, but pre-teach the vocabulary first |
+| > 150 | cut into 3–5 min chunks, listen twice |
 
-Записати число у `friction.md`.
-
----
-
-## Крок 3. Витягнути терміни (5 хв)
-
-Промпт (Claude Project «English Through AI»):
-
-```
-You are building vocabulary material for a B1 English learner
-who is studying AI in English.
-
-From the transcript below, extract the 12 most useful domain terms.
-Prioritise: (a) terms that repeat, (b) terms needed to TALK about AI,
-(c) skip terms that are transparent for a Ukrainian speaker
-    (e.g. "system", "information", "process").
-
-For EACH term return:
-- term
-- definition_b1: max 20 words, CEFR B1 vocabulary only
-- collocations: exactly 2 natural phrases with this term
-- source_sentence: the sentence from the transcript, verbatim
-- gapfill: the source sentence with the term replaced by "_____"
-- ua: Ukrainian equivalent
-
-Return ONLY a JSON array. No markdown fences, no commentary.
-
-TRANSCRIPT:
-<<<paste>>>
-```
-
-**Обов'язково перевірити вручну.** Модель стабільно тягне або надто прості
-слова, або надто рідкісні. Викинути 2–3, додати свої. Зберегти `terms.json`.
+Record the number in `friction.md`.
 
 ---
 
-## Крок 4. B1-версія тексту (3 хв)
+## Step 3. Generate the lesson body (5 min)
 
-```
-Rewrite the transcript below as a clean B1-level reading text.
+`lessons/wNN/source_prompt.md` is the prompt. Send it followed by the whole
+contents of `source.md` (the prompt ends with `SOURCE MATERIAL:`).
 
-Rules:
-- Keep every technical term unchanged and in **bold**
-- Split sentences longer than 15 words
-- Remove filler, repetitions and spoken-language artefacts
-- Keep ALL facts. Do not summarise, do not shorten the content
-- Target length: 400-500 words
-- Output plain markdown
+What the prompt encodes, and why it must not be replaced with something
+generic:
 
-TRANSCRIPT:
-<<<paste>>>
-```
+- **The learner profile** — their tools (CLI agents, routers, drones, the
+  typing platform), their goals, and the weaknesses diagnosed from the
+  baseline recording (dropped `-ing`, missing articles, no present perfect,
+  drifting off the question). Content that ignores this profile is a failure.
+- **Hard output rules** the build later enforces: exactly 9 vocabulary items,
+  exactly 10 quiz questions at 3 easy / 5 medium / 2 hard, exactly 3 options
+  with exactly one correct, `note` ≤ 25 words, `explanation` 80–120 words,
+  every `term_refs` entry present in `vocabulary`, correct answers spread
+  across a/b/c.
 
-→ `transcript_b1.md`
+Output is one raw JSON object with the keys `objectives`, `vocabulary`,
+`pronunciation_focus`, `reading`, `speaking_prompts`, `homework`, `quiz`.
 
-**Як користуватись:** спершу читати B1-версію, потім оригінальний
-транскрипт. Різниця між ними — це і є навчальний матеріал.
-
----
-
-## Крок 5. Воркшит (3 хв)
-
-```
-Using the terms in the JSON below, build a worksheet in markdown:
-
-A. Matching: 12 terms <-> 12 shuffled definitions
-B. Gap-fill: the 12 gapfill sentences, shuffled, with a word bank
-C. Collocation check: 8 items, "choose the natural phrase" (2 options each)
-D. Speaking prompts: 5 questions that FORCE the learner to use
-   at least 3 of these terms in the answer
-
-Then an ANSWER KEY section at the end, clearly separated by "---".
-
-TERMS:
-<<<paste terms.json>>>
-```
-
-→ `worksheet.md`
+If a lesson is being regenerated, keep the previous JSON — comparing two
+generations is the fastest way to spot which parts the model is guessing at.
 
 ---
 
-## Крок 6. Anki (5 хв)
+## Step 4. Review and merge into `lesson.json` (10 min)
+
+**This step is the course.** The model produced a draft; the student decides
+what survives. Merge the generated keys into `lessons/wNN/lesson.json`, then:
+
+- **Fill in `ua` by hand.** The prompt forbids Ukrainian in its output, so
+  every vocabulary item arrives without it. This is deliberate: writing the
+  Ukrainian equivalent yourself is a vocabulary exercise, not clerical work.
+- **Cut and replace terms.** The model reliably picks 2–3 words that are too
+  easy or too rare. Replace them with words that actually blocked you while
+  watching — including non-AI words (`blurry`, `leverage`, `shortcut`).
+- **Rewrite `objectives`, `speaking_prompts` and `homework` in your own
+  words.** Model versions are a starting skeleton. A speaking prompt you did
+  not write is a prompt you will not want to answer.
+- **Drop keys `lesson.json` does not define.** The prompt returns
+  `pronunciation_focus`, and an `example` field per vocabulary item; neither
+  is part of the lesson format (see Known gaps). The build does not reject
+  extra keys, but the schema forbids them — keep the file clean.
+- Set `week`, `title`, `source`, `duration_min` and the `audio` entries.
+  Put mp3 files in `lessons/wNN/audio/` and point `src` at
+  `./audio/wNN-v1.mp3`; use `url` for anything hosted elsewhere.
+
+Then append the week's terms to the cumulative master file
+`termbank/termbank.csv`, semicolon-separated, one row per term:
 
 ```
-Convert the JSON to CSV for Anki import.
-Columns, semicolon-separated, no header row:
-front;back;example
-front   = term
-back    = definition_b1 + " | " + ua
-example = source_sentence with the term wrapped in <b></b>
-Output raw CSV only, no fences.
-```
-
-Anki → File → Import → роздільник `;` → колода `English Through AI::W01`.
-
-Режим повторення: 10 хв щодня, не пакетно перед уроком.
-
----
-
-## Крок 7. План виступу (5 хв)
-
-Не генерувати текст промови. Генерувати **тільки скелет**:
-
-```
-I will give a 3-minute talk in English about <topic> to my English teacher.
-My level is B1.
-
-Give me ONLY a skeleton:
-- 4 bullet points (the structure of the talk)
-- 8 useful phrases for signposting (e.g. "The first idea is...")
-- 3 likely follow-up questions the teacher may ask
-
-Do NOT write the talk itself. I will write and speak it myself.
-```
-
-→ `talk.md`
-
-**Заборонено:** просити модель написати сам текст виступу. Це вбиває сенс
-вправи. Модель дає каркас — м'ясо пише людина.
-
----
-
-## Крок 8. Friction log
-
-Дописати в `friction.md` усе, що зайняло час або дратувало. Приклади формату:
-
-```
-- [copy] Transcript копіюється вручну для кожного відео -> потрібен експорт
-- [terms] ~20% термінів довелося відсіяти -> потрібен стоп-лист
-- [anki] CSV-імпорт руками -> потрібен genanki і .apkg одразу
-- [wpm] рахував калькулятором -> порахувати скриптом
+week;term;definition_b1;collocation_1;collocation_2;ua;source_sentence;added_at
 ```
 
 ---
 
-## Чек-лист готовності до уроку
+## Step 5. Build (1 min)
 
-- [ ] `source.md` заповнено
-- [ ] wpm пораховано
-- [ ] `terms.json` перевірено вручну, 12 термінів
-- [ ] `transcript_b1.md` прочитано двічі
-- [ ] `worksheet.md` **пройдено самостійно**, ключі перевірено
-- [ ] `anki.csv` імпортовано, картки повторювались мінімум 3 дні
-- [ ] `talk.md` є, виступ відрепетирувано вголос 2 рази
-- [ ] `friction.md` заповнено
+```bash
+python3 scripts/build_lesson.py wNN
+```
+
+`lesson.json` → validation → `index.html`, plus a progress block showing what
+is still `TODO`. Add `--quiet` to suppress the block, or use `--all` to
+rebuild every week.
+
+The build **fails and writes nothing** on: a missing top-level key, a `week`
+that does not match the folder, an empty quiz, a question without exactly 3
+options or without exactly one `correct: true`, a missing or over-long `note`
+(max 25 words), an `explanation` outside 80–150 words, an unknown
+`difficulty`, or a `term_refs` entry that is not in `vocabulary`.
+
+It **warns but still builds** when the quiz is not exactly 10 questions or
+`TODO` markers remain. A work-in-progress lesson is expected to warn; a
+lesson you are about to teach from should not.
+
+---
+
+## Step 6. Check in the browser (3 min)
+
+```bash
+open lessons/wNN/index.html
+```
+
+It must work from `file://` with the network off — no server, no CDN, no
+`fetch()`. Walk all seven sections: header, objectives, vocabulary flip cards
+and quick quiz, the reading B1/Original toggle (terms should be highlighted),
+the quiz, the speaking prompts with their 60-second timer, and the homework
+checklist (it persists to `localStorage` under `etai:wNN:*`).
+
+Answer two or three quiz questions deliberately wrong: the options must lock,
+the correct one must be revealed even though you did not pick it, and the
+explanation must teach you something rather than tell you off.
+
+---
+
+## Step 7. Friction log
+
+Append everything that cost time to `lessons/wNN/friction.md`:
+
+```
+- [copy] transcript copied by hand for every video -> needs an export
+- [terms] ~20% of terms had to be thrown out -> needs a stop-list
+- [ua] filled the ua field by hand for 9 terms -> acceptable, it is an exercise
+- [wpm] counted on a calculator -> scripted
+```
+
+---
+
+## Readiness checklist
+
+- [ ] `source.md` filled, every item labelled with its origin
+- [ ] wpm calculated and written into `friction.md`
+- [ ] 9 vocabulary items reviewed by hand, `ua` filled in
+- [ ] `reading.b1` read aloud once, then the original read after it
+- [ ] quiz has 10 questions and the build reports no warnings
+- [ ] `objectives`, `speaking_prompts`, `homework` rewritten in your own words
+- [ ] `python3 scripts/termbank_sync.py` run, terms present in
+      `termbank/termbank.csv`; reviewed for at least 3 days before the lesson
+- [ ] talk rehearsed aloud twice (structure only from AI — see `prep.md`)
+- [ ] `friction.md` filled in
+- [ ] `agenda.md` sent to the teacher a day before the lesson
+
+---
+
+## Known gaps
+
+Recorded here rather than fixed silently:
+
+- `reading.b1` is 40–60 % below the 400–500 words this runbook's prompt asks
+  for in every week from w03 onward. The build warns about it; the readings
+  themselves have not been regenerated. See `docs/revision-spec.md` R10.
+
+- `source_prompt.md` asks for `pronunciation_focus` and a per-term `example`.
+  Neither exists in `lesson.json`, `templates/lesson.schema.json` or
+  `templates/lesson-template.html`, so both are currently discarded at step 4.
+  Either the format grows to hold them or the prompt should stop asking.
+- `source_prompt.md` caps `explanation` at 120 words while the build allows
+  150. The prompt is the stricter of the two, so generated lessons pass — but
+  the two numbers should agree.
+- `scripts/instruction.md` is still in Ukrainian and pending translation.
+- `source_prompt.md` is not part of `templates/week-scaffold/`, so every new
+  week starts by copying it from the previous one.
+
+---
+
+## Quiz option references
+
+Options are shuffled every time the quiz is rendered, so an `explanation` or a
+`note` must never say "the second option". It names the option by id instead:
+
+- `{{opt:b}}` renders as the ordinal that option currently occupies
+- `{{opt:b,c}}` renders as two ordinals in ascending display order
+
+`build_lesson.py` rejects an unknown id and any surviving positional phrase,
+and fails the build if one position holds more than half of the correct
+answers. The 80–150 word limit on an explanation is measured after the tokens
+expand — that is what the student reads.

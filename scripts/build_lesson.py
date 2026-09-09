@@ -28,14 +28,35 @@ EXPLANATION_MIN_WORDS = 80
 EXPLANATION_MAX_WORDS = 150
 QUIZ_EXPECTED = 10
 DIFFICULTIES = ("easy", "medium", "hard")
+# source_prompt.md asks for 400-500 words, up to 700 when the facts need it.
+READING_MIN_WORDS = 400
+READING_MAX_WORDS = 700
 
 REQUIRED_TOP = ("week", "title", "source", "duration_min", "objectives",
                 "vocabulary", "reading", "audio", "quiz",
                 "speaking_prompts", "homework")
 
+# Explanations must point at options symbolically ({{opt:b}}, {{opt:b,c}}), never
+# by position: the template shuffles the options on every attempt, so any
+# "the second option" in the text is wrong as soon as it is rendered.
+OPT_TOKEN = re.compile(r"\{\{opt:([a-z](?:,[a-z])*)\}\}")
+POSITIONAL_REF = re.compile(
+    r"\b(?:first|second|third)\s+(?:and\s+(?:first|second|third)\s+)?options?\b",
+    re.IGNORECASE)
+
 
 def words(s):
     return len(s.split())
+
+
+def rendered(text):
+    """Text as the learner sees it: {{opt:b,c}} becomes 'second and third'.
+
+    Length limits describe what is read on screen, so they are measured after
+    the option tokens expand, not on the shorthand stored in the JSON.
+    """
+    return OPT_TOKEN.sub(
+        lambda m: " and ".join(["second"] * len(m.group(1).split(","))), text)
 
 
 def is_todo(s):
@@ -97,16 +118,19 @@ def validate(week, data):
             note = o.get("note")
             if not isinstance(note, str) or not note.strip():
                 errors.append(f"{week} {qid} option {oid} note: missing or empty")
-            elif words(note) > NOTE_MAX_WORDS:
-                errors.append(f"{week} {qid} option {oid} note: {words(note)} "
-                              f"words, max {NOTE_MAX_WORDS}")
+            elif words(rendered(note)) > NOTE_MAX_WORDS:
+                errors.append(f"{week} {qid} option {oid} note: "
+                              f"{words(rendered(note))} words, "
+                              f"max {NOTE_MAX_WORDS}")
 
         explanation = q.get("explanation")
         if not isinstance(explanation, str) or not explanation.strip():
             errors.append(f"{week} {qid} explanation: missing or empty")
-        elif not EXPLANATION_MIN_WORDS <= words(explanation) <= EXPLANATION_MAX_WORDS:
-            errors.append(f"{week} {qid} explanation: {words(explanation)} words, "
-                          f"must be {EXPLANATION_MIN_WORDS}-{EXPLANATION_MAX_WORDS}")
+        elif not (EXPLANATION_MIN_WORDS <= words(rendered(explanation))
+                  <= EXPLANATION_MAX_WORDS):
+            errors.append(f"{week} {qid} explanation: "
+                          f"{words(rendered(explanation))} words, must be "
+                          f"{EXPLANATION_MIN_WORDS}-{EXPLANATION_MAX_WORDS}")
 
         difficulty = q.get("difficulty")
         if difficulty is not None and difficulty not in DIFFICULTIES:
@@ -117,6 +141,49 @@ def validate(week, data):
             if ref not in terms:
                 errors.append(f"{week} {qid} term_refs: '{ref}' not found in "
                               "vocabulary")
+
+        option_ids = {o.get("id") for o in options}
+        for field, text in [("explanation", q.get("explanation") or "")] + \
+                [(f"option {o.get('id', '?')} note", o.get("note") or "")
+                 for o in options]:
+            for token in OPT_TOKEN.findall(text):
+                for ref in token.split(","):
+                    if ref not in option_ids:
+                        errors.append(f"{week} {qid} {field}: {{{{opt:{token}}}}} "
+                                      f"refers to option '{ref}', which does not "
+                                      "exist")
+            hit = POSITIONAL_REF.search(text)
+            if hit:
+                errors.append(f"{week} {qid} {field}: '{hit.group(0)}' names an "
+                              "option by position; options are shuffled at "
+                              "render time — use {{opt:<id>}} instead")
+
+    # The correct answer must not cluster in one position. source_prompt.md has
+    # required this from the start and it was violated in every week w03-w14:
+    # a prompt is not an enforcement mechanism, so the build checks it.
+    if quiz:
+        counts = [0] * max(len(q.get("options", [])) for q in quiz)
+        for q in quiz:
+            for i, o in enumerate(q.get("options", [])):
+                if o.get("correct") is True:
+                    counts[i] += 1
+        shape = "/".join(str(c) for c in counts)
+        worst = max(counts)
+        if worst > (len(quiz) + 1) // 2:
+            errors.append(f"{week} quiz: the correct answer sits in the same "
+                          f"position {worst} times out of {len(quiz)} "
+                          f"(a/b/c = {shape}); spread it across the options")
+        elif len(quiz) == QUIZ_EXPECTED and not all(3 <= c <= 4 for c in counts):
+            warnings.append(f"{week} quiz: correct-answer spread is {shape}; "
+                            "source_prompt.md asks for 3-4 per position")
+
+    b1 = data.get("reading", {}).get("b1")
+    if isinstance(b1, str) and not is_todo(b1):
+        n_words = words(b1)
+        if not READING_MIN_WORDS <= n_words <= READING_MAX_WORDS:
+            warnings.append(f"{week}: reading.b1 is {n_words} words; "
+                            f"source_prompt.md asks for "
+                            f"{READING_MIN_WORDS}-{READING_MAX_WORDS}")
 
     todo_total = sum(s.count("TODO") for s in iter_strings(data))
     if todo_total:

@@ -1,0 +1,460 @@
+{
+  "week": "w07",
+  "title": "Project Planning and Delegation",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can scope a multi-step technical project for AI-assisted execution.",
+    "By the end of this lesson I can perform a detailed task breakdown through the lens of Delegation.",
+    "By the end of this lesson I can challenge assumptions and specify clear criteria for AI collaboration."
+  ],
+  "vocabulary": [
+    {
+      "term": "substantial",
+      "definition_b1": "large in size, value, importance, or amount",
+      "collocations": [
+        "substantial project",
+        "substantial progress"
+      ],
+      "ua": "значний; ґрунтовний; вагомий",
+      "source_sentence": "Substantial enough to involve multiple types of tasks"
+    },
+    {
+      "term": "manageable",
+      "definition_b1": "easy or possible to control, organize, or accomplish",
+      "collocations": [
+        "manageable task",
+        "manageable pieces"
+      ],
+      "ua": "здійсненний; посильний для виконання",
+      "source_sentence": "Manageable enough to complete within about 1 hour of work"
+    },
+    {
+      "term": "compelling",
+      "definition_b1": "attracting strong interest, attention, or admiration",
+      "collocations": [
+        "compelling presentation",
+        "compelling argument"
+      ],
+      "ua": "переконливий; захоплюючий; вражаючий",
+      "source_sentence": "Create a compelling presentation on a topic you're knowledgeable about"
+    },
+    {
+      "term": "pitch",
+      "definition_b1": "a short speech or presentation designed to persuade someone to accept an idea",
+      "collocations": [
+        "make a pitch",
+        "project pitch"
+      ],
+      "ua": "пітч; коротка презентація ідеї",
+      "source_sentence": "Develop a proposal or pitch for an idea you'd like to pursue"
+    },
+    {
+      "term": "pursue",
+      "definition_b1": "to work hard to achieve or follow a goal over a period of time",
+      "collocations": [
+        "pursue an idea",
+        "pursue a goal"
+      ],
+      "ua": "реалізовувати; переслідувати (мету)",
+      "source_sentence": "Develop a proposal or pitch for an idea you'd like to pursue"
+    },
+    {
+      "term": "emerging",
+      "definition_b1": "starting to exist, develop, or become prominent and known",
+      "collocations": [
+        "emerging technology",
+        "emerging trends"
+      ],
+      "ua": "нова / новітня (технологія); та, що активно з'являється",
+      "source_sentence": "Research and summarize the current state of an emerging technology or trend"
+    },
+    {
+      "term": "breakdown",
+      "definition_b1": "a detailed division of something into smaller parts for analysis",
+      "collocations": [
+        "task breakdown",
+        "detailed breakdown"
+      ],
+      "ua": "розбивка (на складові); деталізація",
+      "source_sentence": "Task breakdown and delegation analysis"
+    },
+    {
+      "term": "through the lens of",
+      "definition_b1": "examining or analyzing a situation from a specific viewpoint",
+      "collocations": [
+        "through the lens of",
+        "look through the lens"
+      ],
+      "ua": "крізь призму (чогось)",
+      "source_sentence": "Similar to what you did in the previous lesson, work with Claude to explore your project through the lens of Delegation:"
+    },
+    {
+      "term": "challenge assumptions",
+      "definition_b1": "to question whether beliefs or ideas are truly correct or justified",
+      "collocations": [
+        "challenge assumptions",
+        "challenge existing assumptions"
+      ],
+      "ua": "ставити під сумнів припущення",
+      "source_sentence": "Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion."
+    },
+    {
+      "term": "clarification",
+      "definition_b1": "the act of making something clearer or easier to understand",
+      "collocations": [
+        "ask for clarification",
+        "provide clarification"
+      ],
+      "ua": "уточнення; роз'яснення",
+      "source_sentence": "Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion."
+    },
+    {
+      "term": "anticipate",
+      "definition_b1": "to imagine or expect that something will happen and prepare for it",
+      "collocations": [
+        "anticipate challenges",
+        "anticipate problems"
+      ],
+      "ua": "передбачати; очікувати",
+      "source_sentence": "What do you anticipate will be the most challenging aspect of your delegation plan?"
+    },
+    {
+      "term": "specify",
+      "definition_b1": "to state or describe something clearly, precisely, and in detail",
+      "collocations": [
+        "specify requirements",
+        "specify details"
+      ],
+      "ua": "чітко вказувати; деталізувати",
+      "source_sentence": "This includes techniques for defining what you want, guiding how the AI approaches the task, and specifying how you want the AI to interact with you throughout the process."
+    }
+  ],
+  "reading": {
+    "b1": "In this module, you apply delegation principles to a real practical project. You will work on this project throughout the course. First, choose a **substantial** yet **manageable** project. It should involve multiple tasks and take about one hour. You can **pursue** a communication **pitch**, research an **emerging** technology, create a story, or build a tutorial.\n\nNext, define a clear project vision. Have a conversation with Claude to clarify what success looks like. Establish what makes the project particularly valuable. A clear goal prevents confusion later.\n\nThen, perform a detailed task **breakdown**. Examine each task **through the lens of** delegation. Discuss what human skills or AI capabilities are needed. Identify where AI creates value and where human judgment is required. During planning, **challenge assumptions** and ask for **clarification**. Save this delegation plan for future lessons.\n\nFinally, reflect on potential bottlenecks. Consider what challenges you **anticipate** during execution. This preparation sets up the next competency: Description. You will learn to **specify** detailed prompts and interaction styles to execute your plan successfully.",
+    "original": "---\nTotal video duration in this module: 20 min\nWord count (wc -w): 620\nWords per minute: 31\nVerdict: <130 comfortable\n---\n\n# Project planning and Delegation\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Apply your understanding of Delegation to a practical multi-step project you'll work on throughout the rest of this course\n\n### Project planning and delegation\n\n*Estimated time: 20 minutes*\n\n#### Step 1: Choose your project\n\nSelect a medium-sized, multi-step project that you can work on throughout the remainder of this course. Your project should be:\n\n- Substantial enough to involve multiple types of tasks\n- Manageable enough to complete within about 1 hour of work\n- Something you're genuinely interested in creating or accomplishing\n\nHere are some suggestions to consider:\n\n**Communication Projects:**\n\n- Create a compelling presentation on a topic you're knowledgeable about\n- Write a post or series of posts explaining a complex topic to a general audience\n- Develop a proposal or pitch for an idea you'd like to pursue\n- Create a personal or professional bio with supporting materials\n\n**Research Projects:**\n\n- Research and summarize the current state of an emerging technology or trend\n- Analyze a dataset to identify patterns and create recommendations\n- Compare multiple products, services, or approaches and create a recommendation\n- Investigate a historical event and present your findings in an engaging format\n\n**Creative Projects:**\n\n- Outline a short story with fully developed characters and plot\n- Design a simple website structure with content for key pages\n- Develop a concept for a product, service, or experience\n\n**Learning Projects:**\n\n- Create a structured learning plan for a skill you want to develop\n- Build a resource collection on a topic you're learning about\n- Develop a tutorial or guide for a process you understand well\n- Create a set of study materials for a topic you want to master\n\n#### Step 2: Project vision and goals\n\nStart a conversation with Claude. Share your project idea and invite Claude to ask you some questions until you feel you have a solid vision for the final result. Work together until you have a clear picture of:\n\n- What success looks like for your project\n- What would make this project particularly valuable or meaningful to you\n\n#### Step 3: Task breakdown and delegation analysis\n\nSimilar to what you did in the previous lesson, work with Claude to explore your project through the lens of Delegation:\n\n1. Identify together the major tasks needed to complete your project.\n2. For each task, one at a time, discuss:\n   1. What specific skills, knowledge, or AI capabilities are needed?\n   2. Which parts would benefit from uniquely human strengths?\n   3. Which parts could leverage AI capabilities well?\n   4. Where might collaboration have the most impact?\n   5. *Note: Again, have a genuine conversation about these questions rather than just exchanging statements. Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion.*\n   6. Create a project plan that includes your major tasks and delegation decisions.\n   7. Save your project plan—you'll return to this project later in the course to practice your Description, Discernment, and Diligence skills.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- What insights emerged from your planning conversation with Claude?\n- What do you anticipate will be the most challenging aspect of your delegation plan?\n- What additional information or skills might help you delegate more effectively to AI?\n\n#### What's next\n\nIn the next lesson, we'll explore the second core competency: Description. You'll learn approaches for communicating effectively with AI systems, which will help you implement the plan you've just created. This includes techniques for defining what you want, guiding how the AI approaches the task, and specifying how you want the AI to interact with you throughout the process.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What criteria should you use when choosing a multi-step project for the AI Fluency course?",
+      "difficulty": "easy",
+      "term_refs": [
+        "substantial",
+        "manageable",
+        "pursue"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The project should be substantial enough to involve multiple tasks, yet manageable within about an hour.",
+          "correct": true,
+          "note": "Correct: balances multi-step complexity with achievable scope."
+        },
+        {
+          "id": "b",
+          "text": "It should consist of a single word query with zero subtasks.",
+          "correct": false,
+          "note": "Incorrect: single-word tasks cannot demonstrate multi-step delegation."
+        },
+        {
+          "id": "c",
+          "text": "It must require five years of full-time development and a team of fifty engineers.",
+          "correct": false,
+          "note": "Incorrect: the project must be manageable within about an hour."
+        }
+      ],
+      "explanation": "The course recommends selecting a project that is substantial enough to require diverse cognitive tasks (such as researching, drafting, structuring, and reviewing), yet manageable enough to complete within about one hour of focused work. Choosing something you genuinely care to pursue ensures meaningful engagement. The {{opt:c}} option is absurdly oversized for a course exercise. The {{opt:b}} option fails to provide enough structural complexity to practice delegation. A well-scoped project gives you realistic opportunities to test automation, augmentation, and human review."
+    },
+    {
+      "id": "q2",
+      "prompt": "What is the purpose of conducting a task breakdown before delegating to an AI assistant?",
+      "difficulty": "easy",
+      "term_refs": [
+        "breakdown",
+        "through the lens of"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To delete all project requirements and start over with no goals.",
+          "correct": false,
+          "note": "Incorrect: task breakdown organizes requirements rather than deleting them."
+        },
+        {
+          "id": "b",
+          "text": "To divide complex work into discrete steps and evaluate each through the lens of delegation.",
+          "correct": true,
+          "note": "Correct: breaking work into components reveals where AI and humans excel."
+        },
+        {
+          "id": "c",
+          "text": "To force the AI model to write the entire application in binary machine code.",
+          "correct": false,
+          "note": "Incorrect: task breakdown is a planning process, not a compiler directive."
+        }
+      ],
+      "explanation": "A task breakdown decomposes an ambitious project into clear, modular subtasks. By analyzing each subtask through the lens of delegation, you can deliberately decide whether it should be automated, explored collaboratively through augmentation, handled by an autonomous agent, or reserved exclusively for human judgment. The {{opt:a}} option is counterproductive. The {{opt:c}} option is a technical absurdity. In software engineering, breaking an epic into small user stories allows developers to delegate routine boilerplate to coding assistants while maintaining architectural control. This structural clarity ensures that every contributor, human or AI, understands their exact responsibilities."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why should you challenge assumptions and ask for clarification during an AI planning discussion?",
+      "difficulty": "easy",
+      "term_refs": [
+        "challenge assumptions",
+        "clarification"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models will permanently erase their memory if you agree with them.",
+          "correct": false,
+          "note": "Incorrect: AI models do not erase memory based on agreement."
+        },
+        {
+          "id": "b",
+          "text": "To intentionally slow down the project until deadlines expire.",
+          "correct": false,
+          "note": "Incorrect: challenging assumptions saves time by preventing mistakes."
+        },
+        {
+          "id": "c",
+          "text": "To expose hidden constraints, avoid vague requirements, and discover unexpected insights.",
+          "correct": true,
+          "note": "Correct: dynamic dialogue sharpens project vision and catches flaws early."
+        }
+      ],
+      "explanation": "Having an interactive dialogue where you challenge assumptions and ask for clarification turns planning into a true thinking partnership. Rather than passively accepting the AI's first generic outline, probing deeper helps you uncover unstated constraints, refine goals, and discover valuable alternative approaches. The {{opt:b}} option is wrong because catching misunderstandings early prevents costly rework. The {{opt:a}} option is nonsense. In technical projects, asking 'What edge cases might break this plan?' often reveals critical security and performance requirements that initial prompts omitted."
+    },
+    {
+      "id": "q4",
+      "prompt": "A developer prepares a pitch for an emerging IoT networking tool. How does delegation support this project?",
+      "difficulty": "medium",
+      "term_refs": [
+        "pitch",
+        "emerging",
+        "compelling"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "AI can research market comparisons and draft slide outlines, while the developer crafts the compelling core argument.",
+          "correct": true,
+          "note": "Correct: leverages AI for drafting while keeping domain perspective."
+        },
+        {
+          "id": "b",
+          "text": "The developer bans all digital tools and writes the pitch on stone tablets.",
+          "correct": false,
+          "note": "Incorrect: refusing modern tools forfeits efficiency and research speed."
+        },
+        {
+          "id": "c",
+          "text": "The developer lets AI present live to investors while he sleeps.",
+          "correct": false,
+          "note": "Incorrect: live pitch delivery and investor questions require human presence."
+        }
+      ],
+      "explanation": "Developing a compelling project pitch for an emerging technology benefits from strategic task distribution. An AI assistant can rapidly gather comparative data, structure talking points, and draft presentation slides. Meanwhile, the developer uses domain insight to refine technical claims, anticipate skeptical stakeholder questions, and deliver the core narrative. The {{opt:c}} option is an irresponsible abdication of professional duties. The {{opt:b}} option is an exaggerated rejection of technology. Strategic collaboration allows engineers to build persuasive technical proposals in hours instead of days."
+    },
+    {
+      "id": "q5",
+      "prompt": "What should a project leader do when anticipating potential bottlenecks in an AI delegation plan?",
+      "difficulty": "medium",
+      "term_refs": [
+        "anticipate",
+        "manageable",
+        "specify"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Cancel the project immediately whenever any task requires more than two steps.",
+          "correct": false,
+          "note": "Incorrect: multi-step tasks are standard and manageable with proper planning."
+        },
+        {
+          "id": "b",
+          "text": "Anticipate failure modes, specify clear verification checkpoints, and keep high-risk tasks manageable.",
+          "correct": true,
+          "note": "Correct: proactive risk anticipation enables robust error recovery."
+        },
+        {
+          "id": "c",
+          "text": "Ignore all risks and assume the AI will automatically fix broken production servers.",
+          "correct": false,
+          "note": "Incorrect: unmonitored delegation invites severe operational failures."
+        }
+      ],
+      "explanation": "When planning multi-step projects, anticipating challenges allows you to design specific verification gates and fallback procedures. For example, if an AI agent generates script syntax, the plan should specify automated unit tests and manual diff review before merging. The {{opt:c}} option assumes magical infallibility, which causes catastrophic outages when models hallucinate. The {{opt:a}} option exhibits unnecessary fear of multi-step complexity. Proactive planning ensures that unexpected AI errors become manageable learning checkpoints rather than project-stopping disasters. By setting up sandboxed environments, developers can test agent-generated configs safely without risking production downtime."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why does saving your delegation plan matter for the upcoming Description, Discernment, and Diligence modules?",
+      "difficulty": "medium",
+      "term_refs": [
+        "specify",
+        "through the lens of",
+        "substantial"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because you will execute the same plan across future lessons, practicing how to specify prompts, evaluate outputs, and ensure diligence.",
+          "correct": true,
+          "note": "Correct: the project serves as a continuous practical thread across the 4Ds."
+        },
+        {
+          "id": "b",
+          "text": "Because course certificates are only awarded to students who keep 1,000 text files on their Desktop.",
+          "correct": false,
+          "note": "Incorrect: file count has no relationship to course accreditation."
+        },
+        {
+          "id": "c",
+          "text": "Because future lessons will forbid you from writing any new prompts or code.",
+          "correct": false,
+          "note": "Incorrect: future lessons involve active prompting and code evaluation."
+        }
+      ],
+      "explanation": "The delegation plan created in this lesson serves as the practical backbone for the rest of the course. In upcoming weeks, you will specify precise instructions for each subtask using Description, critically review generated artifacts with Discernment, and verify safety and ethics through Diligence. The {{opt:b}} option is an absurd administrative joke. The {{opt:c}} option contradicts the course design, which requires continuous hands-on collaboration. Using one substantial project across all 4D modules turns abstract principles into durable practical muscle memory."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does defining 'what success looks like' in Step 2 prevent project drift during AI collaboration?",
+      "difficulty": "medium",
+      "term_refs": [
+        "clarification",
+        "compelling",
+        "manageable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It makes prompt writing completely unnecessary for the remainder of the project.",
+          "correct": false,
+          "note": "Incorrect: clear goals inform better prompts rather than replacing them."
+        },
+        {
+          "id": "b",
+          "text": "It forces the AI to automatically rewrite all internet articles in lowercase letters.",
+          "correct": false,
+          "note": "Incorrect: goal definition guides task direction, not character casing."
+        },
+        {
+          "id": "c",
+          "text": "It establishes unambiguous objective criteria to evaluate whether intermediate AI drafts are moving in the right direction.",
+          "correct": true,
+          "note": "Correct: clear success criteria anchor discernment and prompt refinement."
+        }
+      ],
+      "explanation": "Defining what success looks like provides an essential reference anchor for the entire project. When collaborating with versatile AI models, discussions can easily drift into interesting but irrelevant tangents unless you have established measurable deliverables, target formats, and success benchmarks. The {{opt:b}} option is nonsensical. The {{opt:a}} option is false because clear goals make subsequent prompt description sharper and more effective. When an AI generates draft materials, having clear criteria allows you to ask for targeted clarification and course corrections immediately."
+    },
+    {
+      "id": "q8",
+      "prompt": "A student wants to build a tutorial for a complex deployment process. Which task breakdown best reflects strategic delegation?",
+      "difficulty": "medium",
+      "term_refs": [
+        "breakdown",
+        "substantial",
+        "manageable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "AI executes root commands directly on production routers without saving a tutorial text.",
+          "correct": false,
+          "note": "Incorrect: this fails to create a tutorial and introduces extreme risk."
+        },
+        {
+          "id": "b",
+          "text": "Human outlines the deployment sequence, AI drafts step-by-step commands, human validates commands in a test lab, AI formats markdown.",
+          "correct": true,
+          "note": "Correct: combines human system expertise with AI drafting and formatting speed."
+        },
+        {
+          "id": "c",
+          "text": "Human writes every single letter by hand and uses AI only to calculate 2 + 2.",
+          "correct": false,
+          "note": "Incorrect: underutilizes AI drafting and formatting capabilities."
+        }
+      ],
+      "explanation": "This breakdown represents optimal delegation synergy. The engineer outlines the technical flow based on real architecture knowledge, the AI expands the outline into well-formatted explanatory prose, the engineer verifies every command in a sandbox lab, and the AI finalizes the markdown formatting. The {{opt:a}} option bypasses tutorial creation and risks catastrophic outages. The {{opt:c}} option severely underutilizes AI capabilities. Strategic delegation balances speed in content generation with rigorous human technical verification. Dividing tasks this way allows technical writers and engineers to publish comprehensive documentation in a fraction of the traditional time."
+    },
+    {
+      "id": "q9",
+      "prompt": "What is the primary advantage of exploring project planning through conversational dialogue rather than static prompt submission?",
+      "difficulty": "hard",
+      "term_refs": [
+        "challenge assumptions",
+        "clarification",
+        "emerging"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Iterative dialogue exposes edge cases, prompts clarifying questions, and stimulates emergent problem-solving ideas.",
+          "correct": true,
+          "note": "Correct: conversational back-and-forth deepens analysis and uncovers blind spots."
+        },
+        {
+          "id": "b",
+          "text": "Static single-turn prompts are legally banned in software architecture work.",
+          "correct": false,
+          "note": "Incorrect: single-turn prompts are permitted but less effective for complex planning."
+        },
+        {
+          "id": "c",
+          "text": "Conversational dialogue reduces the electrical power needed by cloud data centers.",
+          "correct": false,
+          "note": "Incorrect: dialogue exchanges require standard API compute cycles."
+        }
+      ],
+      "explanation": "Conversational planning is far more powerful than single-turn prompt submissions because it enables dynamic bidirectional refinement. When you invite the AI to ask clarifying questions, challenge your assumptions, and propose alternative breakdowns, the collaborative exchange surfaces unconsidered trade-offs and edge cases. The {{opt:c}} option is an absurd claim about energy physics. The {{opt:b}} option is factually untrue. Multi-turn planning transforms AI from a basic text autocomplete tool into a genuine intellectual partner, sharpening your vision before implementation begins. In complex infrastructure design, this dialogue helps identify network latency bottlenecks and security constraints early."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does thorough project planning in Delegation directly empower the next competency: Description?",
+      "difficulty": "hard",
+      "term_refs": [
+        "specify",
+        "breakdown",
+        "anticipate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delegation planning eliminates the need for written communication in all future steps.",
+          "correct": false,
+          "note": "Incorrect: Description explicitly requires precise written prompts."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that the AI model will never need any further input or evaluation.",
+          "correct": false,
+          "note": "Incorrect: the 4D framework is an iterative loop requiring ongoing engagement."
+        },
+        {
+          "id": "c",
+          "text": "Knowing the exact task breakdown and required outcomes enables you to specify context-rich, unambiguous instructions during Description.",
+          "correct": true,
+          "note": "Correct: clear delegation planning provides the exact requirements that Description articulates."
+        }
+      ],
+      "explanation": "The 4D competencies build sequentially upon one another. Thorough planning in Delegation defines exactly what subtasks exist, who is responsible for each, and what success criteria apply. This clarity directly empowers Description, allowing you to specify rich context, clear formats, and explicit constraints without hesitation. The {{opt:a}} option contradicts the framework, as Description relies on articulate prompt writing. The {{opt:b}} option is false because collaboration requires ongoing discernment. Without solid delegation planning, prompts become vague and outputs require endless correction."
+    }
+  ],
+  "speaking_prompts": [
+    "Which multi-step technical project would you like to pursue in this course? Explain why it is substantial yet manageable.",
+    "When you break down a complex coding or networking task, how do you look at it through the lens of delegation? Give a concrete example.",
+    "Why is it important to challenge assumptions and ask for clarification during an AI planning session instead of accepting the first plan?",
+    "What potential bottlenecks or risks do you anticipate when delegating parts of a live infrastructure project to a CLI agent?",
+    "How would you create a compelling pitch to explain your AI-assisted project workflow to a manager or client? Use pitch and specify."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 7 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds describing your project's task breakdown and delegation plan. Check your pronunciation of substantial and anticipate.",
+    "Draft a 3-minute talk plan for your teacher explaining your chosen project, goals, and strategic delegation decisions."
+  ]
+}

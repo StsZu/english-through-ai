@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w04",
+  "title": "Deep Dive 1 — What is Generative AI? (Part 1)",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can explain how Generative AI creates new content rather than just analyzing data.",
+    "By the end of this lesson I can describe the roles of pre-training, fine-tuning, and reinforcement learning.",
+    "By the end of this lesson I can evaluate context window limits and emergent capabilities in CLI agent workflows."
+  ],
+  "vocabulary": [
+    {
+      "term": "under the hood",
+      "definition_b1": "how something works behind the scenes or internally",
+      "collocations": [
+        "look under the hood",
+        "work under the hood"
+      ],
+      "ua": "під капотом; зсередини (як це влаштовано)",
+      "source_sentence": "In this video, we'll dive into what generative AI actually is, how it works under the hood, and the technological breakthroughs that made these systems possible."
+    },
+    {
+      "term": "breakthrough",
+      "definition_b1": "an important discovery or development that helps solve a problem",
+      "collocations": [
+        "technological breakthrough",
+        "major breakthrough"
+      ],
+      "ua": "прорив; значне досягнення",
+      "source_sentence": "In this video, we'll dive into what generative AI actually is, how it works under the hood, and the technological breakthroughs that made these systems possible."
+    },
+    {
+      "term": "prominent",
+      "definition_b1": "very well known, important, or easy to notice",
+      "collocations": [
+        "prominent type",
+        "prominent example"
+      ],
+      "ua": "помітний; провідний; визначний",
+      "source_sentence": "Large language models, or LLMs, like Anthropic's Claude models, are a prominent type of generative AI."
+    },
+    {
+      "term": "game changer",
+      "definition_b1": "something that completely changes the way a situation develops",
+      "collocations": [
+        "real game changer",
+        "proven game changer"
+      ],
+      "ua": "переломний момент; те, що докорінно змінює правила гри",
+      "source_sentence": "While neural networks have been around conceptually for decades, the development of the transformer architecture in 2017 was a game changer."
+    },
+    {
+      "term": "vast",
+      "definition_b1": "extremely large in size, amount, or area",
+      "collocations": [
+        "vast amounts",
+        "vast tapestry"
+      ],
+      "ua": "величезний; безмежний",
+      "source_sentence": "This vast tapestry of information helps models develop a broad and nuanced understanding of both language and concepts."
+    },
+    {
+      "term": "scaling laws",
+      "definition_b1": "rules showing how AI improves predictably with more data and computing power",
+      "collocations": [
+        "follow scaling laws",
+        "discover scaling laws"
+      ],
+      "ua": "закони масштабування",
+      "source_sentence": "The combination of these three factors led to an important discovery known as the scaling laws."
+    },
+    {
+      "term": "emergent",
+      "definition_b1": "appearing unexpectedly as a complex system grows larger",
+      "collocations": [
+        "emergent capabilities",
+        "emergent abilities"
+      ],
+      "ua": "емерджентний; такий, що несподівано виникає при масштабуванні",
+      "source_sentence": "More surprisingly, researchers found that entirely new capabilities began to emerge as these models grew larger."
+    },
+    {
+      "term": "pre-training",
+      "definition_b1": "the initial training phase where a model learns language patterns from huge data",
+      "collocations": [
+        "initial pre-training",
+        "during pre-training"
+      ],
+      "ua": "попереднє навчання (базова підготовка моделі)",
+      "source_sentence": "During initial training, also called pre-training, LLMs like Claude analyze patterns across billions of text examples."
+    },
+    {
+      "term": "fine-tuning",
+      "definition_b1": "additional training that teaches a model to follow instructions and be helpful",
+      "collocations": [
+        "undergo fine-tuning",
+        "model fine-tuning"
+      ],
+      "ua": "тонке доналаштування (моделі під завдання)",
+      "source_sentence": "After pre-training, models undergo additional training called fine-tuning, where they learn to follow instructions, provide helpful responses, and, importantly, avoid generating harmful content."
+    },
+    {
+      "term": "reinforcement learning",
+      "definition_b1": "a training method that uses rewards and penalties to guide AI behavior",
+      "collocations": [
+        "apply reinforcement learning",
+        "use reinforcement learning"
+      ],
+      "ua": "навчання з підкріпленням",
+      "source_sentence": "This often involves human feedback to improve the model's performance, as well as reinforcement learning, which uses rewards and penalties to shape the model's behavior toward being more helpful, honest, and harmless."
+    },
+    {
+      "term": "context window",
+      "definition_b1": "the maximum amount of text an AI model can remember during a conversation",
+      "collocations": [
+        "larger context window",
+        "current context window"
+      ],
+      "ua": "контекстне вікно (робоча пам'ять моделі)",
+      "source_sentence": "There's also a practical limit to how much information an LLM can consider at once, known as the context window."
+    },
+    {
+      "term": "in-context learning",
+      "definition_b1": "the ability of an AI to learn new tasks directly from prompt examples",
+      "collocations": [
+        "in-context learning ability",
+        "support in-context learning"
+      ],
+      "ua": "навчання в контексті (прямо з промпту)",
+      "source_sentence": "Second, its in-context learning ability."
+    }
+  ],
+  "reading": {
+    "b1": "Drew Bent from Anthropic explains how **generative AI** works **under the hood**. Traditional AI classifies existing data, such as finding spam emails. In contrast, **generative AI** creates new content that did not exist before. **Large language models** like Claude are a **prominent** type of generative system. They contain billions of parameters that process language like brain connections.\n\nModern **generative AI** developed through three key **breakthrough**s. First, the 2017 transformer architecture became a **game changer** for tracking word relationships. Second, a **vast** tapestry of digital text provided training material. Third, powerful GPU and TPU hardware enabled massive computation. Together, these developments revealed empirical **scaling laws**. As computing and data grew, model performance improved predictably.\n\nFurthermore, scaling produced surprising **emergent** capabilities. Models began solving multi-step logic problems without explicit programming. Training occurs in two main phases. During initial **pre-training**, models analyze billions of texts by predicting the next word. Next, models undergo **fine-tuning** with human feedback and **reinforcement learning**. This trains models to be helpful, honest, and harmless.\n\nWhen users provide a prompt, models generate new statistical continuations rather than retrieving database answers. Models also rely on a **context window**, which acts as working memory. This window holds prompts, responses, and shared files. Through **in-context learning**, models adapt to new tasks directly from prompt instructions. Understanding these foundations helps users interact with AI capably.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1013\nWords per minute: 101\nVerdict: <130 comfortable\n---\n\n# Generative AI fundamentals\n\n\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Define generative AI and how it differs from other AI types\n- Recognize the key characteristics and technological foundations of generative AI\n\n## Generative AI fundamentals\n\n\n**Lesson 3A: What is generative AI? (Deep Dive) | AI Fluency: Framework & Foundations Course**\n\nHi, my name is Drew Bent, and I'm a teacher, programmer, and member of technical staff at Anthropic. Welcome to our exploration of generative AI. In this video, we'll dive into what generative AI actually is, how it works under the hood, and the technological breakthroughs that made these systems possible.\n\nYou might interact with generative AI daily without fully understanding what's happening behind the scenes. Let's change that.\n\nGenerative AI refers to artificial intelligence systems that can create new content rather than just analyzing existing data. For example, while traditional AI might classify emails as spam or not spam based on patterns, generative AI can write a completely new email for you. The first approach analyzes and categorizes. The second creates something new that didn't exist before. This represents a fundamental shift in AI capabilities.\n\nLarge language models, or LLMs, like Anthropic's Claude models, are a prominent type of generative AI. They're called language models because they're trained to predict and generate human language, and large because they contain billions of parameters, mathematical values that determine how the model processes information, somewhat like synaptic connections in your brain.\n\nThe path to today's generative AI wasn't sudden. It involved three crucial developments coming together at the right time.\n\nFirst, there were algorithmic and architectural breakthroughs that fundamentally changed how AI systems learn. While neural networks have been around conceptually for decades, the development of the transformer architecture in 2017 was a game changer. This architecture excels at processing sequences of text while maintaining relationships between words across long passages, which is critical for understanding language in context.\n\nSecond, the explosion of digital data provided the essential raw material for training. Modern LLMs like Claude learn from diverse sources such as websites, code repositories, and other text that represent human knowledge and communication.\n\nThis vast tapestry of information helps models develop a broad and nuanced understanding of both language and concepts.\n\nAnd third, massive increases in computational power made it possible to train these complex models on all that data. Specialized hardware like GPUs, or graphics processing units, and TPUs, or tensor processing units, along with distributed computing networks, often called clusters, enable processing that would have been impossible just a few years earlier.\n\nThe combination of these three factors led to an important discovery known as the scaling laws. These empirical findings showed that as models grew larger and trained on more data with more computing power, their performance improved in predictable ways.\n\nMore surprisingly, researchers found that entirely new capabilities began to emerge as these models grew larger. Abilities no one explicitly programmed, like reasoning through problems step by step or adapting to new tasks with minimal instruction.\n\nLet's peek under the hood at how these systems actually work.\n\nDuring initial training, also called pre-training, LLMs like Claude analyze patterns across billions of text examples. Imagine reading every website and piece of text you could find, not just to absorb information, but to understand the statistical relationships between words, phrases, and concepts. At this stage, the model essentially builds something like a complex map of language and knowledge.\n\nThis pre-training process involves showing the model text and asking it to predict what comes next. Through many iterations, the model gradually refines its predictions, learning the patterns that make language coherent and meaningful.\n\nAfter pre-training, models undergo additional training called fine-tuning, where they learn to follow instructions, provide helpful responses, and, importantly, avoid generating harmful content. This often involves human feedback to improve the model's performance, as well as reinforcement learning, which uses rewards and penalties to shape the model's behavior toward being more helpful, honest, and harmless.\n\nIn the case of Anthropic's models, once models are trained, they are then deployed for you to interact with.\n\nWhen you interact with Claude or another LLM, you're providing a prompt, which is text that the model reads and then continues from based on patterns it learned during training. The model isn't retrieving pre-written answers from a database. Instead, it's generating new text that statistically follows from what you've written.\n\nThere's also a practical limit to how much information an LLM can consider at once, known as the context window. Think of this as the AI's working memory. The context window includes your prompts, the AI responses, and any other information you've shared in your conversation.\n\nWhile AI companies continue to grow the context window to allow for longer documents and conversations, these limits remind us that these systems don't have unlimited access to information and cannot use content beyond their current context window without specialized tools like web search.\n\nBringing this together, the three characteristics that make modern generative AI so powerful include, first, its ability to process vast amounts of information during training, allowing it to learn complex and nuanced patterns in language and knowledge.\n\nSecond, its in-context learning ability. LLMs can adapt to new tasks based on instructions or examples in your prompt without requiring additional training.\n\nAnd third, emerging capabilities that arise from scale. As these models grow larger, they develop abilities that weren't explicitly designed into them, sometimes surprising even their creators.\n\nIn the next video, we'll explore what these systems can and can't do well, along with their most common or valuable applications.\n\n\nThis video introduces the concept of generative AI, focusing on its ability to create new content rather than just analyzing what already exists. We walk through how large language models (LLMs) like Claude actually work and the technological journey that made them possible, from algorithmic breakthroughs like the transformer architecture to vast training datasets and powerful computing. We also explain how these systems learn through pre-training and fine-tuning and discuss concepts like context windows and emergent capabilities.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary difference between traditional AI systems and generative AI?",
+      "difficulty": "easy",
+      "term_refs": [
+        "prominent",
+        "under the hood"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Traditional AI only operates on mobile devices, while generative AI requires mainframe computers.",
+          "correct": false,
+          "note": "Incorrect: hardware type does not define the functional difference."
+        },
+        {
+          "id": "b",
+          "text": "Generative AI copies fixed pre-written answers from a static database table.",
+          "correct": false,
+          "note": "Incorrect: generative models predict new tokens instead of database retrieval."
+        },
+        {
+          "id": "c",
+          "text": "Generative AI creates completely new content, while traditional AI analyzes and categorizes existing data.",
+          "correct": true,
+          "note": "Correct: generative AI synthesizes new text, code, and media."
+        }
+      ],
+      "explanation": "Generative AI is defined by its ability to create novel content that did not previously exist, rather than merely classifying or filtering existing data. A traditional machine learning model might identify whether an incoming email is spam by examining pattern matches. In contrast, a prominent generative model like Claude can draft a completely new, context-aware reply for you. The {{opt:a}} option is incorrect because the distinction is architectural, not based on device format. The {{opt:b}} option is wrong because language models generate text dynamically based on learned probabilities rather than retrieving canned static database answers."
+    },
+    {
+      "id": "q2",
+      "prompt": "Why was the introduction of the transformer architecture in 2017 considered a major game changer?",
+      "difficulty": "easy",
+      "term_refs": [
+        "game changer",
+        "breakthrough"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It allowed AI systems to maintain relationships between words across long passages of text.",
+          "correct": true,
+          "note": "Correct: attention mechanisms process context across long sequences effectively."
+        },
+        {
+          "id": "b",
+          "text": "It replaced all neural networks with simple spreadsheet formulas and rules.",
+          "correct": false,
+          "note": "Incorrect: transformers are advanced deep neural network architectures."
+        },
+        {
+          "id": "c",
+          "text": "It completely eliminated the need for computational hardware like GPUs and TPUs.",
+          "correct": false,
+          "note": "Incorrect: transformers require massive compute clusters to train."
+        }
+      ],
+      "explanation": "The transformer architecture was a technological breakthrough and a true game changer because it enabled parallel processing of sequences while tracking semantic relationships across long text passages. Before transformers, older recurrent neural networks struggled with memory over long sentences and could not easily scale across large computer clusters. The {{opt:c}} option is false because modern transformer training demands thousands of specialized GPUs and TPUs. The {{opt:b}} option is absurd because transformers represent complex multi-layer neural networks. This self-attention breakthrough forms the foundation of modern large language models, image generators, and coding assistants."
+    },
+    {
+      "id": "q3",
+      "prompt": "What occurs during the initial pre-training phase of a large language model?",
+      "difficulty": "easy",
+      "term_refs": [
+        "pre-training",
+        "vast"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Human editors manually write answers for every possible user prompt.",
+          "correct": false,
+          "note": "Incorrect: pre-training is self-supervised on billions of text documents."
+        },
+        {
+          "id": "b",
+          "text": "The model is connected directly to live router interfaces to execute commands.",
+          "correct": false,
+          "note": "Incorrect: initial pre-training only ingests raw text datasets."
+        },
+        {
+          "id": "c",
+          "text": "The model analyzes vast amounts of text and learns to predict what word comes next.",
+          "correct": true,
+          "note": "Correct: next-token prediction builds statistical knowledge of language."
+        }
+      ],
+      "explanation": "During pre-training, an LLM analyzes a vast collection of text documents and learns by predicting the most probable next word across billions of examples. Through repeated iterations, the system builds a rich internal map of syntax, factual associations, and abstract concepts. The {{opt:a}} option is wrong because manual curation at this scale is impossible—pre-training relies on self-supervised learning across web data, books, and code. The {{opt:b}} option confuses training with deployment tools. Pre-training gives the model broad knowledge, which is later refined during fine-tuning to follow specific instructions safely and helpfully."
+    },
+    {
+      "id": "q4",
+      "prompt": "What are scaling laws in modern artificial intelligence research?",
+      "difficulty": "medium",
+      "term_refs": [
+        "scaling laws",
+        "emergent"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Empirical rules showing that model performance improves predictably as compute, data, and parameters increase.",
+          "correct": true,
+          "note": "Correct: scaling laws describe predictable quality gains from scale."
+        },
+        {
+          "id": "b",
+          "text": "Hardware limits that cause neural networks to lose all reasoning abilities when expanded.",
+          "correct": false,
+          "note": "Incorrect: scaling produces stronger and emergent abilities rather than degradation."
+        },
+        {
+          "id": "c",
+          "text": "Government regulations that limit how many users can access a chatbot daily.",
+          "correct": false,
+          "note": "Incorrect: scaling laws are mathematical and empirical research observations."
+        }
+      ],
+      "explanation": "Scaling laws are empirical scientific observations showing that as models grow in parameter count, training dataset size, and compute budget, their loss decreases and performance improves in mathematically predictable curves. Researchers at Anthropic and other labs discovered that scaling is not merely incremental—it also unlocks emergent capabilities such as step-by-step reasoning that were never explicitly coded. The {{opt:c}} option confuses scientific scaling laws with public policy regulations. The {{opt:b}} option contradicts reality, as increased scale consistently produces more capable and nuanced models. Understanding scaling laws helps engineers plan compute investments."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does fine-tuning differ from pre-training in the model development pipeline?",
+      "difficulty": "medium",
+      "term_refs": [
+        "fine-tuning",
+        "reinforcement learning",
+        "pre-training"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Fine-tuning uses instruction datasets and reinforcement learning to make the base model helpful, honest, and harmless.",
+          "correct": true,
+          "note": "Correct: fine-tuning aligns the raw base model for conversational collaboration."
+        },
+        {
+          "id": "b",
+          "text": "Fine-tuning erases all vocabulary knowledge learned during the pre-training phase.",
+          "correct": false,
+          "note": "Incorrect: fine-tuning builds directly on top of pre-trained knowledge."
+        },
+        {
+          "id": "c",
+          "text": "Fine-tuning is a hardware maintenance process that cleans dust from TPU cooling fans.",
+          "correct": false,
+          "note": "Incorrect: fine-tuning is an algorithmic model training process."
+        }
+      ],
+      "explanation": "Fine-tuning takes a raw pre-trained base model and shapes its behavior using high-quality instruction examples and reinforcement learning with human feedback (RLHF). This process teaches the assistant how to converse constructively, format responses clearly, decline harmful requests, and follow complex system prompts. The {{opt:b}} option is incorrect because fine-tuning preserves the general language comprehension gained during pre-training. The {{opt:c}} option is a joke about physical server maintenance. Without fine-tuning, a base model would simply continue your prompt text without realizing it is supposed to answer your question."
+    },
+    {
+      "id": "q6",
+      "prompt": "What is an AI model's 'context window' and why does it matter during real work?",
+      "difficulty": "medium",
+      "term_refs": [
+        "context window",
+        "in-context learning"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It is a physical glass screen installed on server racks in data centers.",
+          "correct": false,
+          "note": "Incorrect: context window is a software token limit, not physical glass."
+        },
+        {
+          "id": "b",
+          "text": "It is a database table where all previous chat sessions from last year are stored permanently.",
+          "correct": false,
+          "note": "Incorrect: context window is active memory for the current session only."
+        },
+        {
+          "id": "c",
+          "text": "It is the working memory limit containing current prompts, files, and conversation history.",
+          "correct": true,
+          "note": "Correct: models only process tokens inside their active context window."
+        }
+      ],
+      "explanation": "The context window represents the maximum amount of text (measured in tokens) an LLM can actively hold in working memory during a conversation. It contains the system prompt, conversation history, user attachments, and generated replies. If a project exceeds this window, older context falls out of scope unless retrieved via external tools. The {{opt:a}} option is an amusing literal confusion with physical windows. The {{opt:b}} option confuses active context with persistent storage. In CLI agent workflows, monitoring token usage in the context window ensures that code snippets and error logs fit within available memory."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does in-context learning allow a developer to teach an AI a custom formatting style?",
+      "difficulty": "medium",
+      "term_refs": [
+        "in-context learning",
+        "under the hood"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By deleting all punctuation marks from the user query before execution.",
+          "correct": false,
+          "note": "Incorrect: punctuation removal does not teach task structures."
+        },
+        {
+          "id": "b",
+          "text": "By providing two or three example inputs and outputs directly in the prompt without retraining the model.",
+          "correct": true,
+          "note": "Correct: few-shot prompt examples guide output format dynamically."
+        },
+        {
+          "id": "c",
+          "text": "By renting GPU clusters to re-train the foundational model weights from scratch.",
+          "correct": false,
+          "note": "Incorrect: in-context learning requires zero model retraining."
+        }
+      ],
+      "explanation": "In-context learning is the emergent ability of language models to recognize patterns and follow instructions directly from examples supplied within the prompt itself (often called few-shot prompting). You do not need to retrain the neural network or modify its internal weights under the hood. The {{opt:c}} option describes expensive full pre-training, which is unnecessary for formatting tasks. The {{opt:a}} option is irrelevant. For example, if you want an AI to convert router logs into a specific JSON schema, showing two sample transformations in your prompt enables the model to format subsequent inputs accurately."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why can unexpected 'emergent capabilities' appear when language models scale up in size?",
+      "difficulty": "medium",
+      "term_refs": [
+        "emergent",
+        "scaling laws",
+        "vast"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because complex multi-layered representations allow the network to combine patterns into novel reasoning steps.",
+          "correct": true,
+          "note": "Correct: emergent abilities arise organically from scale and depth."
+        },
+        {
+          "id": "b",
+          "text": "Because software engineers secretly write hidden if-else statements inside the weights.",
+          "correct": false,
+          "note": "Incorrect: neural network weights are mathematical matrices, not hardcoded code."
+        },
+        {
+          "id": "c",
+          "text": "Because the model connects directly to quantum satellites during nighttime hours.",
+          "correct": false,
+          "note": "Incorrect: emergent behaviors stem from classical matrix multiplication at scale."
+        }
+      ],
+      "explanation": "Emergent capabilities arise because deep neural networks trained on vast datasets learn generalized abstract representations across diverse domains. As parameter count and compute increase according to scaling laws, the model learns to compose simple linguistic associations into sophisticated reasoning chains, solving multi-step logic problems without explicit coding. The {{opt:b}} option is false because neural models contain billions of floating-point numbers rather than manual rule trees. The {{opt:c}} option is science fiction. Emergence is one of the most fascinating phenomena in machine learning, demonstrating that scale creates qualitative functional jumps."
+    },
+    {
+      "id": "q9",
+      "prompt": "A developer runs a CLI agent on a large codebase, and the agent suddenly forgets early instructions. What happened under the hood?",
+      "difficulty": "hard",
+      "term_refs": [
+        "context window",
+        "under the hood",
+        "prominent"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The agent switched automatically from reinforcement learning to binary machine code execution.",
+          "correct": false,
+          "note": "Incorrect: execution mode does not alter context retention dynamics."
+        },
+        {
+          "id": "b",
+          "text": "The session history and code diffs exceeded the active context window limit, causing older tokens to be dropped.",
+          "correct": true,
+          "note": "Correct: exceeding context capacity forces truncation of earlier context."
+        },
+        {
+          "id": "c",
+          "text": "The transformer architecture suffered permanent hardware damage and forgot its pre-training weights.",
+          "correct": false,
+          "note": "Incorrect: model weights remain unchanged; only ephemeral conversation memory overflowed."
+        }
+      ],
+      "explanation": "When an agent loses track of early instructions, the conversation transcript and code files have exceeded the model's active context window. Language models have a strict upper boundary on how many tokens they can ingest in a single forward pass; once history overflows, older messages are truncated or summarized. The {{opt:c}} option is incorrect because the pre-trained weights in data centers remain completely intact. The {{opt:a}} option is nonsense. To prevent this issue in large coding sessions, experienced engineers break large refactors into smaller commits and periodically clear non-essential terminal outputs."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why is reinforcement learning with human feedback (RLHF) critical before deploying AI assistants to the public?",
+      "difficulty": "hard",
+      "term_refs": [
+        "reinforcement learning",
+        "fine-tuning",
+        "breakthrough"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because fine-tuning is only permitted by law on desktop computers without internet access.",
+          "correct": false,
+          "note": "Incorrect: model training occurs on cloud supercomputing clusters."
+        },
+        {
+          "id": "b",
+          "text": "Because raw pre-trained models predict likely text without considering truthfulness, safety boundaries, or helpfulness.",
+          "correct": true,
+          "note": "Correct: RLHF aligns statistical word prediction with human ethical standards."
+        },
+        {
+          "id": "c",
+          "text": "Because reinforcement learning reduces the power consumption of server hardware to zero watts.",
+          "correct": false,
+          "note": "Incorrect: reinforcement learning is an alignment method, not an electrical power tool."
+        }
+      ],
+      "explanation": "Reinforcement learning is essential because a raw pre-trained model is simply a statistical next-word prediction engine. Left unaligned, it might autocomplete dangerous instructions, reproduce internet toxicity, or generate misleading claims. Through fine-tuning and reinforcement learning, human feedback guides the reward model to favor helpful, honest, and harmless responses while penalizing harmful outputs. The {{opt:c}} option is physically impossible. The {{opt:a}} option is factually inaccurate. This alignment breakthrough transforms raw language models into reliable, professional collaborators suitable for production environments. In practice, techniques like Constitutional AI allow models to critique their own drafts against written safety rules during reinforcement training."
+    }
+  ],
+  "speaking_prompts": [
+    "In your own words, explain how Generative AI differs from traditional classification AI. Give one concrete example from your programming or networking experience using prominent and breakthrough.",
+    "Describe how the transformer architecture became a game changer in 2017. How does attention under the hood help AI maintain context across long code files?",
+    "What is the difference between pre-training and fine-tuning? Why is reinforcement learning necessary to make models helpful and safe?",
+    "Have you ever experienced context window limits when working with a CLI agent or chat model? How did you adapt your workflow to manage memory effectively?",
+    "Do you think emergent capabilities from scaling laws will eventually make prompt engineering obsolete? Defend your position using in-context learning and vast."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 4 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the difference between pre-training and fine-tuning. Check your pronunciation of reinforcement learning and context window.",
+    "Draft a 3-minute talk skeleton for your teacher describing how Generative AI works under the hood and how you use it in your technical work."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

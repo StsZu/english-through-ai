@@ -1,0 +1,458 @@
+{
+  "week": "w03",
+  "title": "The 4D Framework",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can explain the 4D Framework and its four core competencies.",
+    "By the end of this lesson I can analyze how description and discernment form an iterative collaboration loop.",
+    "By the end of this lesson I can evaluate diligence, fairness, and transparency in AI-assisted workflows."
+  ],
+  "vocabulary": [
+    {
+      "term": "competency",
+      "definition_b1": "an important skill or ability needed to do a task well",
+      "collocations": [
+        "core competency",
+        "key competency"
+      ],
+      "ua": "компетентність; ключова навичка",
+      "source_sentence": "Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely."
+    },
+    {
+      "term": "navigate",
+      "definition_b1": "to deal successfully with a difficult situation or complex process",
+      "collocations": [
+        "navigate collaboration",
+        "navigate change"
+      ],
+      "ua": "орієнтуватися; успішно проходити крізь",
+      "source_sentence": "Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely."
+    },
+    {
+      "term": "offload",
+      "definition_b1": "to give a task or responsibility to someone else to reduce your work",
+      "collocations": [
+        "offload tasks",
+        "offload work"
+      ],
+      "ua": "перекладати завдання (на когось/щось); скидати навантаження",
+      "source_sentence": "Delegation isn't just about offloading tasks."
+    },
+    {
+      "term": "context-rich",
+      "definition_b1": "providing a lot of useful background information and clear details",
+      "collocations": [
+        "context-rich conversation",
+        "context-rich prompt"
+      ],
+      "ua": "насичений контекстом; інформативний",
+      "source_sentence": "Description goes beyond just writing prompts. It's about having detailed, context-rich conversations that establish what you're hoping to achieve, the format of the output, how you want the AI to approach the task, the context and information that the AI might need to best work with you on this task, and the tone and style of interaction."
+    },
+    {
+      "term": "articulate",
+      "definition_b1": "to express an idea, thought, or feeling clearly in words",
+      "collocations": [
+        "articulate your vision",
+        "articulate needs clearly"
+      ],
+      "ua": "чітко формулювати; висловлювати",
+      "source_sentence": "Effective description means articulating your needs and vision in a way that sets up both you and the AI for the greatest collaborative success."
+    },
+    {
+      "term": "align with",
+      "definition_b1": "to match or agree with specific goals, standards, or values",
+      "collocations": [
+        "align with values",
+        "align with goals"
+      ],
+      "ua": "узгоджуватися з; відповідати",
+      "source_sentence": "Does the reasoning make sense? Do the recommendations align with your brand values and audience?"
+    },
+    {
+      "term": "refinement",
+      "definition_b1": "the process of making small changes to improve something",
+      "collocations": [
+        "need refinement",
+        "continuous refinement"
+      ],
+      "ua": "доопрацювання; покращення; вдосконалення",
+      "source_sentence": "Discernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely."
+    },
+    {
+      "term": "set aside",
+      "definition_b1": "to decide not to use or consider something",
+      "collocations": [
+        "set aside completely",
+        "set aside an idea"
+      ],
+      "ua": "відкласти вбік; відмовитися від використання",
+      "source_sentence": "Discernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely."
+    },
+    {
+      "term": "fairness",
+      "definition_b1": "treating people equally and without unfair advantage",
+      "collocations": [
+        "ensure fairness",
+        "check for fairness"
+      ],
+      "ua": "справедливість; неупередженість",
+      "source_sentence": "For example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases?"
+    },
+    {
+      "term": "bias",
+      "definition_b1": "an unfair preference or prejudice for or against something",
+      "collocations": [
+        "potential bias",
+        "unconscious bias"
+      ],
+      "ua": "упередженість; викривлення",
+      "source_sentence": "For example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases?"
+    },
+    {
+      "term": "transparency",
+      "definition_b1": "being open, clear, and honest about how something is done",
+      "collocations": [
+        "ensure transparency",
+        "maintain transparency"
+      ],
+      "ua": "прозорість; відкритість",
+      "source_sentence": "Have you considered how to be transparent about the involvement of AI?"
+    },
+    {
+      "term": "stand behind",
+      "definition_b1": "to support and take full responsibility for a product or decision",
+      "collocations": [
+        "stand behind results",
+        "stand behind final products"
+      ],
+      "ua": "ручатися за; нести відповідальність за",
+      "source_sentence": "Diligence means taking ownership of your AI-assisted work and being willing to stand behind final products created using AI."
+    }
+  ],
+  "reading": {
+    "b1": "Rick Dacon from Ringling College introduces the **4D framework**. This framework guides human-AI collaboration across **automation**, **augmentation**, and **agency**. The goal is effective, efficient, ethical, and safe interaction. Four core **competencies** make the difference. They are **delegation**, **description**, **discernment**, and **diligence**.\n\n**Delegation** focuses on the big picture. You decide what work to handle yourself. You decide where AI can help. Effective delegation is not just about **offload**ing tasks. It requires a clear vision and strategic division of labor. For example, AI can review long documents. However, humans should keep critical analysis and final conclusions.\n\n**Description** is about clear communication. It goes far beyond short prompt commands. It means having **context-rich** conversations with AI. You should **articulate** your goal, format, context, and preferred tone clearly. For instance, you can ask AI to teach step by step instead of giving the answer.\n\n**Discernment** means evaluating AI outputs thoughtfully. You check if facts are accurate and logical. You verify whether suggestions **align with** your goals. Domain expertise helps you separate useful output from flawed output. You decide when AI ideas need **refinement** or when to **set aside** bad suggestions. Most interactions form small loops of **description** and **discernment**.\n\n**Diligence** focuses on responsible interaction. Users must ensure **fairness** and control for **bias** in AI decisions. They must protect sensitive data and maintain **transparency**. Diligence means taking ownership. You must be ready to **stand behind** any AI-assisted work.\n\nThese core **competencies** help learners **navigate** AI collaboration confidently. They are lasting skills that adapt as technology continues to change.",
+    "original": "# w03 — source material\n\nRaw text collected from Coursera. No editing, no cleaning.\nReadings: select the page text and paste it.\nVideos: use the Transcript tab under the player, not Subtitles.\n\nSeparator format:\n\n--- reading: <title> ---\n--- video N: <title> (MM:SS) ---\n\nTotal video duration in this module: ___ min\nWord count (wc -w): ___\nWords per minute: ___\n\n\n\n# The 4D Framework\n\n## What you’ll learn\n\nBy the end of this lesson you will be able to:\n\n- Explain the basic AI Fluency Framework and its core \"4Ds\": Delegation, Description, Discernment, and Diligence\n\n## The 4D framework\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nHi, my name is Rick Dacon from the Ringling College of Art and Design. Now that we've explored what AI fluency means and the different ways we interact with AI, let's dive into the core competencies that help us navigate AI collaboration effectively, efficiently, ethically, and safely.\n\nNo matter how you're working with AI, whether through automation, augmentation, or agency, there are four essential competencies that make all the difference. We call them the four Ds: delegation, description, discernment, and diligence.\n\nFirst is delegation, which focuses on the big picture. What are you trying to accomplish? What kinds of work are involved? What work should you handle yourself? And where might AI be helpful?\n\nThink about a research project you're working on. You might decide to have your AI assistant review lengthy documents and data, then engage in a thoughtful discussion about the implications and findings, but reserve the critical analysis and final conclusions for yourself.\n\nTo delegate effectively, you need to understand your goal and the problem you're solving, recognize what AI can and can't do well, and, lastly, thoughtfully divide the work between you and the AI.\n\nDelegation isn't just about offloading tasks. It's about having a clear vision and strategically choosing how AI fits into your process. This thoughtful approach is essential for both effective and efficient AI collaboration.\n\nNext comes description, which focuses on clear communication with AI. Consider the difference between vaguely stating, \"Make me a logo,\" versus describing your company's values, target audience, preferred colors, style references, and so on.\n\nOr, if you're using an AI as a tutor, you might take the extra step to specify, \"Don't tell me the answer. Just help me work through this problem step by step so I can better understand the concept.\"\n\nDescription goes beyond just writing prompts. It's about having detailed, context-rich conversations that establish what you're hoping to achieve, the format of the output, how you want the AI to approach the task, the context and information that the AI might need to best work with you on this task, and the tone and style of interaction.\n\nEffective description means articulating your needs and vision in a way that sets up both you and the AI for the greatest collaborative success.\n\nThe third D is discernment, which involves thoughtfully evaluating what AI gives you. Let's say you've asked an AI assistant to suggest a marketing strategy. Your discernment comes into play as you assess: Are the facts accurate? Does the reasoning make sense? Do the recommendations align with your brand values and audience? And most importantly, does this output actually help you move forward?\n\nDiscernment draws upon your own expertise in a domain and requires developing the judgment and critical insight to separate what's useful from what's not, and to recognize when AI outputs need refinement or should be set aside entirely.\n\nMost of our interactions with AI involve small loops of description and discernment: describing what we need, evaluating what we get, refining our request, and so on. We'll explore this more deeply later in the course.\n\nFinally, there's diligence, which focuses on responsible AI interactions.\n\nFor example, if you are using AI to help write job descriptions or review applications, how are you ensuring fairness and controlling for potential biases? When making important decisions with AI assistance, how are you verifying the accuracy of the information presented to you? Are you protecting sensitive data? Have you considered how to be transparent about the involvement of AI? Are you willing to be accountable for the AI-assisted work you have done?\n\nDiligence means taking ownership of your AI-assisted work and being willing to stand behind final products created using AI. Diligence is critical for safe and ethical AI collaboration.\n\nTo recap, AI fluency means developing practical skills, knowledge, insights, and values that help you use AI effectively, efficiently, ethically, and safely.\n\nAI fluency includes four key competencies: delegation to decide when and how to use AI, description to communicate clearly with AI, discernment to evaluate AI outputs, and diligence to use AI responsibly.\n\nWhat makes these competencies so valuable is that they aren't tied to specific AI tools or techniques that might become outdated. Instead, they're fundamental skills that will help you adapt and grow alongside this rapidly evolving technology.\n\n\n\nThis video introduces the four core competencies of AI Fluency, or the \"4Ds\": Delegation, Description, Discernment, and Diligence.\n\n- Delegation: Thoughtfully deciding what work to do with AI vs. doing yourself\n- Description: Communicating clearly with AI systems\n- Discernment: Evaluating AI outputs and behavior with a critical eye\n- Diligence: Ensuring you interact with AI responsibly\n\nWe explore how these competencies work together across different ways of engaging with AI, and why developing these skills prepares you for whatever AI evolution brings next.\n\n#### Key takeaways\n\n- AI Fluency means engaging with AI in ways that are effective, efficient, ethical, and safe\n- There are three primary ways we engage with AI:\n  - Automation: AI executes specific tasks based on your instructions\n  - Augmentation: You and AI collaborate as creative thinking and task execution partners\n  - Agency: You guide AI to work independently on your behalf, shaping its knowledge and behavior rather than specific actions\n- The AI Fluency Framework consists of four core competencies (the 4Ds):\n  - Delegation: Deciding what work to do with AI vs. yourself\n  - Description: Communicating effectively with AI systems\n  - Discernment: Evaluating AI outputs critically\n  - Diligence: Ensuring responsible AI collaboration\n- These competencies apply across all three ways of working with AI\n- Developing these competencies prepares you for evolving AI capabilities\n\n## Exercises\n\n### Exercise 1: Apply the 4D's\n\n*Estimated time: 5 minutes*\n\nPick one of these collaboration scenarios and consider how you might apply the 4D Framework:\n\n#### Communication project\n\nYou're working with an AI assistant to draft a series of emails for a marketing campaign.\n\n- **Delegation:** What aspects of this project would you handle yourself vs. collaborate on with AI?\n- **Description:** How would you communicate your vision for the campaign's tone, purpose, and success criteria to the AI?\n- **Discernment:** What criteria would help you evaluate whether the AI-drafted emails meet your needs?\n- **Diligence:** What considerations around transparency and responsibility would be important?\n\n#### Research project\n\nYou're using AI to help analyze a large dataset for a research paper.\n\n- **Delegation:** How would you divide the analytical work between yourself and the AI?\n- **Description:** What context would the AI need to understand about your research question to do its share of the tasks well?\n- **Discernment:** How would you verify the AI's analysis for accuracy?\n- **Diligence:** What ethical considerations might arise when publishing AI-assisted research?\n\n#### Creative project\n\nYou're collaborating with AI to develop character concepts for a story.\n\n- **Delegation:** What creative elements would you want to explore through AI collaboration vs. develop independently?\n- **Description:** How might you guide the AI to generate characters that fit your story's world?\n- **Discernment:** How would you decide which AI-suggested elements to keep, modify, or discard?\n- **Diligence:** How would you acknowledge AI's contribution to your creative work?\n\n### Exercise 2: Explore something you love\n\n*Estimated time: 5-10 minutes*\n\nSpend 5-10 minutes chatting with Claude about a topic you're passionate about and know well. We will be using Claude across exercises for the rest of the course, but you can also do these exercises with another AI. In fact, it might be worthwhile for you to try the exercises across this course with several AI assistants to get a feel for how they differ.\n\nInstructions:\n\n1. Choose a topic you know well and enjoy discussing such as a hobby, professional interest, favorite book series, etc.\n2. Have a natural conversation with Claude about this topic, like you would with someone who shares your interest.\n3. Try to notice moments where:\n   1. Claude enhances your thinking\n   2. You need to clarify or correct the Claude's understanding\n   3. Your expertise leads you to evaluate the Claude's responses\n\n### Exercise 3: Learn something new\n\n*Estimated time: 5-10 minutes*\n\nSpend 5-10 minutes asking Claude to teach you about a topic you're unfamiliar with but interested in exploring. See how this experience differs from your conversation about something you love and know well.\n\nInstructions:\n\n1. Choose a topic you'd like to learn more about.\n2. Engage Claude in a conversation to help you understand the basics of this topic. Don't worry about prompting the \"wrong way\" or the \"right way.\" Just ask Claude to teach you.\n3. Try to notice moments where the Claude:\n   1. Offers helpful explanations\n   2. Provides examples that make abstract ideas concrete\n   3. Responds naturally to your questions as they arise\n   4. Explains things where you would want to double check its explanations\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which of the 4Ds (Delegation, Description, Discernment, Diligence) do you feel most confident in already? Which might need more development?\n- Can you recall a recent AI interaction where the framework might have helped?\n- What specific skills from the 4D framework would most enhance your work or personal projects?\n\n#### What's next\n\nThe next lesson, Deep Dive 1: \"What is Generative AI?\" is a two-part technical lesson that explains the foundational workings of modern AI, how it differs from previous technologies, and its current capabilities and limitations. This knowledge will provide valuable context for the 4Ds and especially strengthen your Delegation competence.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "A researcher asks an AI to summarize 20 articles, but reserves the final conclusions for herself. Which competency does this demonstrate?",
+      "difficulty": "easy",
+      "term_refs": [
+        "competency",
+        "offload"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Strategic delegation that divides work thoughtfully rather than blindly offloading everything.",
+          "correct": true,
+          "note": "Correct: the human decides which parts AI handles and keeps critical judgment."
+        },
+        {
+          "id": "b",
+          "text": "Complete automation where the human gives up all responsibility for findings.",
+          "correct": false,
+          "note": "Incorrect: the researcher explicitly keeps the critical synthesis."
+        },
+        {
+          "id": "c",
+          "text": "Automatic transcription without reviewing the quality of the sources.",
+          "correct": false,
+          "note": "Incorrect: this does not describe the intentional division of research tasks."
+        }
+      ],
+      "explanation": "The correct choice is strategic delegation. Delegation is about understanding the problem, knowing what AI can do, and dividing work thoughtfully between yourself and the system. Rather than offloading the entire project, the researcher uses AI for reading speed while preserving human judgment for critical analysis. The {{opt:c}} option is wrong because summarizing documents is not simple transcription. The third is wrong because keeping final conclusions is the opposite of giving up responsibility. A useful extra nuance is that effective delegation often changes across project phases: early research may use more AI support, while final approval remains human."
+    },
+    {
+      "id": "q2",
+      "prompt": "Instead of typing 'Write an email', a manager describes the target audience, preferred tone, constraints, and success criteria. What is this?",
+      "difficulty": "easy",
+      "term_refs": [
+        "context-rich",
+        "articulate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "A context-rich description where the user articulates precise needs and constraints.",
+          "correct": true,
+          "note": "Correct: detailed description sets up the AI for collaborative success."
+        },
+        {
+          "id": "b",
+          "text": "A technical error that confuses the language model with too much detail.",
+          "correct": false,
+          "note": "Incorrect: background details and constraints improve output relevance."
+        },
+        {
+          "id": "c",
+          "text": "An example of diligence that eliminates all possible hallucinations instantly.",
+          "correct": false,
+          "note": "Incorrect: this is description, and prompts alone cannot guarantee total accuracy."
+        }
+      ],
+      "explanation": "The correct answer is context-rich description. Description in the 4D framework goes far beyond basic prompts. It involves articulating your goals, audience, format, background information, and interaction style clearly. The {{opt:b}} option is incorrect because modern language models benefit greatly from relevant context and explicit constraints. The {{opt:c}} option confuses description with diligence and assumes prompts alone prevent all errors. A practical tip when writing technical instructions is to provide negative constraints too, such as 'do not modify existing function names' or 'use only standard Python libraries'."
+    },
+    {
+      "id": "q3",
+      "prompt": "A developer reviews an AI-generated database schema and notices two redundant tables that do not match project goals. What should she do?",
+      "difficulty": "easy",
+      "term_refs": [
+        "align with",
+        "set aside",
+        "refinement"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delete the entire codebase and avoid using AI for software development forever.",
+          "correct": false,
+          "note": "Incorrect: discernment refines outputs iteratively instead of abandoning collaboration."
+        },
+        {
+          "id": "b",
+          "text": "Use discernment to set aside the redundant tables and request targeted refinement.",
+          "correct": true,
+          "note": "Correct: critical evaluation identifies what to keep and what to adjust."
+        },
+        {
+          "id": "c",
+          "text": "Accept the schema without changes because AI models never make architecture mistakes.",
+          "correct": false,
+          "note": "Incorrect: AI outputs often require domain verification and editing."
+        }
+      ],
+      "explanation": "The developer should apply discernment to evaluate the output, set aside unnecessary parts, and request refinement. Discernment relies on your domain expertise to separate useful code from flawed ideas and check whether suggestions align with your architecture. Accepting the schema blindly is dangerous because AI can propose redundant structures. Completely abandoning AI is also unnecessary because small iterative corrections solve most problems. An extra insight is that discernment works best when combined with automated unit tests or schema validation scripts, giving you objective evidence alongside your personal review."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why are the core competencies in the 4D framework considered durable over time?",
+      "difficulty": "medium",
+      "term_refs": [
+        "competency",
+        "navigate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because they only work with current version chat models and will expire next year.",
+          "correct": false,
+          "note": "Incorrect: the entire framework is designed to avoid obsolescence."
+        },
+        {
+          "id": "b",
+          "text": "Because prompts memorized today will produce identical results in every future model.",
+          "correct": false,
+          "note": "Incorrect: specific prompt tricks frequently change or break across model updates."
+        },
+        {
+          "id": "c",
+          "text": "Because they focus on human judgment and collaboration rather than temporary tool settings.",
+          "correct": true,
+          "note": "Correct: fundamental skills help users navigate evolving technologies."
+        }
+      ],
+      "explanation": "The 4D competencies are durable because they represent fundamental human abilities—deciding when to delegate, communicating goals clearly, evaluating results, and taking responsibility. These skills help you navigate technological changes regardless of which AI tool you use. The {{opt:a}} option is wrong because the framework specifically avoids tool-dependent rules. The {{opt:b}} option is wrong because exact prompt templates often become obsolete when models update. For example, whether you work with text models, code agents, or multimodal systems, the need to evaluate truthfulness and verify fairness remains identical across every platform."
+    },
+    {
+      "id": "q5",
+      "prompt": "An HR team uses AI to screen job applications. Which action best demonstrates diligence?",
+      "difficulty": "medium",
+      "term_refs": [
+        "fairness",
+        "bias",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Audit candidate criteria for bias, ensure fairness, and maintain transparency about AI usage.",
+          "correct": true,
+          "note": "Correct: diligence actively manages ethics, bias, and accountability."
+        },
+        {
+          "id": "b",
+          "text": "Automate all hiring decisions fully without human oversight to increase speed.",
+          "correct": false,
+          "note": "Incorrect: unmonitored automation can amplify bias and violates diligence."
+        },
+        {
+          "id": "c",
+          "text": "Hide AI usage from applicants and delete all screening logs to avoid questions.",
+          "correct": false,
+          "note": "Incorrect: secrecy and deleting records contradict ethical transparency."
+        }
+      ],
+      "explanation": "The HR team demonstrates diligence by testing screening criteria for potential bias, ensuring fairness, and being transparent about AI assistance. Diligence means taking active ownership of ethics, safety, and accountability in AI-assisted work. The {{opt:b}} option is irresponsible because automated hiring without human oversight can perpetuate historical discrimination. The {{opt:c}} option contradicts transparency and makes auditing impossible. In many jurisdictions, regulations now legally require organizations to disclose automated employment decision tools and provide candidate appeal mechanisms, showing that diligence is both an ethical and legal necessity."
+    },
+    {
+      "id": "q6",
+      "prompt": "What happens in a typical 'description-discernment loop' during an AI coding session?",
+      "difficulty": "medium",
+      "term_refs": [
+        "articulate",
+        "refinement",
+        "align with"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The AI rewrites your codebase without receiving any input or feedback from you.",
+          "correct": false,
+          "note": "Incorrect: human guidance and critical review are essential to the loop."
+        },
+        {
+          "id": "b",
+          "text": "You write a prompt once and never review the resulting code before deployment.",
+          "correct": false,
+          "note": "Incorrect: a loop requires repeated evaluation and prompt adjustment."
+        },
+        {
+          "id": "c",
+          "text": "You articulate a task, evaluate the output, and refine instructions until results align with goals.",
+          "correct": true,
+          "note": "Correct: description and discernment operate in an iterative cycle."
+        }
+      ],
+      "explanation": "In a description-discernment loop, you articulate your request, carefully evaluate the AI output against your requirements, and provide refinement feedback in iterative cycles. This repeating loop turns collaboration into an evolving dialogue where both prompt and output improve. The second choice ignores discernment entirely by skipping code review. The third choice describes unconstrained agency without human direction. A practical example is refactoring: you ask the model to simplify a function, inspect the diff for edge cases, and ask it to preserve specific error handling it missed on the first pass."
+    },
+    {
+      "id": "q7",
+      "prompt": "A consultant publishes an AI-generated market report under his own name with false statistics. Why did he fail diligence?",
+      "difficulty": "medium",
+      "term_refs": [
+        "stand behind",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "He used an AI assistant instead of writing every word manually on paper.",
+          "correct": false,
+          "note": "Incorrect: using AI is permitted, but unverified claims violate diligence."
+        },
+        {
+          "id": "b",
+          "text": "He failed to verify the facts and was unwilling or unable to stand behind his final product.",
+          "correct": true,
+          "note": "Correct: diligence requires verifying accuracy and owning the final result."
+        },
+        {
+          "id": "c",
+          "text": "He provided too many collocations and definitions in his initial prompt.",
+          "correct": false,
+          "note": "Incorrect: prompt vocabulary has no bearing on ethical accountability."
+        }
+      ],
+      "explanation": "The consultant failed diligence because he did not verify the statistics and cannot legitimately stand behind the final product. Diligence requires taking personal ownership of your work, ensuring accuracy, and remaining accountable for errors regardless of whether AI drafted the text. Using AI tools is completely acceptable, but publishing unverified hallucinations under your name breaches professional ethics. A robust diligence checklist includes cross-referencing every cited number against original primary sources, checking calculation methods, and maintaining transparency about how AI contributed to the document."
+    },
+    {
+      "id": "q8",
+      "prompt": "How does domain expertise influence your ability to use discernment when collaborating with AI?",
+      "difficulty": "medium",
+      "term_refs": [
+        "refinement",
+        "align with",
+        "set aside"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Domain expertise makes AI assistants unnecessary for all professional tasks.",
+          "correct": false,
+          "note": "Incorrect: experts use AI effectively for speed and augmentation."
+        },
+        {
+          "id": "b",
+          "text": "Expertise guarantees that the AI model will never generate hallucinations.",
+          "correct": false,
+          "note": "Incorrect: human knowledge does not alter model generation limits."
+        },
+        {
+          "id": "c",
+          "text": "Expertise gives you the critical insight to catch subtle errors and guide necessary refinement.",
+          "correct": true,
+          "note": "Correct: domain knowledge enables accurate evaluation of AI output."
+        }
+      ],
+      "explanation": "Domain expertise allows you to evaluate AI outputs critically, recognize subtle hallucinations, verify whether recommendations align with best practices, and guide targeted refinement. Non-experts often accept plausible-sounding but incorrect answers because they lack the background to judge accuracy. The {{opt:a}} option is wrong because experts often achieve the highest productivity gains from AI by delegating routine work. The third is wrong because AI models generate errors independently of who is prompting them. Deep domain insight turns AI from a risky black box into a powerful thinking partner."
+    },
+    {
+      "id": "q9",
+      "prompt": "An autonomous agent suggests modifying firewall rules on a live router. Which plan best balances delegation and diligence?",
+      "difficulty": "hard",
+      "term_refs": [
+        "offload",
+        "stand behind",
+        "transparency"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delegate rule analysis and diff generation to AI, but require human review before applying changes.",
+          "correct": true,
+          "note": "Correct: balances automation efficiency with strict human accountability."
+        },
+        {
+          "id": "b",
+          "text": "Offload all live configuration updates to the agent without saving backup scripts or logs.",
+          "correct": false,
+          "note": "Incorrect: unmonitored live updates create severe security and stability risks."
+        },
+        {
+          "id": "c",
+          "text": "Prohibit all AI network analysis because delegation is never safe in infrastructure.",
+          "correct": false,
+          "note": "Incorrect: read-only analysis and draft generation are safe with proper checks."
+        }
+      ],
+      "explanation": "The best plan delegates traffic analysis and draft rule generation to the agent, while requiring human verification and manual approval before touching live infrastructure. This allows the network engineer to stand behind the configuration while maintaining transparency through diff inspection and logs. Offloading live changes without human checks creates severe operational hazards. Completely forbidding AI analysis misses valuable optimization and diagnostic support. In professional DevOps workflows, this pattern is known as human-in-the-loop (HITL), ensuring automated speed never bypasses critical safety verification."
+    },
+    {
+      "id": "q10",
+      "prompt": "Why is 'prompt engineering' insufficient on its own to achieve true AI fluency in complex projects?",
+      "difficulty": "hard",
+      "term_refs": [
+        "competency",
+        "navigate",
+        "context-rich"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because modern AI assistants do not read or interpret text prompts anymore.",
+          "correct": false,
+          "note": "Incorrect: text-based prompting remains the primary human interface."
+        },
+        {
+          "id": "b",
+          "text": "Because prompting covers only description, whereas fluency also demands delegation, discernment, and diligence.",
+          "correct": true,
+          "note": "Correct: prompting is just one of four interconnected competencies."
+        },
+        {
+          "id": "c",
+          "text": "Because prompt engineering has been completely replaced by hardware accelerators.",
+          "correct": false,
+          "note": "Incorrect: prompt crafting remains relevant as part of description."
+        }
+      ],
+      "explanation": "Prompt engineering alone is insufficient because it addresses only the description competency. True AI fluency is a multi-dimensional ability requiring you to decide what to delegate, evaluate output quality critically with discernment, and ensure responsible, transparent deployment through diligence. The {{opt:c,a}} options are factually absurd because prompts remain the primary interface for human-AI interaction. In real engineering projects, writing a clever prompt will not save you if you delegated the wrong task, failed to catch algorithmic flaws, or neglected data privacy requirements."
+    }
+  ],
+  "speaking_prompts": [
+    "When you collaborate with a CLI agent on a coding task, how do you divide work? Explain your approach to delegation and how you avoid simply offloading tasks.",
+    "Why is a context-rich prompt better than a short command? Give an example where you had to articulate your vision to an AI.",
+    "Describe a situation where an AI output did not align with your goal. How did discernment help you decide whether to request refinement or set it aside?",
+    "How do you practice diligence and maintain transparency when creating software or documentation with AI tools? What helps you stand behind the final result?",
+    "Which of the four Ds (Delegation, Description, Discernment, Diligence) is most critical when using AI for network administration or drone projects? Defend your opinion."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 3 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the description-discernment loop using at least four vocabulary terms. Check the transcription for accurate pronunciation.",
+    "Draft a short 3-minute talk plan for your teacher about applying the 4D Framework to one of your real technical projects."
+  ]
+}

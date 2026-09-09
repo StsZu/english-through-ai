@@ -1,0 +1,459 @@
+{
+  "week": "w08",
+  "title": "A Closer Look at Description",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can communicate my intentions clearly to AI systems across product, process, and performance.",
+    "By the end of this lesson I can differentiate and construct Product Description, Process Description, and Performance Description.",
+    "By the end of this lesson I can perform a structured prompt makeover to steer AI interactions effectively."
+  ],
+  "vocabulary": [
+    {
+      "term": "intention",
+      "definition_b1": "an aim, purpose, or plan that you want to achieve",
+      "collocations": [
+        "clear intention",
+        "communicate intentions"
+      ],
+      "ua": "намір; мета; задум",
+      "source_sentence": "Understand how to effectively communicate your intentions to AI systems"
+    },
+    {
+      "term": "steer",
+      "definition_b1": "to guide or control the direction of a conversation or process",
+      "collocations": [
+        "steer a conversation",
+        "steer in the right direction"
+      ],
+      "ua": "скеровувати; спрямовувати (діалог)",
+      "source_sentence": "It's about being able to steer a conversation that is going wrong."
+    },
+    {
+      "term": "product description",
+      "definition_b1": "the clear definition of what you want the AI to create or provide",
+      "collocations": [
+        "clear product description",
+        "define product description"
+      ],
+      "ua": "опис результату / продукту (що створити)",
+      "source_sentence": "We call this first concept product description: the ability to clearly define what you want the AI to create or provide."
+    },
+    {
+      "term": "tackle",
+      "definition_b1": "to make a determined effort to deal with a difficult problem or task",
+      "collocations": [
+        "tackle a job",
+        "tackle a problem"
+      ],
+      "ua": "братися за (справу); вирішувати завдання",
+      "source_sentence": "Sometimes specifying how an AI should tackle a job is as, or even more, important than specifying the end goal."
+    },
+    {
+      "term": "process description",
+      "definition_b1": "guiding the exact method, steps, and approach an AI should use",
+      "collocations": [
+        "provide process description",
+        "detailed process description"
+      ],
+      "ua": "опис процесу / методу (як виконувати)",
+      "source_sentence": "We call this second concept process description: the ability to guide how the AI assistant approaches your request."
+    },
+    {
+      "term": "draw on",
+      "definition_b1": "to use information, knowledge, or experience to help you achieve something",
+      "collocations": [
+        "draw on data",
+        "draw on experience"
+      ],
+      "ua": "спиратися на; задіювати (дані/знання)",
+      "source_sentence": "Are there specific data you want the AI to draw on?"
+    },
+    {
+      "term": "tremendous",
+      "definition_b1": "extremely good, large, important, or effective",
+      "collocations": [
+        "tremendous difference",
+        "tremendous impact"
+      ],
+      "ua": "величезний; колосальний",
+      "source_sentence": "Taking time to explain these elements makes a tremendous difference."
+    },
+    {
+      "term": "vending machine",
+      "definition_b1": "an automatic machine that drops items after money is inserted, used metaphorically for non-collaborative tools",
+      "collocations": [
+        "treat as a vending machine",
+        "not a vending machine"
+      ],
+      "ua": "торговельний автомат (метафора пасивного інструменту)",
+      "source_sentence": "If you take one thing from this course, it should be this: AI tools are not databases or vending machines."
+    },
+    {
+      "term": "follow your lead",
+      "definition_b1": "to accept someone's direction and do what they do or say",
+      "collocations": [
+        "follow someone's lead",
+        "simply follow your lead"
+      ],
+      "ua": "іти за вашим прикладом / вказівками; слідувати за вами",
+      "source_sentence": "Do you want the AI to challenge your assumptions or simply follow your lead?"
+    },
+    {
+      "term": "performance description",
+      "definition_b1": "defining the behavioral style, persona, and tone of an AI interaction",
+      "collocations": [
+        "set performance description",
+        "define performance description"
+      ],
+      "ua": "опис стилю поведінки / взаємодії (як поводитися)",
+      "source_sentence": "We call this third concept performance description: the ability to define the behavioral aspects of an AI interaction."
+    },
+    {
+      "term": "finely tuned",
+      "definition_b1": "adjusted very carefully and precisely to work at maximum effectiveness",
+      "collocations": [
+        "finely tuned partner",
+        "finely tuned system"
+      ],
+      "ua": "тонко налаштований; відкалібрований",
+      "source_sentence": "When you develop your capacity for description, you transform AI from generic assistants into finely tuned thinking partners that can truly meet your needs."
+    },
+    {
+      "term": "makeover",
+      "definition_b1": "a set of changes that significantly improves the appearance or quality of something",
+      "collocations": [
+        "prompt makeover",
+        "complete makeover"
+      ],
+      "ua": "перевтілення; повне оновлення / покращення",
+      "source_sentence": "Bad Prompt Makeover"
+    }
+  ],
+  "reading": {
+    "b1": "Description is the art of communicating your **intention**s effectively to an AI system. It goes far beyond writing clever prompts. Description builds a thinking bridge between human goals and machine capabilities. When interactions go off course, you must **steer** the conversation in the right direction. Because AI cannot read your mind, explicit communication is essential.\n\nDescription consists of three key components. First is **product description**. This clearly defines what you want the AI to deliver. You specify output formats, target audiences, and required technical structures. Clear criteria prevent the AI from guessing.\n\nSecond is **process description**. This defines how the AI should **tackle** the task. You provide step-by-step instructions or outline a specific workflow. You can also specify which data or documentation the AI should **draw on**. Explaining these constraints makes a **tremendous** difference in output quality.\n\nThird is **performance description**. AI models are not static databases or a **vending machine**. They are flexible conversational partners. You define how the AI behaves during collaboration. You decide whether the model should challenge your assumptions or simply **follow your lead**. You can request concise terminal commands or detailed explanations. Developing these three skills gives bad prompts a complete **makeover**. It transforms generic models into **finely tuned** thinking partners.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1136\nWords per minute: 114\nVerdict: <130 comfortable\n---\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Understand how to effectively communicate your intentions to AI systems\n- Recognize the importance of clear, purposeful communication\n- Develop skills in three types of Description: Product, Process, and Performance\n\n## A closer look at description\n\n\n\n**Lesson 3B: Capabilities & limitations | AI Fluency: Framework & Foundations Course**\n\nIn this video, we'll dig deeper into the AI fluency competency of description. AI fluency means working with an AI effectively, efficiently, ethically, and safely. Description is about communicating with AI, which is the core of most human-AI interaction.\n\nDescription goes far beyond just writing clever prompts. It's about communicating with the AI to explain tasks, ask questions, provide context, and otherwise guide the interaction. It's about being able to steer a conversation that is going wrong. It's about guiding an AI's thought process or logical reasoning. And it's about building a kind of thinking environment where both you and the AI can each do your best work.\n\nThink of it as building a bridge between your intentions and the AI's capabilities. The quality of AI outputs often depends on how clearly you describe what you want. It's like the difference between asking someone to make dinner versus providing a detailed recipe with ingredients and cooking instructions.\n\nAI can't read your mind. Instead of assuming the AI knows what you're looking for, you need to explain every relevant detail. What is the context for this work? What exactly are you looking for the AI to do? What format should the output take? Who is the audience, and what style is appropriate?\n\nDon't make AI guess what you're thinking. Set explicit requirements and give the AI the information it needs to deliver what you're actually looking for.\n\nWe call this first concept product description: the ability to clearly define what you want the AI to create or provide.\n\nSometimes specifying how an AI should tackle a job is as, or even more, important than specifying the end goal. Just as you might prefer that a colleague tackle a problem using your specific method, you can guide how an AI works through your request.\n\nYou can and should give the AI helpful guidance to help it accomplish your desired goal. There are different ways to approach this. You might provide general guidance like a manual, step-by-step instructions like a cookbook, or even a demonstration through examples: \"Here's how I'd do it.\"\n\nThink about it this way. The AI already has extensive training, but you're providing additional context specific to your unique situation. Are there specific data you want the AI to draw on? Are there specific issues it should be addressing, or in a particular order? Is there a particular style of analysis you need, or maybe a specific workflow or technique you want it to use?\n\nTaking time to explain these elements makes a tremendous difference.\n\nWe call this second concept process description: the ability to guide how the AI assistant approaches your request.\n\nIf you take one thing from this course, it should be this: AI tools are not databases or vending machines. They are interactive systems that can behave differently in different contexts, much like people might. You need to explain how you want the AI to behave to get the best results.\n\nWhen you next sit down with AI, think first: what kind of thinking partner do you need right now? Are you narrowing down toward a specific answer or trying to explore multiple possibilities? Do you want the AI to challenge your assumptions or simply follow your lead? To provide extensive detail or keep things concise? To explain why it's answering in a certain way or just give you the answer?\n\nWe call this third concept performance description: the ability to define the behavioral aspects of an AI interaction.\n\nYou should now have a better sense of how product description, process description, and performance description combine to form the description competency. When you develop your capacity for description, you transform AI from generic assistants into finely tuned thinking partners that can truly meet your needs.\n\n\n\n\n\nThis video explores the Description competency of AI Fluency—the art of communicating effectively with AI systems. We explain that Description goes beyond simply writing prompts; it involves creating a collaborative environment where both you and the AI can work effectively together. We introduce three key components of Description:\n\n- Product Description: Clearly defining what you want the AI to create\n- Process Description: Guiding how the AI approaches your request\n- Performance Description: Defining how you want the AI to behave during your collaboration.\n\nWe also emphasize that AI can't read your mind, and how the quality of your results often comes down to how clearly you articulate your needs, preferred approach, and desired interaction style.\n\n#### Key takeaways\n\n- Description is about communicating with AI in ways that create a productive collaborative environment\n- Product Description involves clearly defining what you want in terms of outputs, format, audience, and style\n- Process Description guides how the AI approaches your request, which can be as important as specifying the end goal\n- Performance Description defines behavioral aspects like whether the AI should be concise or detailed, challenging or supportive\n- AI systems are interactive partners, not databases or vending machines\n- Clear communication up front saves time and leads to better results\n\n## Exercises\n\n### Bad Prompt Makeover\n\n*Estimated time: 10 minutes*\n\n**Instructions:**\n\n1. Ask Claude to challenge you with some poorly written prompts for you to improve.\n2. Apply your Description thinking to improve each one, considering:\n   1. Clear product description (what exactly you want)\n   2. Process guidance (how you want Claude to approach it)\n   3. Performance specifications (how you want Claude to behave during your collaboration)\n3. Have a chat about the before/after versions with Claude and ask for feedback on how your improved descriptions would help it provide better responses.\n4. After about 5 minutes, switch roles and provide bad prompts for Claude to fix. Notice what information Claude tends to add and how it organizes this information.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which component of Description (product, process, or performance) do you think you might be overlooking in your current AI interactions?\n- Think about a recent AI interaction that didn't quite meet your expectations. How might better description skills have improved the outcome?\n\n#### What’s next\n\nIn the next lesson, we'll take a closer look at the first of the 4D competencies: Delegation. You'll learn how to make strategic decisions about dividing work between yourself and AI based on understanding both your goals and AI capabilities. This foundation will help you thoughtfully determine when and how to bring AI into your creative and problem-solving processes.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary purpose of 'Product Description' when prompting an AI model?",
+      "difficulty": "easy",
+      "term_refs": [
+        "product description",
+        "intention"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To clearly define what you want created, specifying formats, deliverables, audiences, and exact style requirements.",
+          "correct": true,
+          "note": "Correct: Product Description articulates the exact deliverable and structure."
+        },
+        {
+          "id": "b",
+          "text": "To buy physical packaging boxes from an e-commerce website.",
+          "correct": false,
+          "note": "Incorrect: Product Description is a prompt specification, not physical packaging."
+        },
+        {
+          "id": "c",
+          "text": "To delete all conversation history after typing one word.",
+          "correct": false,
+          "note": "Incorrect: Product Description enriches context rather than clearing memory."
+        }
+      ],
+      "explanation": "Product Description focuses on defining the exact final deliverable you expect from the AI assistant. This includes specifying the output format (such as a JSON schema, markdown table, or Python function), the target audience (such as junior developers or executive stakeholders), and tone constraints. The {{opt:b}} option confuses prompting with retail merchandise logistics. The {{opt:c}} option is nonsensical. By explicitly describing the desired product upfront, you eliminate ambiguity and prevent the model from guessing what kind of artifact you need."
+    },
+    {
+      "id": "q2",
+      "prompt": "How does 'Process Description' guide an AI assistant during a complex task?",
+      "difficulty": "easy",
+      "term_refs": [
+        "process description",
+        "tackle",
+        "draw on"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It forces the computer processor to run at double its physical clock speed.",
+          "correct": false,
+          "note": "Incorrect: Process Description is cognitive guidance, not CPU overclocking."
+        },
+        {
+          "id": "b",
+          "text": "It prevents the AI from using English vocabulary during reasoning.",
+          "correct": false,
+          "note": "Incorrect: Process Description guides reasoning steps in natural language."
+        },
+        {
+          "id": "c",
+          "text": "It specifies the method, sequential steps, and specific datasets or documentation the AI must draw on to tackle the job.",
+          "correct": true,
+          "note": "Correct: Process Description outlines the execution methodology and sources."
+        }
+      ],
+      "explanation": "Process Description provides step-by-step guidance on how the AI should approach and solve your request. Just like giving a cookbook recipe or workflow manual, you can instruct the model to analyze logs first, compare configurations second, and generate diffs last. You can also specify exact data sources to draw on. The {{opt:a}} option is an absurd hardware distraction. The {{opt:b}} option is false. Providing clear process constraints prevents models from taking unwanted shortcuts or jumping prematurely to incorrect conclusions. In software refactoring, for instance, defining the sequence of tests and code edits ensures safe, reliable transformations."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why should users avoid treating AI assistants like a 'vending machine'?",
+      "difficulty": "easy",
+      "term_refs": [
+        "vending machine",
+        "steer"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because AI systems are interactive partners whose behavior and direction can be steered through dynamic collaboration.",
+          "correct": true,
+          "note": "Correct: collaborative dialogue produces far better results than static requests."
+        },
+        {
+          "id": "b",
+          "text": "Because AI models physically dispense soda cans when you insert coins into your keyboard.",
+          "correct": false,
+          "note": "Incorrect: vending machine is a metaphor for passive, transactional tools."
+        },
+        {
+          "id": "c",
+          "text": "Because using AI tools is strictly illegal in software engineering organizations.",
+          "correct": false,
+          "note": "Incorrect: AI collaboration is widely adopted in modern development teams."
+        }
+      ],
+      "explanation": "The vending machine metaphor warns against treating language models as passive slot machines where you insert a brief phrase and passively accept whatever pops out. Modern AI systems are interactive thinking partners capable of adapting their personas, reasoning sequentially, and refining drafts through dialogue. If an output misses the mark, you can actively steer the conversation rather than giving up. The {{opt:b}} option takes the metaphor absurdly literally. The {{opt:c}} option is factually false. Collaborative interaction consistently yields superior technical outcomes."
+    },
+    {
+      "id": "q4",
+      "prompt": "What does 'Performance Description' establish during a collaborative session?",
+      "difficulty": "medium",
+      "term_refs": [
+        "performance description",
+        "follow your lead"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The exact download speed of the local internet router connection.",
+          "correct": false,
+          "note": "Incorrect: network bandwidth has no connection to behavioral prompting."
+        },
+        {
+          "id": "b",
+          "text": "The behavioral tone and interaction style, such as whether the AI should challenge assumptions or simply follow your lead.",
+          "correct": true,
+          "note": "Correct: Performance Description defines the conversational role and posture."
+        },
+        {
+          "id": "c",
+          "text": "The price of cloud server subscriptions across different regions.",
+          "correct": false,
+          "note": "Incorrect: Performance Description configures model behavior, not billing."
+        }
+      ],
+      "explanation": "Performance Description configures the behavioral persona, tone, and conversational posture of the AI assistant. For example, during brainstorming, you might ask the model to be critical and challenge your assumptions. During rapid coding, you might ask it to be concise, omit conversational filler, and simply follow your lead with clean code blocks. The {{opt:c,a}} options confuse behavioral configuration with cloud pricing and network bandwidth. Setting performance expectations ensures the model interacts in harmony with your immediate workflow needs."
+    },
+    {
+      "id": "q5",
+      "prompt": "A developer writes: 'Write a script for my router.' How would you give this prompt a proper 'makeover'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "makeover",
+        "product description",
+        "process description"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Type the exact same five words into three different chat windows simultaneously.",
+          "correct": false,
+          "note": "Incorrect: repeating a bad prompt does not fix missing context."
+        },
+        {
+          "id": "b",
+          "text": "Delete the word 'router' and replace it with a random animal name.",
+          "correct": false,
+          "note": "Incorrect: random word changes destroy prompt utility completely."
+        },
+        {
+          "id": "c",
+          "text": "Add Product Description (RouterOS v7 syntax), Process Description (generate firewall rules step-by-step), and Performance Description (concise diffs).",
+          "correct": true,
+          "note": "Correct: supplies complete context across product, process, and performance."
+        }
+      ],
+      "explanation": "A complete prompt makeover transforms a vague request into a context-rich, actionable instruction. By defining the Product (a MikroTik RouterOS v7 firewall script in syntax-highlighted code), the Process (check input interfaces first, filter WAN traffic, and log dropped packets), and the Performance (output only code and a short 2-line explanation), the AI receives all required constraints. The {{opt:a,b}} options fail to provide context. Structured makeovers turn frustrating hallucinations into accurate, production-ready code. Taking one extra minute to refine your prompt structure saves hours of tedious debugging and manual code correction."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why does taking time to explain process constraints make a 'tremendous difference' in technical output quality?",
+      "difficulty": "medium",
+      "term_refs": [
+        "tremendous",
+        "process description",
+        "draw on"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It grounds the model's reasoning in verified methodology, reducing hallucinations and preventing unaligned shortcuts.",
+          "correct": true,
+          "note": "Correct: clear process constraints guide attention toward correct solution paths."
+        },
+        {
+          "id": "b",
+          "text": "It permanently doubles the physical RAM inside your local computer.",
+          "correct": false,
+          "note": "Incorrect: prompt constraints do not alter physical memory hardware."
+        },
+        {
+          "id": "c",
+          "text": "It forces the language model to delete all other customer accounts worldwide.",
+          "correct": false,
+          "note": "Incorrect: prompt instructions operate within an isolated session scope."
+        }
+      ],
+      "explanation": "Providing process constraints creates a tremendous difference because large language models generate text based on learned statistical associations. When you restrict the model to a specific methodology, sequential order, and authoritative documentation to draw on, you significantly narrow the probability space of possible tokens. This prevents the model from synthesizing plausible-sounding but incompatible library calls. The {{opt:b,c}} options are absurd exaggerations. Defining process parameters is the most reliable way to enforce strict engineering standards across automated tasks, ensuring that every generated script complies with your team's security protocols."
+    },
+    {
+      "id": "q7",
+      "prompt": "When should an engineer request that an AI assistant 'challenge assumptions' rather than 'follow your lead'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "follow your lead",
+        "steer",
+        "performance description"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Only when the engineer wants the AI to refuse all future coding requests permanently.",
+          "correct": false,
+          "note": "Incorrect: challenging assumptions is constructive collaboration, not refusal."
+        },
+        {
+          "id": "b",
+          "text": "When typing routine bash commands that require immediate execution within two seconds.",
+          "correct": false,
+          "note": "Incorrect: routine CLI commands need direct execution, not philosophical debate."
+        },
+        {
+          "id": "c",
+          "text": "During early architectural planning or threat modeling, to uncover blind spots and hidden system vulnerabilities.",
+          "correct": true,
+          "note": "Correct: adversarial critique during planning strengthens system resilience."
+        }
+      ],
+      "explanation": "Asking an AI to challenge your assumptions is exceptionally valuable during architectural design, security audits, and risk assessment. An AI prompted as a critical thinking partner can spot unaddressed single points of failure, edge-case race conditions, or unstated dependency assumptions before code is written. In contrast, during rapid CLI script execution, you prefer the AI to follow your lead with concise output. The {{opt:b,a}} options confuse high-level design review with routine tactical execution. Matching performance posture to task stage elevates engineering quality."
+    },
+    {
+      "id": "q8",
+      "prompt": "How does Description transform an AI assistant into a 'finely tuned' thinking partner?",
+      "difficulty": "medium",
+      "term_refs": [
+        "finely tuned",
+        "intention",
+        "product description"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By limiting the prompt to a single emoji icon without explanatory text.",
+          "correct": false,
+          "note": "Incorrect: single emoji prompts provide zero context or behavioral guidance."
+        },
+        {
+          "id": "b",
+          "text": "By aligning deliverables, methodology, and interaction style precisely with the user's specific context and standards.",
+          "correct": true,
+          "note": "Correct: combining the 3 Ps tailors generic models into specialized partners."
+        },
+        {
+          "id": "c",
+          "text": "By soldering new microchips directly onto the AI model's circuit boards.",
+          "correct": false,
+          "note": "Incorrect: fine tuning through description is linguistic, not hardware soldering."
+        }
+      ],
+      "explanation": "Description transforms a generic language model into a finely tuned thinking partner by articulating clear intentions across all three dimensions: Product (what to build), Process (how to build it), and Performance (how to communicate). Rather than relying on generic default behaviors, the AI operates with explicit awareness of your coding conventions, architectural patterns, and communication preferences. The {{opt:c}} option confuses prompt guidance with physical soldering. The {{opt:a}} option strips away all necessary context. Deliberate description unlocks professional-grade precision, enabling developers to integrate AI seamlessly into complex production pipelines."
+    },
+    {
+      "id": "q9",
+      "prompt": "During a CLI session, an agent generates a 500-word essay instead of running the requested command. What failed in the prompt's description?",
+      "difficulty": "hard",
+      "term_refs": [
+        "performance description",
+        "product description",
+        "steer"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Performance Description and Product Description failed to specify output format constraints and concise behavioral mode.",
+          "correct": true,
+          "note": "Correct: lack of concise performance formatting caused verbose default output."
+        },
+        {
+          "id": "b",
+          "text": "The computer keyboard ran out of electrical ink during the terminal prompt.",
+          "correct": false,
+          "note": "Incorrect: keyboards do not use electrical ink to transmit text commands."
+        },
+        {
+          "id": "c",
+          "text": "The operating system Kernel deleted all command-line binaries from the hard drive.",
+          "correct": false,
+          "note": "Incorrect: verbose text is a prompt formatting issue, not binary deletion."
+        }
+      ],
+      "explanation": "When an agent outputs an unwanted essay instead of a crisp command, the prompt lacked clear Product Description (specifying raw shell script output without conversational prose) and Performance Description (specifying a terse, action-oriented CLI persona). Without explicit constraints, models fall back on conversational defaults. The {{opt:b}} option is an amusing impossibility. The {{opt:c}} option confuses text verbosity with filesystem corruption. Steering the agent with explicit instructions like 'Output only the executable shell command in backticks' eliminates conversational fluff, streamlining automation workflows and keeping terminal logs clean."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does mastering the 3 Ps of Description (Product, Process, Performance) prevent conversational drift in complex AI workflows?",
+      "difficulty": "hard",
+      "term_refs": [
+        "intention",
+        "tackle",
+        "steer"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It restricts all AI interactions strictly to single-word yes/no questions.",
+          "correct": false,
+          "note": "Incorrect: rich description enables deep, nuanced multi-step collaboration."
+        },
+        {
+          "id": "b",
+          "text": "It creates a complete thinking environment with explicit boundaries for deliverables, methods, and communication styles.",
+          "correct": true,
+          "note": "Correct: structured framing eliminates ambiguity across every phase of collaboration."
+        },
+        {
+          "id": "c",
+          "text": "It guarantees that software projects will never require testing or debugging.",
+          "correct": false,
+          "note": "Incorrect: testing and verification remain essential in all engineering tasks."
+        }
+      ],
+      "explanation": "Mastering Product, Process, and Performance Description prevents conversational drift by establishing a comprehensive collaborative framework. By defining exactly what deliverable is required, how the AI should tackle intermediate reasoning steps, and how the model should behave throughout the dialogue, you eliminate the ambiguity that causes AI responses to wander off track. The {{opt:c}} option is false because testing is always mandatory. The {{opt:a}} option ignores the power of context-rich collaboration. Solid description turns AI into a predictable, high-leverage technical asset."
+    }
+  ],
+  "speaking_prompts": [
+    "Why is treating an AI like a vending machine an ineffective approach? How do you steer a conversation when an output is unhelpful?",
+    "Explain the difference between Product Description and Process Description. Give a concrete programming or networking prompt example.",
+    "When collaborating on a complex refactor or design, do you prefer the AI to challenge your assumptions or follow your lead? Why?",
+    "How does specifying data sources to draw on create a tremendous difference in code generation accuracy?",
+    "Describe how you would do a bad prompt makeover for an ambiguous terminal command instruction. Use finely tuned and makeover."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 8 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the 3 Ps of Description (Product, Process, Performance). Verify your pronunciation using speech recognition.",
+    "Draft a 3-minute talk skeleton for your teacher analyzing a before-and-after prompt makeover from your technical work."
+  ]
+}

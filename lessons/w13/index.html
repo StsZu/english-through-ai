@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w13",
+  "title": "Conclusion — The AI Fluency Framework",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can consolidate the four core competencies of AI Fluency (Delegation, Description, Discernment, Diligence).",
+    "By the end of this lesson I can construct a personal AI usage and disclosure policy to resolve ethical dilemmas.",
+    "By the end of this lesson I can apply the widely applicable 4D framework to shape future engineering workflows."
+  ],
+  "vocabulary": [
+    {
+      "term": "consolidate",
+      "definition_b1": "to combine and strengthen separate pieces of knowledge or skills into a solid whole",
+      "collocations": [
+        "consolidate learning",
+        "consolidate gains"
+      ],
+      "ua": "закріплювати; об'єднувати в єдине ціле",
+      "source_sentence": "Consolidate key learnings from the course"
+    },
+    {
+      "term": "cover ground",
+      "definition_b1": "to travel over distance or deal with a large amount of material and information",
+      "collocations": [
+        "cover a lot of ground",
+        "cover ground together"
+      ],
+      "ua": "охопити великий обсяг матеріалу; пройти значний шлях",
+      "source_sentence": "Over a short period, we've covered quite a lot of ground together, exploring the AI fluency framework and seeing how it applies to everyday collaboration with AI."
+    },
+    {
+      "term": "non-negotiable",
+      "definition_b1": "mandatory and not open to debate, change, or compromise",
+      "collocations": [
+        "non-negotiable responsibility",
+        "non-negotiable requirement"
+      ],
+      "ua": "такий, що не підлягає обговоренню; обов'язковий",
+      "source_sentence": "For discernment, critical evaluation of AI outputs is a non-negotiable responsibility."
+    },
+    {
+      "term": "overnight",
+      "definition_b1": "happening very quickly, suddenly, or within a single day",
+      "collocations": [
+        "not mastered overnight",
+        "overnight success"
+      ],
+      "ua": "за одну ніч; раптово / миттєво",
+      "source_sentence": "These competencies aren't mastered overnight."
+    },
+    {
+      "term": "silver bullet",
+      "definition_b1": "a simple, magical solution that instantly solves a complicated problem",
+      "collocations": [
+        "not a silver bullet",
+        "search for a silver bullet"
+      ],
+      "ua": "панацея; магічне універсальне вирішення",
+      "source_sentence": "These are powerful systems, but they're not silver bullets or magical solutions to every problem."
+    },
+    {
+      "term": "back-and-forth",
+      "definition_b1": "an active discussion or dialogue moving in alternating directions between parties",
+      "collocations": [
+        "back-and-forth conversation",
+        "back-and-forth dialogue"
+      ],
+      "ua": "взаємний обмін думками; живий діалог туди-сюди",
+      "source_sentence": "Practice the art of description and discernment, that thoughtful back-and-forth conversation that transforms AI from simple automation machines into genuine thinking partners."
+    },
+    {
+      "term": "dilemma",
+      "definition_b1": "a difficult situation where a person must choose between two unfavorable options",
+      "collocations": [
+        "ethical dilemma",
+        "face a dilemma"
+      ],
+      "ua": "дилема; складний вибір",
+      "source_sentence": "Develop decision-making criteria for addressing ethical dilemmas"
+    },
+    {
+      "term": "attribution",
+      "definition_b1": "the act of giving credit to the creator or source of an idea or content",
+      "collocations": [
+        "proper attribution",
+        "attribution statement"
+      ],
+      "ua": "зазначення авторства / джерела",
+      "source_sentence": "Create templates for attribution and transparency statements"
+    },
+    {
+      "term": "shape",
+      "definition_b1": "to influence, guide, and determine the development or future of something",
+      "collocations": [
+        "shape the future",
+        "shape collaboration"
+      ],
+      "ua": "формувати; впливати на розвиток",
+      "source_sentence": "The future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully."
+    },
+    {
+      "term": "widely applicable",
+      "definition_b1": "able to be used or put into practice across many different fields and situations",
+      "collocations": [
+        "widely applicable framework",
+        "widely applicable skills"
+      ],
+      "ua": "широко застосовний",
+      "source_sentence": "The fluency framework is designed to be widely applicable to the broad range of generative AI assistants and remain relevant even as AI systems continue to evolve, but it is up to us to make sure we continue to apply our learning as well."
+    },
+    {
+      "term": "equipped",
+      "definition_b1": "having the necessary skills, tools, or knowledge to do a particular task",
+      "collocations": [
+        "well equipped",
+        "better equipped"
+      ],
+      "ua": "озброєний (знаннями); підготовлений",
+      "source_sentence": "The future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully."
+    },
+    {
+      "term": "integrity",
+      "definition_b1": "the quality of being honest and possessing strong moral principles",
+      "collocations": [
+        "maintain integrity",
+        "build trust and integrity"
+      ],
+      "ua": "доброчесність; принциповість; цілісність",
+      "source_sentence": "Being transparent about AI's role in your work builds trust and integrity."
+    }
+  ],
+  "reading": {
+    "b1": "In this concluding lesson, we **consolidate** our understanding of the AI fluency framework. Over recent weeks, we have **cover ground** across four core competencies: Delegation, Description, Discernment, and Diligence. These 4Ds apply across all interaction modes: automation, augmentation, and agency.\n\nDelegation establishes that human domain expertise is the cornerstone of collaboration. Description bridges intent and machine capabilities through structured prompts. Discernment is a **non-negotiable** responsibility, auditing factual correctness and reasoning steps. Diligence guarantees that work remains ethical, safe, and transparent, building professional **integrity**.\n\nFluency is not mastered **overnight**. AI models are powerful, but they are never a magical **silver bullet**. They are thinking partners shaped through thoughtful **back-and-forth** dialogue. To govern your work, create a personal AI policy. Establish clear boundaries for sensitive data, provide proper **attribution**, and resolve any ethical **dilemma**.\n\nThe 4D framework is **widely applicable** across all generative models. You are now well **equipped** to **shape** the future of engineering collaboration thoughtfully.",
+    "original": "---\nTotal video duration in this module: 12 min\nWord count (wc -w): 1501\nWords per minute: 125\nVerdict: <130 comfortable\n---\n\ny the end of this lesson, you will be able to:\n\n- Consolidate key learnings from the course\n- Connect AI Fluency to your continuing development\n\n## Video: Conclusion\n\n\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\nHello and welcome to our final session covering the foundations of AI fluency.\n\nI'm Professor Rick Dacen from the Ringling College of Art and Design. Over a short period, we've covered quite a lot of ground together, exploring the AI fluency framework and seeing how it applies to everyday collaboration with AI. Let's take a moment to reflect on what we've learned, highlight some key takeaways, and look ahead to where you might go next.\n\nLet's begin by revisiting the four core competencies, also known as the four Ds, that make up the AI fluency framework.\n\nDelegation focuses on deciding what work should be done by and with AI versus what's best handled by humans alone. It combines your understanding of the problem, awareness of AI capabilities, and skill in distributing work effectively between you and your AI assistants.\n\nDescription addresses how we communicate with AI systems. Through clear articulation of what we want, how we want it approached, and what kind of interaction is most helpful to us, also known as product, process, and performance description, we guide AI to produce the outputs we need and become more effective collaborators and assistants.\n\nDiscernment involves critically evaluating AI outputs and behaviors. By developing your ability to assess outputs, processes, and interactions, also known as product, process, and performance discernment, you ensure quality and appropriateness in all your AI-driven outputs.\n\nAnd finally, diligence ensures our AI interactions are responsible. Through thoughtful selection of AI systems, transparency about AI's role, and taking accountability for the final product, also known as creation, transparency, and deployment diligence, we can work with AI ethically and safely.\n\nRemember that these competencies apply across all three ways we interact with AI: automation, where AI performs specific tasks following your instructions; augmentation, where you and AI collaborate as thinking partners; and agency, where AI is configured to act independently on your behalf.\n\nAs you move forward in your AI journey, keep these essential insights in mind.\n\nFor delegation, your expertise and judgment remain the foundation of effective AI use. The most powerful outcomes often emerge when you can identify opportunities where you and AI can build on each other's strengths through iterative collaboration, creating outcomes neither could achieve alone.\n\nFor description, clear communication bridges your intentions and AI capabilities. Sometimes the most effective instructions aren't elaborate prompts, but thoughtful conversations that provide context, examples, and feedback.\n\nFor discernment, critical evaluation of AI outputs is a non-negotiable responsibility. Your discernment skills protect against AI limitations and, once again, enable you to achieve results neither you nor the AI could easily create alone.\n\nFor diligence, you remain accountable for what you do with AI and its impact on others. Being transparent about AI's role in your work builds trust and integrity.\n\nThese competencies aren't mastered overnight. They develop through practice. As you delegate work, describe your needs, discern the quality of outputs, and apply diligence to your process, your AI fluency will grow naturally.\n\nThe goal isn't perfection. It's about continually developing awareness, commitment, and an intentional approach to working with AI. The fluency framework is designed to be widely applicable to the broad range of generative AI assistants and remain relevant even as AI systems continue to evolve, but it is up to us to make sure we continue to apply our learning as well.\n\nWe hope this course is just the beginning of your AI fluency journey. To close out the AI Fluency Foundations course, you'll find some follow-on activities designed to help you apply what you've learned, along with resources for continued exploration.\n\nWe began this course with the goal of helping you think differently about AI and the ways we work with it. These are powerful systems, but they're not silver bullets or magical solutions to every problem. They're only as useful and safe as we enable them to be.\n\nSo invest in your own expertise and stay aware of technological change so that you can delegate appropriately. Practice the art of description and discernment, that thoughtful back-and-forth conversation that transforms AI from simple automation machines into genuine thinking partners.\n\nAnd above all, take responsibility for the way you work with AI and what you create together. Be effective and efficient. Be ethical and safe.\n\nWe're all learning together how to navigate this rapidly evolving landscape. Thank you for joining us on this journey toward greater AI fluency.\n\nThe future of human-AI collaboration is bright, and you're now better equipped to shape it thoughtfully.\n\n===\n\nThis concluding video revisits the AI Fluency Framework and brings together the key concepts explored throughout the course. We recap the four core competencies (the 4Ds): Delegation (deciding what work to do with AI versus independently), Description (communicating effectively with AI), Discernment (evaluating AI outputs and behaviors), and Diligence (ensuring responsible AI collaboration). We emphasize that these competencies apply across all three major ways of interacting with AI (Automation, Augmentation, and Agency) and that fluency develops through practice, not overnight mastery. We close with a reminder that AI systems are powerful but not magical solutions; they're only as useful and safe as we enable them to be through our thoughtful engagement.\n\n#### Key takeaways\n\n- AI Fluency develops through intentional practice of the four core competencies\n- Delegation emphasizes that our expertise and judgment remain the foundation of effective AI collaboration\n- Description involves clear communication that bridges our intentions and AI capabilities\n- Discernment requires thoughtful and critical evaluation of outputs to work within the systems constraints\n- Diligence ensures accountability, transparency, and responsibility in our AI work\n- The most powerful outcomes emerge when humans and AI build on each other's strengths\n- The framework is designed to remain relevant as AI systems continue to evolve\n\n## Exercises\n\n### Exercise: Discuss the AI Fluency Course with Claude\n\nEngage Claude in a meaningful conversation about this course and the AI Fluency Framework (upload a copy of the framework from https://ringling.libguides.com/ai/framework)\n\nSuggested conversation starters:\n\n- \"I've just completed a course on AI Fluency covering Delegation, Description, Discernment, and Diligence. Let’s discuss how these competencies might apply to [my degree program or my job or whatever].\"\n- \"Let's explore how the AI Fluency Framework might evolve as AI capabilities advance. What new competencies might become important in the future?\" (If you do this one, reach out and let us know what you discover!)\n- \"Help me identify which of the 4D competencies I seem to understand well and which I might need to develop further, based on our conversation.\"\n- “Here’s [some exercise you did in this course]. Let’s analyze it to improve my competencies.”\n\n### Exercise: Build a Personal AI Policy\n\nWith the help of Claude, create your own guidelines for responsible and ethical AI collaboration in your personal and professional contexts:\n\n- Create clear standards for when and how you'll work with AI in different contexts\n- Establish boundaries for sensitive or confidential information\n- Define how you'll maintain quality control for AI-assisted work\n- Identify ethical issues most relevant to your field or activities\n- Develop decision-making criteria for addressing ethical dilemmas\n- Consider the perspectives of different people who might be affected by your AI interactions\n- Determine how you'll disclose AI collaboration in different contexts\n- Create templates for attribution and transparency statements\n- Establish criteria for when more detailed disclosure is appropriate\n\nWork with Claude as a thinking partner in this process to explore ethical considerations from multiple perspectives.\n\n### Reflection\n\nThe exercises above serve as the reflection component for this lesson. Through them, you'll have the opportunity to consolidate your learning and connect it to your ongoing development.\n\n#### What’s next\n\nCongratulations on completing the AI Fluency: Framework and Foundations course! This is just the beginning of your AI Fluency journey. As AI technologies continue to evolve, the competencies you've developed in Delegation, Description, Discernment, and Diligence, will provide a lasting framework to guide your work with these systems.\n\nRemember that fluency develops through practice. Each interaction with AI is an opportunity to refine your skills and deepen your understanding. By approaching AI as a thinking partner rather than just a tool, and by maintaining a commitment to effectiveness, efficiency, ethics, and safety, you're well-positioned to navigate the future of human-AI collaboration.\n\nWe encourage you to continue exploring, experimenting, and reflecting on your AI interactions. There are many good additional exercises in Lesson 12 to continue your journey.\n\nWe encourage you to share what you've learned with others (and us!), seek out diverse perspectives, and contribute to the ongoing conversation about how we can work with AI in ways that amplify human potential while respecting our values and responsibilities to each other. Thank you for your participation and engagement throughout this course!\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "Why are large language models described as 'not silver bullets' in the course conclusion?",
+      "difficulty": "easy",
+      "term_refs": [
+        "silver bullet",
+        "non-negotiable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because server microprocessors are made of copper and silicon rather than silver metal.",
+          "correct": false,
+          "note": "Incorrect: silver bullet is a metaphor for magical instant solutions."
+        },
+        {
+          "id": "b",
+          "text": "Because they are cognitive tools that require human domain expertise, clear description, and rigorous discernment to be useful and safe.",
+          "correct": true,
+          "note": "Correct: AI models amplify competence but do not replace human judgment."
+        },
+        {
+          "id": "c",
+          "text": "Because AI models permanently shut down whenever a user encounters a technical bug.",
+          "correct": false,
+          "note": "Incorrect: models continue functioning regardless of application bugs."
+        }
+      ],
+      "explanation": "Describing AI systems as 'not silver bullets' emphasizes that language models cannot magically solve engineering problems on their own. They are powerful cognitive amplifiers that depend entirely on human direction. Without domain expertise to scope delegation, clear description to set constraints, and non-negotiable discernment to catch hallucinations, AI outputs can easily mislead. The {{opt:a}} option is an amusing literal metallic confusion. The {{opt:c}} option is nonsensical. AI fluency recognizes that tools are only as reliable and safe as the human methodology guiding them."
+    },
+    {
+      "id": "q2",
+      "prompt": "How does an active 'back-and-forth' dialogue transform AI from an automation tool into a true thinking partner?",
+      "difficulty": "easy",
+      "term_refs": [
+        "back-and-forth",
+        "consolidate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By sending tennis balls back and forth across a physical sports court.",
+          "correct": false,
+          "note": "Incorrect: back-and-forth describes conversational dialogue, not athletic sports."
+        },
+        {
+          "id": "b",
+          "text": "By enabling continuous questioning, assumption challenging, iterative feedback, and progressive refinement of ideas.",
+          "correct": true,
+          "note": "Correct: bidirectional exchange unlocks collaborative augmentation."
+        },
+        {
+          "id": "c",
+          "text": "By forcing the AI to repeat the exact same sentence 100 times in a loop.",
+          "correct": false,
+          "note": "Incorrect: repetitive looping degrades conversation quality."
+        }
+      ],
+      "explanation": "A back-and-forth dialogue transforms AI interaction from basic mechanical automation into intellectual augmentation. By exchanging ideas, probing edge cases, challenging unstated assumptions, and offering corrective feedback, human and machine consolidate complex knowledge into superior solutions. The {{opt:a}} option takes the idiom literally. The {{opt:c}} option describes an unhelpful infinite loop. Dynamic conversational interaction allows engineers to explore complex architectural tradeoffs, discovering insights and edge-case solutions that neither partner would have produced in isolation, fostering deep technical creativity. This collaborative synergy unlocks novel engineering solutions that accelerate project timelines."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why is critical evaluation considered a 'non-negotiable' responsibility in professional AI use?",
+      "difficulty": "easy",
+      "term_refs": [
+        "non-negotiable",
+        "integrity",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because software licenses require engineers to sign printed papers with blue ink.",
+          "correct": false,
+          "note": "Incorrect: non-negotiable refers to ethical ownership, not physical stationery."
+        },
+        {
+          "id": "b",
+          "text": "Because language models will refuse to generate responses unless you praise them.",
+          "correct": false,
+          "note": "Incorrect: models generate outputs objectively based on prompt tokens."
+        },
+        {
+          "id": "c",
+          "text": "Because human authors remain legally and ethically accountable for the truthfulness, safety, and security of what they share.",
+          "correct": true,
+          "note": "Correct: professional accountability mandates active verification."
+        }
+      ],
+      "explanation": "Critical evaluation is non-negotiable because software engineers, architects, and writers bear total professional accountability for their deliverables. AI models generate text probabilistically and can produce subtle, confident hallucinations. Abdicating verification violates professional integrity and risks deploying catastrophic vulnerabilities to live networks. The {{opt:a}} option is an irrelevant stationery distraction. The {{opt:b}} option is factually false. Exercising non-negotiable discernment ensures that every line of code or technical recommendation is validated before it impacts live production environments, protecting corporate infrastructure from preventable service disruptions."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why is the 4D framework considered 'widely applicable' across the entire generative AI landscape?",
+      "difficulty": "medium",
+      "term_refs": [
+        "widely applicable",
+        "overnight",
+        "equipped"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because Delegation, Description, Discernment, and Diligence address fundamental human-machine collaboration principles that transcend specific models.",
+          "correct": true,
+          "note": "Correct: the 4Ds establish timeless collaboration skills for all AI platforms."
+        },
+        {
+          "id": "b",
+          "text": "Because future AI systems will completely eliminate all computer software code.",
+          "correct": false,
+          "note": "Incorrect: software engineering and code will continue to evolve."
+        },
+        {
+          "id": "c",
+          "text": "Because international treaties require all computer users to memorize the 4Ds by law.",
+          "correct": false,
+          "note": "Incorrect: the framework is an educational methodology, not a legal mandate."
+        }
+      ],
+      "explanation": "The 4D framework is widely applicable because it is built upon fundamental cognitive and organizational principles rather than narrow, ephemeral prompt hacks. Whether you collaborate with large language models, vision systems, autonomous CLI agents, or future reasoning models, you will always need to delegate wisely, describe intentions clearly, discern output quality, and exercise ethical diligence. The {{opt:c}} option is a legal fantasy. The {{opt:b}} option is unrealistic. Mastering these four competencies equips engineers with durable skills that remain relevant across technological generations."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does creating a 'Personal AI Policy' help resolve an ethical dilemma in a development team?",
+      "difficulty": "medium",
+      "term_refs": [
+        "dilemma",
+        "attribution",
+        "integrity"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It automatically uninstalls all code editors from employee laptops.",
+          "correct": false,
+          "note": "Incorrect: policies guide human behavior, not software uninstallation."
+        },
+        {
+          "id": "b",
+          "text": "It provides explicit decision-making criteria for data privacy, attribution disclosure, and quality control boundaries in advance.",
+          "correct": true,
+          "note": "Correct: pre-established rules guide ethical decisions during complex situations."
+        },
+        {
+          "id": "c",
+          "text": "It forces developers to delete all git commits every Friday evening.",
+          "correct": false,
+          "note": "Incorrect: deleting git history destroys valuable engineering records."
+        }
+      ],
+      "explanation": "A Personal AI Policy serves as an ethical compass when facing complex professional dilemmas, such as sharing proprietary logs, attributing co-created code, or deciding when AI disclosure is required. Having predefined rules on data confidentiality, disclosure thresholds, and verification checklists ensures you uphold professional integrity consistently under deadline pressure. The {{opt:a,c}} options are absurd, destructive caricatures. A well-constructed AI policy protects both the individual engineer's reputation and the organization's intellectual property, establishing clear guidelines for transparent and responsible technical collaboration across teams."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why is true AI fluency described as developing through continuous practice rather than 'overnight'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "overnight",
+        "consolidate",
+        "cover ground"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because mastering nuanced delegation, prompt description, and critical discernment requires building hands-on muscle memory across real projects.",
+          "correct": true,
+          "note": "Correct: practical collaboration skills require repeated real-world application."
+        },
+        {
+          "id": "b",
+          "text": "Because software engineering certificates take ten years to print on paper.",
+          "correct": false,
+          "note": "Incorrect: certificate printing is unrelated to developing collaboration skills."
+        },
+        {
+          "id": "c",
+          "text": "Because computer monitors only refresh their pixels once every twenty-four hours.",
+          "correct": false,
+          "note": "Incorrect: monitor refresh rates have no bearing on human learning curves."
+        }
+      ],
+      "explanation": "AI fluency cannot be achieved overnight because it is an active pair-programming craft, not passive memorization. Learning how to steer diverging conversations, spot subtle logic lapses, balance model temperature, and sanitize sensitive inputs requires experiential learning across diverse technical tasks. The {{opt:c}} option is an absurd hardware joke. The {{opt:b}} option is irrelevant. As you iteratively cover ground across real-world refactors and system designs, you consolidate practical intuition, turning the 4D framework into second nature and ensuring consistent high-quality engineering outputs."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does proper 'attribution' build stakeholder trust when delivering AI-assisted technical documentation?",
+      "difficulty": "medium",
+      "term_refs": [
+        "attribution",
+        "integrity",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It legally forces readers to pay royalties to the computer monitor manufacturer.",
+          "correct": false,
+          "note": "Incorrect: attribution is an ethical disclosure, not a hardware royalty."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that the documentation will never require updates in the future.",
+          "correct": false,
+          "note": "Incorrect: documentation must always be maintained as systems evolve."
+        },
+        {
+          "id": "c",
+          "text": "It transparently clarifies AI's role while demonstrating that human domain experts reviewed, verified, and endorsed the final content.",
+          "correct": true,
+          "note": "Correct: honest attribution confirms verification rigor and builds credibility."
+        }
+      ],
+      "explanation": "Providing clear attribution in technical documentation or software releases demonstrates transparency and professional integrity. When stakeholders see a clear diligence statement explaining that AI was used for scaffolding while human engineers verified all technical claims, confidence in the deliverable increases. The {{opt:a}} option is a bizarre legal claim. The {{opt:b}} option is unrealistic. Transparent attribution proves that the team adheres to high ethical standards and takes full responsibility for system accuracy, fostering an organizational culture of openness and technical excellence."
+    },
+    {
+      "id": "q8",
+      "prompt": "Reflecting on the course journey, how has covering this ground 'equipped' you for future technical leadership?",
+      "difficulty": "medium",
+      "term_refs": [
+        "cover ground",
+        "equipped",
+        "shape"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "You have memorized a single magic prompt that solves all computer problems.",
+          "correct": false,
+          "note": "Incorrect: AI fluency relies on adaptable methodology rather than magic prompts."
+        },
+        {
+          "id": "b",
+          "text": "You are now legally permitted to ignore all software testing protocols forever.",
+          "correct": false,
+          "note": "Incorrect: testing protocols remain fundamental to engineering success."
+        },
+        {
+          "id": "c",
+          "text": "You now possess a structured 4D mental model to evaluate tools, design prompts, audit code, and enforce safety across your team.",
+          "correct": true,
+          "note": "Correct: provides a complete operational framework for AI-assisted engineering."
+        }
+      ],
+      "explanation": "Covering the complete AI Fluency curriculum equips engineers with a disciplined, holistic framework for technical collaboration. Instead of relying on random prompt hacks or treating AI as a mysterious black box, you now understand how to structure tasks, specify exact execution constraints, catch subtle hallucinations, and maintain ethical data safeguards. The {{opt:b,a}} options describe dangerous engineering anti-patterns. This comprehensive mental model empowers you to lead AI adoption responsibly across your organization, ensuring that innovative tools are deployed safely and effectively."
+    },
+    {
+      "id": "q9",
+      "prompt": "A junior developer uses a CLI agent to refactor a core network script without testing it. How does the 4D framework correct this?",
+      "difficulty": "hard",
+      "term_refs": [
+        "non-negotiable",
+        "silver bullet",
+        "integrity"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By reinforcing that AI is not a silver bullet, mandating non-negotiable Discernment testing in a virtual lab, and upholding Diligence accountability.",
+          "correct": true,
+          "note": "Correct: enforces the necessity of rigorous verification and human accountability."
+        },
+        {
+          "id": "b",
+          "text": "By blaming the language model vendor for generating valid syntax that was misapplied.",
+          "correct": false,
+          "note": "Incorrect: the deploying team remains responsible for verifying code before execution."
+        },
+        {
+          "id": "c",
+          "text": "By disconnecting the junior developer's internet access permanently.",
+          "correct": false,
+          "note": "Incorrect: constructive coaching and safety protocols resolve skill gaps."
+        }
+      ],
+      "explanation": "In this scenario, the junior developer committed a classic AI fluency mistake: assuming the tool is a silver bullet and skipping verification. The 4D framework corrects this by establishing that Discernment testing in a sandbox environment is non-negotiable. Furthermore, Diligence requires developers to stand behind their commits with personal accountability. The {{opt:c}} option is an unhelpful punitive reaction. The {{opt:b}} option avoids accountability. Enforcing 4D quality gates ensures that automated refactoring never bypasses critical verification standards, preventing broken configurations from reaching production networks."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does mastering the 4D framework empower engineers to thoughtfully 'shape' the future of human-AI collaboration?",
+      "difficulty": "hard",
+      "term_refs": [
+        "shape",
+        "consolidate",
+        "equipped"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "By combining technical speed and computational scale with irreplaceable human creativity, domain expertise, and ethical stewardship.",
+          "correct": true,
+          "note": "Correct: harmonizes machine capabilities with human judgment to lead innovation."
+        },
+        {
+          "id": "b",
+          "text": "By replacing all human programmers with fully autonomous, unmonitored server robots.",
+          "correct": false,
+          "note": "Incorrect: the framework champions human-in-the-loop stewardship and oversight."
+        },
+        {
+          "id": "c",
+          "text": "By prohibiting all machine learning research across global universities.",
+          "correct": false,
+          "note": "Incorrect: the goal is fluent, responsible collaboration rather than technological prohibition."
+        }
+      ],
+      "explanation": "Mastering Delegation, Description, Discernment, and Diligence equips engineers to shape the future of technology responsibly. Rather than passively fearing automation or recklessly deploying unverified code, fluent practitioners leverage AI as a powerful collaborative partner. They combine the computational velocity of large language models with the indispensable human virtues of domain expertise, moral stewardship, and critical judgment. The {{opt:b,c}} options are dystopian extremes. True AI fluency elevates human potential, building a future where technology serves society with excellence and integrity."
+    }
+  ],
+  "speaking_prompts": [
+    "How do you consolidate the four Ds (Delegation, Description, Discernment, Diligence) in your daily technical work?",
+    "Why is critical evaluation a non-negotiable responsibility? How does a thoughtful back-and-forth conversation turn AI into a thinking partner?",
+    "Explain why AI models are not silver bullets. How do human expertise and integrity keep software systems robust?",
+    "How would you handle an ethical dilemma regarding code attribution and disclosure when delivering a project to a client?",
+    "Reflecting on how much ground we covered, how are you now better equipped to shape the future of AI-assisted engineering?"
+  ],
+  "homework": [
+    "Complete two final review sessions with the complete AI Fluency vocabulary deck in Anki. Say each key term and its definition aloud.",
+    "Record a 90-second speech explaining the full 4D framework (Delegation, Description, Discernment, Diligence) and how you apply it.",
+    "Draft a 3-minute talk plan for your teacher presenting your personal AI usage policy, covering attribution, security, and verification."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

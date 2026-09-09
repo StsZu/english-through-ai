@@ -5,9 +5,10 @@
 **Format:** 90 minutes, student-led
 **Source material:** Anthropic — *AI Fluency: Framework & Foundations*, Module 1 (Coursera)
 
-> Надішліть цей файл вчителю **за добу до уроку**. Він написаний англійською
-> навмисно: це ваша перша письмова робота, і вчитель одразу бачить рівень.
-> Заповніть порожні поля своїм змістом перед відправкою.
+> Send this file to the teacher **a day before the lesson**. It is written in
+> English on purpose: it is your first piece of written work, and the teacher
+> sees your level straight away. Fill in the blanks with your own content
+> before sending it.
 
 ---
 
@@ -100,7 +101,7 @@ at least twice. I need the practice of rephrasing.
 
 ## Block 5 (40–55) — Worksheet
 
-I prepared `worksheet.md` from the module transcript:
+I prepared the quiz in `index.html` from the module transcript:
 - A: matching terms and definitions
 - B: gap-fill
 - C: collocation check

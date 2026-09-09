@@ -1,0 +1,459 @@
+{
+  "week": "w10",
+  "title": "A Closer Look at Discernment",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can critically evaluate AI outputs, processes, and behaviors across the three types of Discernment.",
+    "By the end of this lesson I can detect logical errors, attention lapses, and circular reasoning in AI generated code and text.",
+    "By the end of this lesson I can provide structured feedback to close the Description-Discernment quality loop."
+  ],
+  "vocabulary": [
+    {
+      "term": "discernment",
+      "definition_b1": "the ability to judge well and evaluate quality critically",
+      "collocations": [
+        "develop discernment",
+        "exercise discernment"
+      ],
+      "ua": "проникливість; критична оцінка / судження",
+      "source_sentence": "Discernment is specifically about evaluating AI outputs, processes, and behaviors—essentially, your quality control system for AI collaboration."
+    },
+    {
+      "term": "shortcoming",
+      "definition_b1": "a fault, defect, or failure to meet a certain standard",
+      "collocations": [
+        "typical shortcomings",
+        "identify shortcomings"
+      ],
+      "ua": "недолік; слабке місце",
+      "source_sentence": "Doing this well requires both domain expertise—in other words, knowing enough to judge quality—and an understanding of how AI systems work, including their typical shortcomings."
+    },
+    {
+      "term": "safeguard",
+      "definition_b1": "a protection against something undesirable, harmful, or risky",
+      "collocations": [
+        "essential safeguard",
+        "act as a safeguard"
+      ],
+      "ua": "запобіжник; гарантія захисту",
+      "source_sentence": "Your capacity for discernment acts as an essential safeguard."
+    },
+    {
+      "term": "product discernment",
+      "definition_b1": "the ability to critically judge the factual accuracy and value of AI output",
+      "collocations": [
+        "apply product discernment",
+        "practice product discernment"
+      ],
+      "ua": "оцінка продукту / результату (наскільки якісним є вихідний матеріал)",
+      "source_sentence": "We call this first concept product discernment: the ability to judge the accuracy and value of AI-created output."
+    },
+    {
+      "term": "lapse",
+      "definition_b1": "a temporary failure in concentration, memory, or quality",
+      "collocations": [
+        "lapse in attention",
+        "memory lapse"
+      ],
+      "ua": "провал (уваги/пам'яті); тимчасова помилка",
+      "source_sentence": "Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning."
+    },
+    {
+      "term": "circular reasoning",
+      "definition_b1": "a logical error where an argument repeats its premise as the conclusion",
+      "collocations": [
+        "trap in circular reasoning",
+        "avoid circular reasoning"
+      ],
+      "ua": "замкнене коло в міркуваннях (хибна тавтологічна логіка)",
+      "source_sentence": "Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning."
+    },
+    {
+      "term": "process discernment",
+      "definition_b1": "the ability to evaluate the steps, logic, and methodology the AI used",
+      "collocations": [
+        "require process discernment",
+        "maintain process discernment"
+      ],
+      "ua": "оцінка процесу (перевірка логіки та кроків ШІ)",
+      "source_sentence": "We call this kind of recognition process discernment: the ability to judge the quality and effectiveness of the AI's process."
+    },
+    {
+      "term": "in sync",
+      "definition_b1": "working together harmoniously and sharing the same understanding",
+      "collocations": [
+        "think in sync",
+        "stay in sync"
+      ],
+      "ua": "синхронно; узгоджено",
+      "source_sentence": "It's needed to ensure you and the AI are thinking in sync throughout the process, guiding the AI toward your vision for success."
+    },
+    {
+      "term": "performance discernment",
+      "definition_b1": "evaluating the behavioral quality and communication style of an AI interaction",
+      "collocations": [
+        "exercise performance discernment",
+        "improve performance discernment"
+      ],
+      "ua": "оцінка стилю взаємодії (наскільки зручно й ефективно ведеться діалог)",
+      "source_sentence": "We call this performance discernment: the ability to judge the quality of the human-AI interaction, which helps you shape more productive working engagement with AI systems."
+    },
+    {
+      "term": "revisit",
+      "definition_b1": "to return to a topic, decision, or plan to re-examine or change it",
+      "collocations": [
+        "revisit decisions",
+        "revisit assumptions"
+      ],
+      "ua": "переглядати; повертатися до розгляду",
+      "source_sentence": "If you like, revisit Bad Prompt Makeover from the previous lesson to give these prompting principles a workout."
+    },
+    {
+      "term": "oversight",
+      "definition_b1": "the responsibility of watching over something to ensure it is done correctly",
+      "collocations": [
+        "human oversight",
+        "maintain oversight"
+      ],
+      "ua": "нагляд; контроль",
+      "source_sentence": "Even the most advanced AI systems benefit from human judgment and oversight"
+    },
+    {
+      "term": "flip side",
+      "definition_b1": "the opposite, reverse, or complementary aspect of a situation",
+      "collocations": [
+        "flip side of",
+        "on the flip side"
+      ],
+      "ua": "зворотний бік (медалі); доповняльна сторона",
+      "source_sentence": "It's kind of the flip side of description. If description is about clearly communicating what you want, discernment is about deciding whether what you get back actually meets your needs."
+    }
+  ],
+  "reading": {
+    "b1": "**Discernment** is the third core competency of AI fluency. It acts as your quality control system during collaboration. It is the **flip side** of description. Description communicates what you want. **Discernment** evaluates whether what you receive meets your standards. Understanding typical AI **shortcoming**s makes human judgment an essential **safeguard**.\n\nDiscernment includes three distinct dimensions. First is **product discernment**. This evaluates the final deliverable. You verify factual accuracy, coherence, structure, and domain value. You ensure outputs solve real problems.\n\nSecond is **process discernment**. This evaluates how the AI arrived at the solution. You watch for logical bugs, a **lapse** in attention, or **circular reasoning**. In multi-step projects, checking methodology ensures human and machine think **in sync**.\n\nThird is **performance discernment**. This evaluates the collaborative interaction itself. You assess whether communication is too verbose or too brief. You check if the AI responds constructively to feedback.\n\nFinally, discernment drives actionable improvements. When you spot issues, provide clear feedback to refine your prompts. If quality problems persist, **revisit** your delegation choices. Maintaining active human **oversight** ensures AI collaboration remains reliable, safe, and productive.",
+    "original": "---\nTotal video duration in this module: 10 min\nWord count (wc -w): 1558\nWords per minute: 156\nVerdict: >150 split into 3-5 min chunks\n---\n\n# A closer look at Discernment\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Understand how to evaluate AI outputs and processes thoughtfully\n- Develop critical thinking skills for your AI interactions\n- Learn to identify and address quality concerns in your AI interactions\n\n## A Closer Look at Discernment\n\nHere is the polished transcript, kept as close as possible to the original spoken structure.\n\n## Introduction\n\nIn this video, we'll dig deeper into the AI fluency competency of discernment. AI fluency means working with AI effectively, efficiently, ethically, and safely.\n\n## What Is Discernment?\n\nDiscernment is specifically about evaluating AI outputs, processes, and behaviors—essentially, your quality control system for AI collaboration.\n\nDiscernment is your ability to critically evaluate what AI produces, how it produces it, and how it behaves. It's kind of the flip side of description. If description is about clearly communicating what you want, discernment is about deciding whether what you get back actually meets your needs.\n\nDeveloping your discernment helps you identify when AI outputs are valuable versus problematic, recognize strengths and limitations, and determine when outputs are ready to use or need more work.\n\nDoing this well requires both domain expertise—in other words, knowing enough to judge quality—and an understanding of how AI systems work, including their typical shortcomings.\n\nRemember, even the most advanced AI systems can make reasoning errors, produce factual mistakes, or act in unexpected ways. Your capacity for discernment acts as an essential safeguard.\n\nThe most straightforward form of discernment is evaluating the quality of what the AI actually produces. When reviewing AI-generated content, ask yourself questions like: Is this factually accurate? Is it appropriate for my audience and purpose? Is it coherent and well-structured? Does it meet my requirements? And does it add value or solve the problem I intended?\n\nWe call this first concept product discernment: the ability to judge the accuracy and value of AI-created output.\n\n## Process Discernment\n\nWhen interacting with AI, you need to assess not just what the AI produces, but how it got there. Some things to look out for include logical errors, lapses in the AI's attention, taking inappropriate steps, getting stuck on one small detail or interpretation and being unable to consider any alternatives, or getting trapped in circular reasoning.\n\nFor example, imagine you're working with AI to expand on one of five outline options it offered for a document. After several rounds of back-and-forth ideation together, you notice elements of rejected ideas being reinserted by AI.\n\nWe call this kind of recognition process discernment: the ability to judge the quality and effectiveness of the AI's process. It's needed to ensure you and the AI are thinking in sync throughout the process, guiding the AI toward your vision for success.\n\nIt becomes especially important for complex tasks where the correct answer isn't immediately obvious. In these situations, having trust in the process is everything.\n\n## Performance Discernment\n\nIt's also often valuable to evaluate and guide how the AI behaves during your interaction. We call this performance discernment.\n\nThe difference between process and performance is maybe a bit subtle. You can think of process as the work the AI is doing, while performance is how well it is interacting with you while it does the work.\n\nWhen evaluating an AI assistant's performance, you can ask yourself: Is there a better way for the AI to communicate with you for greater ease and productivity going forward? Is it providing the information you need in a helpful way? Does it respond well to your feedback and direction? And is the interaction efficient or unnecessarily complex?\n\nFor example, is the AI asking too many questions when you need concise answers, or is it too brief when you need comprehensive information?\n\nWe call this performance discernment: the ability to judge the quality of the human-AI interaction, which helps you shape more productive working engagement with AI systems.\n\n## Feedback Discernment\n\nOf course, discernment doesn't end with evaluation. You also need to provide feedback in order to improve what an AI delivers going forward.\n\nWhen you identify problems in AI outputs, effective feedback includes specifying what the problem is, clearly explaining why it is a problem, providing concrete suggestions for improvement, and revising your instructions or examples.\n\nIn other words, when discernment flags a problem, better description is often the solution. But this isn't always the case. Sometimes you may need to rethink your delegation decisions because you might be using the wrong tool or approaching the problem in entirely the wrong way.\n\n## Recap\n\nTo recap, product, process, and performance discernment combine to form the discernment competency.\n\nDiscernment works hand in hand with description. While description focuses on communicating your needs to AI, discernment evaluates how well those needs were met.\n\nTogether, they form a continuous loop of instruction and evaluation that drives quality.\n\nBy developing your discernment skills, you ensure that your AI collaboration remains guided by human judgment, a critical element of truly effective AI fluency.\n\n===\n\n\n\nThis video explores Discernment, the AI Fluency competency focused on thoughtfully evaluating AI outputs, processes, and behaviors. We explain that Discernment is the flip side of Description. While Description helps you communicate your intentions clearly, Discernment helps you evaluate whether what you receive meets your needs. The video introduces three types of Discernment:\n\n- Product Discernment: Evaluating the quality of AI outputs\n- Process Discernment: Assessing how the AI approached the task\n- Performance Discernment: Evaluating how the AI behaved during the interaction itself\n\nTogether, these skills help ensure that your AI collaboration remains guided by thoughtful human judgment.\n\n#### Key takeaways\n\n- Discernment is your ability to thoughtfully evaluate what AI produces, how it produces it, and how it behaves\n- Product Discernment focuses on evaluating the quality of actual outputs (accuracy, appropriateness, coherence, relevance)\n- Process Discernment involves assessing how the AI arrived at its output, looking for logical errors, attention gaps, or inappropriate reasoning\n- Performance Discernment evaluates how the AI behaves within the collaboration process itself, considering whether its communication style is effective for your needs\n- Discernment works hand-in-hand with Description in a continuous feedback loop\n- Even the most advanced AI systems benefit from human judgment and oversight\n\n## Exercises\n\n### Expert Discernment: Evaluating AI Responses in Your Domain\n\n#### Activity Goal\n\nPractice Product, Process, and Performance Discernment by evaluating AI-generated content in a domain where you have expertise, recognizing how your knowledge enhances your ability to critically assess AI outputs.\n\n#### Instructions\n\n**Step 1: Return to Your Area of Expertise**\n\nRecall the topic you discussed with Claude in the earlier exercise (Lesson 2, Exercise 2: \"Explore something you love\"). This was a topic where you had strong knowledge and passion.\n\n**Step 2: Ask for Multiple Explanations**\n\nStart a new conversation with Claude and ask it to generate three different explanations or analyses about a specific aspect of your expert topic. For example:\n\n- If your topic was photography, you might ask for three different explanations of depth of field\n- If your topic was cooking, you might ask for three different analyses of fermentation techniques\n- If your topic was history, you might ask for three different perspectives on a specific historical event\n\n**Step 3: Apply Your Expert Discernment**\n\nDrawing on your expertise, carefully evaluate each explanation provided by Claude:\n\n**Product Discernment:**\n\n- Which explanation contains the most accurate information?\n- Are there any factual errors or misconceptions?\n- Is the level of detail appropriate for someone learning about this topic?\n\n**Process Discernment:**\n\n- Does Claude follow logical reasoning in each explanation?\n- Are there gaps in its analysis or thinking process?\n- Does Claude make appropriate connections between concepts?\n\n**Performance Discernment:**\n\n- Was Claude attentive to your specific question and responsive to feedback and direction?\n- Is terminology used appropriately for the topic?\n- How does the tone and style affect the clarity of the explanation?\n\n**Step 4: Provide Feedback and Refinement**\n\nBased on your evaluation:\n\n1. Identify the strongest explanation and specifically tell Claude specifically why it's effective\n2. Identify the weakest explanation and provide specific feedback on what makes it problematic\n3. Work with Claude to create an improved version that addresses the issues you identified\n\n**Step 5: Reflection**\n\nDiscuss with Claude (in the same chat):\n\n- What specific knowledge did you have that allowed you to identify strengths or weaknesses?\n- How might someone without your expertise struggle to discern the quality of these explanations?\n- What does this experience teach you about the relationship between domain knowledge and effective Discernment?\n\n**For a more playful Discernment workout, you might want to try some of the “Game Night” suggestions in the final lesson (\"Additional Activities\").**\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- Which type of Discernment (Product, Process, or Performance) do you find most challenging to apply, and why?\n- How does Discernment complement Description? How do they work together?\n- What signals or patterns might indicate that an AI output requires closer scrutiny?\n\n#### What’s next\n\nIn the next lesson, you'll have the opportunity to apply both Description and Discernment skills to your overarching course project. You'll put into practice what you've learned about effectively communicating with AI and critically evaluating its outputs to produce results that leverage the best of both human and AI capabilities.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "Why is Discernment described as the 'flip side' of Description?",
+      "difficulty": "easy",
+      "term_refs": [
+        "discernment",
+        "flip side"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because Discernment requires flipping your computer upside down during chat sessions.",
+          "correct": false,
+          "note": "Incorrect: flip side is an idiom for complementary aspects, not physical hardware rotation."
+        },
+        {
+          "id": "b",
+          "text": "Because Description is only used on weekends and Discernment on weekdays.",
+          "correct": false,
+          "note": "Incorrect: both competencies operate continuously together in real time."
+        },
+        {
+          "id": "c",
+          "text": "While Description communicates your intentions to the AI, Discernment evaluates whether the response actually meets your standards.",
+          "correct": true,
+          "note": "Correct: Description instructs, while Discernment evaluates output quality."
+        }
+      ],
+      "explanation": "Discernment is the complementary flip side of Description because prompt writing and output evaluation form a tight iterative loop. Description allows you to articulate requirements clearly, while Discernment gives you the critical judgment to verify whether the AI's deliverable satisfies factual, structural, and security constraints. The {{opt:a}} option takes the idiom absurdly literally. The {{opt:b}} option is nonsensical. Operating both competencies simultaneously ensures that AI collaboration remains purposeful, preventing unverified outputs from contaminating production systems. In real workflows, this continuous loop catches misunderstandings before they turn into costly errors."
+    },
+    {
+      "id": "q2",
+      "prompt": "What is the primary focus of 'Product Discernment' when reviewing an AI deliverable?",
+      "difficulty": "easy",
+      "term_refs": [
+        "product discernment",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Judging the factual accuracy, structural coherence, audience appropriateness, and real value of the created output.",
+          "correct": true,
+          "note": "Correct: Product Discernment audits the quality and validity of the final artifact."
+        },
+        {
+          "id": "b",
+          "text": "Calculating the shipping delivery cost of physical consumer goods.",
+          "correct": false,
+          "note": "Incorrect: Product Discernment evaluates AI-generated artifacts, not retail logistics."
+        },
+        {
+          "id": "c",
+          "text": "Deleting all code files whenever an automated test passes successfully.",
+          "correct": false,
+          "note": "Incorrect: passing tests validate quality rather than prompting deletion."
+        }
+      ],
+      "explanation": "Product Discernment is the systematic inspection of the artifact generated by an AI assistant. When evaluating text, scripts, or diagrams, you verify whether the facts are accurate, whether the structure is logical, and whether the deliverable solves the intended problem safely. The {{opt:b}} option confuses AI deliverables with physical parcel shipping. The {{opt:c}} option is counterproductive. Practicing rigorous product discernment acts as an essential safeguard against silent hallucinations, ensuring that only verified solutions are deployed to production. This verification is especially critical when dealing with database migrations or API keys."
+    },
+    {
+      "id": "q3",
+      "prompt": "What is 'circular reasoning' in the context of Process Discernment?",
+      "difficulty": "easy",
+      "term_refs": [
+        "circular reasoning",
+        "process discernment",
+        "lapse"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "A computer graphics algorithm designed to draw round circles on screen.",
+          "correct": false,
+          "note": "Incorrect: circular reasoning is a logical fallacy, not a graphic drawing method."
+        },
+        {
+          "id": "b",
+          "text": "A logical flaw where the AI's argument assumes what it is trying to prove, repeating premises without real proof.",
+          "correct": true,
+          "note": "Correct: circular logic offers tautological explanations instead of valid derivation."
+        },
+        {
+          "id": "c",
+          "text": "A routing protocol that forwards network packets in an infinite physical loop.",
+          "correct": false,
+          "note": "Incorrect: that describes a network routing loop rather than argumentative fallacy."
+        }
+      ],
+      "explanation": "Circular reasoning is a logical fallacy where an AI attempts to justify a claim by restating the claim in different words rather than providing independent evidence or derivation. In complex multi-step reasoning, models can become trapped in circular logic, presenting self-referential statements as valid explanations. The {{opt:a}} option describes computer geometry rendering. The {{opt:c}} option confuses logical fallacies with networking packet loops. Process discernment allows engineers to spot circular reasoning early and force the model to explore alternate deduction paths, ensuring that proofs and architectural conclusions rest on solid empirical foundations."
+    },
+    {
+      "id": "q4",
+      "prompt": "How does 'Process Discernment' differ from 'Product Discernment'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "process discernment",
+        "product discernment",
+        "in sync"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Product Discernment evaluates what was produced, while Process Discernment assesses the reasoning steps and methodology used.",
+          "correct": true,
+          "note": "Correct: differentiates artifact quality from execution methodology."
+        },
+        {
+          "id": "b",
+          "text": "Process Discernment completely forbids human beings from inspecting source code.",
+          "correct": false,
+          "note": "Incorrect: Process Discernment encourages active human inspection of reasoning."
+        },
+        {
+          "id": "c",
+          "text": "Product Discernment is for mobile phones and Process Discernment is for desktop towers.",
+          "correct": false,
+          "note": "Incorrect: both discernment skills apply across all computing devices."
+        }
+      ],
+      "explanation": "The distinction between Product and Process Discernment is central to quality control. Product Discernment reviews the final artifact (e.g. 'Is this SQL query correct?'), whereas Process Discernment evaluates the intermediate journey (e.g. 'Did the AI analyze foreign key relationships before creating indexes?'). The {{opt:c}} option is an absurd hardware classification. The {{opt:b}} option contradicts the core principle of human review. By evaluating methodology, engineers ensure human and AI stay in sync throughout complex refactors, catching flawed algorithmic logic before buggy code is committed to version control repositories."
+    },
+    {
+      "id": "q5",
+      "prompt": "What does an engineer evaluate when practicing 'Performance Discernment'?",
+      "difficulty": "medium",
+      "term_refs": [
+        "performance discernment",
+        "shortcoming"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The physical speed of typing on a mechanical keyboard in words per minute.",
+          "correct": false,
+          "note": "Incorrect: human typing speed is unrelated to evaluating AI conversational performance."
+        },
+        {
+          "id": "b",
+          "text": "The price of graphic cards sold on secondary auction websites.",
+          "correct": false,
+          "note": "Incorrect: Performance Discernment evaluates interaction dynamics, not hardware auctions."
+        },
+        {
+          "id": "c",
+          "text": "The collaborative efficiency, tone, verbosity, and responsiveness of the AI interaction itself.",
+          "correct": true,
+          "note": "Correct: Performance Discernment evaluates conversational usability and interaction style."
+        }
+      ],
+      "explanation": "Performance Discernment focuses on the ergonomics and effectiveness of the human-AI interaction. You observe whether the model is providing excessive filler, asking too many questions, being overly terse, or failing to adapt to feedback. The {{opt:b,a}} options confuse conversational assessment with hardware trading and typing speed. Evaluating performance allows you to give behavioral steering instructions (e.g. 'Be more concise' or 'Explain your logic before writing code'), making collaboration smoother and more productive. Fine-tuning the conversational rhythm keeps developer momentum high during long debugging sessions."
+    },
+    {
+      "id": "q6",
+      "prompt": "An AI assistant reinserts a rejected architecture approach after several turns. What caused this process lapse?",
+      "difficulty": "medium",
+      "term_refs": [
+        "lapse",
+        "process discernment",
+        "in sync"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "An attention lapse where the model lost track of earlier conversational decisions across a long context window.",
+          "correct": true,
+          "note": "Correct: extended context dilution often leads to reintroducing rejected ideas."
+        },
+        {
+          "id": "b",
+          "text": "The AI model intentionally rebelled against the engineer's authority.",
+          "correct": false,
+          "note": "Incorrect: models operate probabilistically without personal malice or rebellion."
+        },
+        {
+          "id": "c",
+          "text": "The computer monitor overheated and altered the network firewall settings.",
+          "correct": false,
+          "note": "Incorrect: monitor temperature cannot alter conversational state or network rules."
+        }
+      ],
+      "explanation": "Reinserting rejected ideas is a classic attention lapse in long multi-turn sessions. As conversation length grows, earlier negative constraints can be diluted across the context window, causing the model to resynthesize discarded patterns. The {{opt:c}} option is an unrelated thermal distraction. The {{opt:b}} option falsely attributes conscious rebellion to mathematical models. Applying process discernment allows engineers to catch these lapses immediately, prompting a context reset or explicit reminder to keep collaboration in sync, preventing discarded architecture proposals from resurfacing in production plans."
+    },
+    {
+      "id": "q7",
+      "prompt": "When discernment identifies a serious shortcoming in an AI response, what is the best immediate step?",
+      "difficulty": "medium",
+      "term_refs": [
+        "shortcoming",
+        "revisit",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Accept the broken output immediately and deploy it to live customer servers.",
+          "correct": false,
+          "note": "Incorrect: deploying unverified errors creates catastrophic production failures."
+        },
+        {
+          "id": "b",
+          "text": "Provide targeted feedback explaining the error, refine your Description prompt, or revisit delegation choices if the tool is unsuitable.",
+          "correct": true,
+          "note": "Correct: combines prompt refinement with strategic delegation review."
+        },
+        {
+          "id": "c",
+          "text": "Throw the computer out of the office window and change professions.",
+          "correct": false,
+          "note": "Incorrect: errors are natural feedback signals for iterative refinement."
+        }
+      ],
+      "explanation": "When discernment flags an error, the professional response is to diagnose the root cause and provide structured feedback. Clearly state what is wrong, explain why it fails domain standards, and supply refined prompt constraints. If the model consistently fails due to reasoning limits, revisit your delegation strategy and choose a more capable model or human execution. The {{opt:a}} option is an operational disaster. The {{opt:c}} option is an absurd overreaction. Closing the loop with better description resolves shortcomings reliably, helping developers build resilient prompts that handle edge cases effectively."
+    },
+    {
+      "id": "q8",
+      "prompt": "Why is deep domain expertise required to exercise effective Discernment?",
+      "difficulty": "medium",
+      "term_refs": [
+        "discernment",
+        "oversight",
+        "safeguard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because software engineering licenses are legally required to view markdown text.",
+          "correct": false,
+          "note": "Incorrect: markdown viewing is open and unrestricted by law."
+        },
+        {
+          "id": "b",
+          "text": "Because AI models refuse to answer prompts unless the user proves they have a PhD.",
+          "correct": false,
+          "note": "Incorrect: language models respond to all prompt queries regardless of academic degrees."
+        },
+        {
+          "id": "c",
+          "text": "Because without domain knowledge, a user cannot distinguish plausible-sounding hallucinations from robust, secure engineering solutions.",
+          "correct": true,
+          "note": "Correct: domain expertise enables accurate technical auditing and quality control."
+        }
+      ],
+      "explanation": "Domain expertise is the cornerstone of Discernment because large language models write with high fluency and confidence, even when generating incorrect assertions. Without deep subject knowledge in networking, security, or algorithms, an inexperienced user will mistake plausible hallucinations for production-ready code. The {{opt:a}} option is a legal fabrication. The {{opt:b}} option is false. Human oversight grounded in real domain mastery acts as the primary safeguard protecting systems from subtle technical vulnerabilities, ensuring that critical configurations conform strictly to industry best practices."
+    },
+    {
+      "id": "q9",
+      "prompt": "An AI suggests adding an unencrypted telnet port to a router firewall. How does Discernment protect infrastructure?",
+      "difficulty": "hard",
+      "term_refs": [
+        "safeguard",
+        "oversight",
+        "discernment"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The router hardware will automatically melt its plastic case to protect data.",
+          "correct": false,
+          "note": "Incorrect: hardware does not melt intentionally as a security mechanism."
+        },
+        {
+          "id": "b",
+          "text": "Product Discernment recognizes the insecure telnet protocol, triggering human oversight to reject the rule and mandate SSH.",
+          "correct": true,
+          "note": "Correct: security auditing catches unsafe recommendations before deployment."
+        },
+        {
+          "id": "c",
+          "text": "The AI assistant will call emergency services to report a security violation.",
+          "correct": false,
+          "note": "Incorrect: language models do not place emergency telephone calls."
+        }
+      ],
+      "explanation": "In this scenario, Product Discernment enables the network engineer to immediately spot a critical security flaw: opening unencrypted Telnet port 23 exposes credentials to cleartext sniffing. Through vigilant human oversight, the engineer rejects the AI draft, maintains security safeguards, and prompts the assistant to implement encrypted SSH on port 22 with key-based authentication. The {{opt:a,c}} options are absurd fantasies. Active discernment prevents AI-generated recommendations from creating severe network vulnerabilities, ensuring that only hardened, encrypted management protocols are exposed across corporate firewalls."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does maintaining an active Description-Discernment loop prevent project failure across long AI workflows?",
+      "difficulty": "hard",
+      "term_refs": [
+        "discernment",
+        "in sync",
+        "oversight"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It creates a continuous cadence of clear specification, immediate verification, and timely course correction at every milestone.",
+          "correct": true,
+          "note": "Correct: the iterative loop catches misunderstandings before they compound into major failures."
+        },
+        {
+          "id": "b",
+          "text": "It automatically rewrites all internet databases into encrypted binary strings.",
+          "correct": false,
+          "note": "Incorrect: the loop operates strictly within the active project workspace."
+        },
+        {
+          "id": "c",
+          "text": "It completely eliminates the need for computer monitors and input keyboards.",
+          "correct": false,
+          "note": "Incorrect: collaboration requires standard computing interfaces."
+        }
+      ],
+      "explanation": "The Description-Discernment loop ensures long-term project success by maintaining continuous quality control. Clear description articulates requirements at each milestone, while vigilant discernment immediately verifies deliverables against domain standards before proceeding. This iterative cadence prevents minor misunderstandings from compounding into disastrous architectural failures, keeping human and machine in sync throughout complex engineering initiatives. The {{opt:c,b}} options are nonsensical. This disciplined feedback loop embodies the essence of professional AI fluency, allowing engineering teams to build scalable, reliable software with confidence."
+    }
+  ],
+  "speaking_prompts": [
+    "Why is Discernment considered the flip side of Description? How do they form a continuous feedback loop in your technical work?",
+    "How do you apply product discernment to catch subtle hallucinations or syntax shortcomings in code generated by an AI assistant?",
+    "Describe an experience where an AI model experienced a lapse in attention or fell into circular reasoning. How did process discernment help you fix it?",
+    "When evaluating an interactive session, how does performance discernment help you adjust the AI's communication style and verbosity?",
+    "Why is human oversight an irreplaceable safeguard in production systems? When should poor AI results cause you to revisit delegation decisions?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 10 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining the difference between Process Discernment and Performance Discernment. Verify pronunciation using speech recognition.",
+    "Draft a 3-minute talk skeleton for your teacher analyzing how you apply discernment and human oversight to code or configuration reviews."
+  ]
+}

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w11",
+  "title": "The Description-Discernment Loop",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can execute a multi-step technical project using iterative Description-Discernment feedback loops.",
+    "By the end of this lesson I can integrate domain expertise, refine intermediate drafts, and discard flawed outputs.",
+    "By the end of this lesson I can establish explicit expectations and take full responsibility for AI-assisted deliverables."
+  ],
+  "vocabulary": [
+    {
+      "term": "feedback loop",
+      "definition_b1": "a continuous cycle where output evaluations are used to adjust future inputs",
+      "collocations": [
+        "productive feedback loop",
+        "continuous feedback loop"
+      ],
+      "ua": "цикл зворотного зв'язку",
+      "source_sentence": "Engage in productive Description-Discernment feedback loops"
+    },
+    {
+      "term": "exceed",
+      "definition_b1": "to be greater, larger, or better than an expected amount or limit",
+      "collocations": [
+        "exceed expectations",
+        "exceed results"
+      ],
+      "ua": "перевершувати; перевищувати",
+      "source_sentence": "Create results through human-AI collaboration that exceed what either could achieve alone"
+    },
+    {
+      "term": "pull up",
+      "definition_b1": "to open, retrieve, or display a file or document on a screen",
+      "collocations": [
+        "pull up a plan",
+        "pull up files"
+      ],
+      "ua": "відкрити; підтягнути (файл/документ на екрані)",
+      "source_sentence": "Pull up the project plan you created in Lesson 5"
+    },
+    {
+      "term": "dive into",
+      "definition_b1": "to start doing something enthusiastically or energetically without delay",
+      "collocations": [
+        "dive into execution",
+        "dive into the project"
+      ],
+      "ua": "зануритися у (виконання/роботу)",
+      "source_sentence": "Before diving into execution, plan how you'll approach Description:"
+    },
+    {
+      "term": "expectation",
+      "definition_b1": "a belief about what will happen or what someone should achieve",
+      "collocations": [
+        "establish expectations",
+        "meet expectations"
+      ],
+      "ua": "очікування",
+      "source_sentence": "Discuss these questions with Claude to establish clear expectations for your collaboration."
+    },
+    {
+      "term": "refine",
+      "definition_b1": "to improve something by making small and precise changes",
+      "collocations": [
+        "refine your plan",
+        "refine outputs"
+      ],
+      "ua": "вдосконалювати; доопрацьовувати",
+      "source_sentence": "Feel free to refine your plan based on what you've learned since then"
+    },
+    {
+      "term": "integrate",
+      "definition_b1": "to combine two or more things effectively to create a whole",
+      "collocations": [
+        "integrate expertise",
+        "integrate systems"
+      ],
+      "ua": "інтегрувати; поєднувати",
+      "source_sentence": "Integrate your own expertise and judgment:"
+    },
+    {
+      "term": "discard",
+      "definition_b1": "to get rid of something that is no longer useful or needed",
+      "collocations": [
+        "discard ideas",
+        "modify or discard"
+      ],
+      "ua": "відкидати; позбуватися непотрібного",
+      "source_sentence": "Make the final decisions about what to keep, modify, or discard"
+    },
+    {
+      "term": "take responsibility",
+      "definition_b1": "to accept personal accountability for an action, decision, or final outcome",
+      "collocations": [
+        "take responsibility",
+        "take full responsibility"
+      ],
+      "ua": "брати на себе відповідальність",
+      "source_sentence": "Take responsibility for the final output"
+    },
+    {
+      "term": "along the way",
+      "definition_b1": "during the course of a process, journey, or period of time",
+      "collocations": [
+        "learn along the way",
+        "adjustments along the way"
+      ],
+      "ua": "по ходу справи; у процесі (роботи)",
+      "source_sentence": "What adjustments did you make along the way?"
+    },
+    {
+      "term": "accountable",
+      "definition_b1": "responsible for explaining one's decisions and bearing the consequences",
+      "collocations": [
+        "hold accountable",
+        "remain accountable"
+      ],
+      "ua": "підзвітний; відповідальний",
+      "source_sentence": "You'll learn how to ensure your AI collaborations are responsible, transparent, and accountable."
+    },
+    {
+      "term": "diligence",
+      "definition_b1": "careful, thorough, and persistent effort to ensure quality, safety, and ethics",
+      "collocations": [
+        "exercise diligence",
+        "due diligence"
+      ],
+      "ua": "сумлінність; належна обачність / перевірка",
+      "source_sentence": "In the next lesson, we'll explore the final competency in the AI Fluency Framework: Diligence."
+    }
+  ],
+  "reading": {
+    "b1": "In this hands-on workshop, you apply Description and Discernment to complete your practical project. Human-AI collaboration allows you to create deliverables that **exceed** what either partner could achieve alone. First, **pull up** your project plan from Lesson 5. Review your delegation choices and **refine** your timeline.\n\nNext, prepare your description strategy. Before you **dive into** task execution, establish clear **expectation**s with Claude across Product, Process, and Performance. Setting explicit rules upfront prevents misunderstandings.\n\nThen, execute each subtask using a four-step **feedback loop**. First, describe your requirements clearly. Second, discern the quality of the generated output and reasoning. Third, **refine** your prompts with concrete feedback until satisfied. Fourth, **integrate** your unique domain expertise. You decide what code to modify, keep, or **discard**. You must **take responsibility** for the final production deliverable.\n\nFinally, reflect on adjustments made **along the way**. This iterative practice prepares you for the fourth competency: **diligence**. You ensure workflows remain ethical, transparent, and **accountable**.",
+    "original": "---\nTotal video duration in this module: 30 min\nWord count (wc -w): 562\nWords per minute: 19\nVerdict: <130 comfortable\n---\n\n# The Description-Discernment loop\n\n*Estimated Time: 30 - 60 minutes*\n\nBy the end of this lesson, you'll be able to:\n\n- Apply Description and Discernment skills to a real project\n- Engage in productive Description-Discernment feedback loops\n- Create results through human-AI collaboration that exceed what either could achieve alone\n\n## Exercises\n\n### Exercise: Project execution with description-discernment loops\n\nNow it's time to put everything you've learned into practice by working on the project you planned in Lesson 5, using the Description and Discernment skills you've been developing.\n\n#### Step 1: Review your project plan\n\n- Pull up the project plan you created in Lesson 5\n- Quickly review your delegation decisions about which tasks would benefit from human expertise, AI capabilities, or collaboration\n- Feel free to refine your plan based on what you've learned since then\n\n#### Step 2: Prepare your description approach\n\nStart a conversation with Claude and explain the project you'll be working on together. Before diving into execution, plan how you'll approach Description:\n\n- **Product Description**: What specific outputs do you need from Claude for each task? What format, style, length, and level of detail are you looking for?\n- **Process Description**: How should Claude approach each task? Are there specific methods, frameworks, or steps you want it to follow?\n- **Performance Description**: What kind of collaborative behavior do you want from Claude during this project? Should it be concise or detailed, challenging or supportive, focused on ideas or analysis?\n\nDiscuss these questions with Claude to establish clear expectations for your collaboration.\n\n#### Step 3: Execute your project using description-discernment loops\n\nNow, work through your planned project tasks with Claude. For each task:\n\n1. **Describe** what you need clearly, using the Description skills you've learned:\n   1. Be specific about what you want (Product)\n   2. Guide how Claude should approach or think about the task (Process)\n   3. Specify how you want Claude to engage with you during the process (Performance)\n2. **Discern** the quality of what you receive:\n   1. Evaluate the output itself (Product Discernment)\n   2. Assess how Claude approached the task (Process Discernment)\n   3. Consider if Claude's behavior is most helpful for what you need (Performance Discernment)\n3. **Refine** based on your discernment:\n   1. Provide feedback on what worked and what didn't\n   2. Clarify or adjust your description as needed\n   3. Request iterations until you're satisfied with the result\n4. **Integrate** your own expertise and judgment:\n   1. Add your unique perspective, creativity, or domain knowledge\n   2. Make the final decisions about what to keep, modify, or discard\n   3. Take responsibility for the final output\n\nContinue this Description-Discernment loop for each task in your project until completion.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- What patterns did you notice in the types of descriptions that led to the best outcomes?\n- Which required more effort from you: Description or Discernment? Why do you think that was the case?\n- How did your actual project execution compare to your initial plan from Lesson 5? What adjustments did you make along the way?\n\n#### What's next\n\nIn the next lesson, we'll explore the final competency in the AI Fluency Framework: Diligence. While Delegation, Description, and Discernment focus primarily on effectiveness and efficiency, Diligence addresses the ethical and safety aspects of working with AI. You'll learn how to ensure your AI collaborations are responsible, transparent, and accountable.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What is the primary objective of engaging in Description-Discernment feedback loops?",
+      "difficulty": "easy",
+      "term_refs": [
+        "feedback loop",
+        "exceed"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To iteratively guide, evaluate, and refine AI outputs so the final result exceeds what either human or AI could produce alone.",
+          "correct": true,
+          "note": "Correct: the continuous loop elevates quality beyond individual capabilities."
+        },
+        {
+          "id": "b",
+          "text": "To ensure that software code is never tested or reviewed by human engineers.",
+          "correct": false,
+          "note": "Incorrect: feedback loops explicitly require active human evaluation."
+        },
+        {
+          "id": "c",
+          "text": "To permanently disable all network routers in the office building.",
+          "correct": false,
+          "note": "Incorrect: feedback loops are collaborative design workflows, not network shutdowns."
+        }
+      ],
+      "explanation": "Engaging in Description-Discernment feedback loops transforms prompt interactions into a continuous quality improvement cycle. By clearly describing expectations, critically discerning intermediate outputs, and refining instructions iteratively, developers create solutions whose speed, nuance, and structural polish exceed what human or machine could achieve alone. The {{opt:c}} option is an absurd network disruption. The {{opt:b}} option contradicts the core principle of human discernment. This disciplined feedback cadence ensures that final technical deliverables meet production standards without costly rework, combining computational speed with nuanced human judgment."
+    },
+    {
+      "id": "q2",
+      "prompt": "Why should you establish clear expectations before diving into task execution in Step 2?",
+      "difficulty": "easy",
+      "term_refs": [
+        "expectation",
+        "dive into"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To delete the user operating system and install a fresh kernel.",
+          "correct": false,
+          "note": "Incorrect: project execution operates within standard application environments."
+        },
+        {
+          "id": "b",
+          "text": "To align on deliverables (Product), methodology (Process), and interaction style (Performance) before generating content.",
+          "correct": true,
+          "note": "Correct: establishing expectations upfront aligns collaborative posture."
+        },
+        {
+          "id": "c",
+          "text": "To purchase physical flight tickets to a tropical island.",
+          "correct": false,
+          "note": "Incorrect: establishing expectations is a conversational framing step, not travel booking."
+        }
+      ],
+      "explanation": "Establishing clear expectations across Product, Process, and Performance before diving into execution sets the collaborative ground rules. Defining the required file formats, step-by-step reasoning approaches, and desired communication tone upfront prevents conversational drift and eliminates frustrating misunderstandings. The {{opt:c}} option is a whimsical travel distraction. The {{opt:a}} option describes extreme OS reinstallation. Aligning on expectations early ensures that the AI assistant acts as a focused, disciplined partner throughout multi-step project workflows, saving developers time that would otherwise be spent re-prompting ambiguous drafts."
+    },
+    {
+      "id": "q3",
+      "prompt": "What does it mean to 'integrate your own expertise and judgment' during Step 3 of the loop?",
+      "difficulty": "easy",
+      "term_refs": [
+        "integrate",
+        "discard",
+        "take responsibility"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Accepting 100% of the AI's output without reading a single word of text.",
+          "correct": false,
+          "note": "Incorrect: blind acceptance abdicates essential human responsibility."
+        },
+        {
+          "id": "b",
+          "text": "Copying and pasting random text snippets from an encyclopedia.",
+          "correct": false,
+          "note": "Incorrect: integration requires deliberate domain-specific curation."
+        },
+        {
+          "id": "c",
+          "text": "Applying domain knowledge to decide what generated content to keep, modify, or discard, while taking full responsibility for the result.",
+          "correct": true,
+          "note": "Correct: human judgment filters AI drafts and owns the final outcome."
+        }
+      ],
+      "explanation": "Integrating human expertise is the decisive phase of the collaboration loop. An AI model can draft boilerplate code or prose, but only the human engineer possesses the contextual insight to verify security, evaluate edge cases, and decide what to modify or discard. Taking personal responsibility for the final artifact ensures that automation never compromises safety or professional ethics. The {{opt:a}} option describes dangerous passivity. The {{opt:b}} option lacks domain coherence. Human curation remains irreplaceable in production engineering, ensuring that deployed code adheres to strict architectural and security standards."
+    },
+    {
+      "id": "q4",
+      "prompt": "A developer reviews an AI-generated database migration script and finds a redundant table join. What should she do?",
+      "difficulty": "medium",
+      "term_refs": [
+        "refine",
+        "discard",
+        "feedback loop"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Deploy the flawed migration immediately to the main production database cluster.",
+          "correct": false,
+          "note": "Incorrect: deploying unoptimized queries risks severe database latency."
+        },
+        {
+          "id": "b",
+          "text": "Exercise discernment, discard the inefficient join, and refine the prompt to instruct the AI to optimize query execution.",
+          "correct": true,
+          "note": "Correct: identifies inefficiency and guides iterative query refinement."
+        },
+        {
+          "id": "c",
+          "text": "Shut down the entire company database servers permanently.",
+          "correct": false,
+          "note": "Incorrect: prompt refinement resolves query issues without server shutdown."
+        }
+      ],
+      "explanation": "When discernment identifies a redundant join or performance bottleneck in generated SQL, the engineer should discard the flawed clause and provide precise feedback through the loop. Stating 'The join on table B is redundant; rewrite the query using an indexed subquery' guides the AI to synthesize an optimized schema. The {{opt:a}} option risks severe database performance degradation in production. The {{opt:c}} option is an absurd overreaction. Closing the feedback loop ensures database scripts are performant, robust, and clean, preventing slow query execution and high server CPU loads."
+    },
+    {
+      "id": "q5",
+      "prompt": "How does reflecting on adjustments made 'along the way' improve an engineer's long-term AI fluency?",
+      "difficulty": "medium",
+      "term_refs": [
+        "along the way",
+        "refine",
+        "pull up"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It highlights recurring communication patterns and prompt bottlenecks, allowing developers to refine their future workflows.",
+          "correct": true,
+          "note": "Correct: meta-reflection turns project friction into durable collaboration skills."
+        },
+        {
+          "id": "b",
+          "text": "It increases the physical clock speed of the user's laptop processor.",
+          "correct": false,
+          "note": "Incorrect: reflection builds human cognitive skills, not hardware clock rates."
+        },
+        {
+          "id": "c",
+          "text": "It legally excuses developers from writing software documentation.",
+          "correct": false,
+          "note": "Incorrect: documentation remains an essential software engineering deliverable."
+        }
+      ],
+      "explanation": "Reflecting on adjustments made along the way provides valuable meta-cognitive insights into your prompting habits. Reviewing where prompts went off track, which descriptions yielded rapid breakthroughs, and why certain tasks required multiple discernment cycles allows engineers to refine their prompt templates for future projects. The {{opt:b}} option is an absurd hardware distraction. The {{opt:c}} option is a false legal assertion. Deliberate reflection converts individual project experiences into durable, high-leverage AI collaboration instincts, helping engineers develop an intuitive understanding of model strengths and limitations."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why is 'taking responsibility' for AI outputs a critical professional standard in engineering?",
+      "difficulty": "medium",
+      "term_refs": [
+        "take responsibility",
+        "accountable",
+        "diligence"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models will pay financial penalties directly from their bank accounts.",
+          "correct": false,
+          "note": "Incorrect: AI models do not possess bank accounts or legal liability."
+        },
+        {
+          "id": "b",
+          "text": "Because AI assistants are tools without legal or ethical agency; the human engineer remains strictly accountable for system reliability.",
+          "correct": true,
+          "note": "Correct: human professionals bear legal and ethical accountability for deployed code."
+        },
+        {
+          "id": "c",
+          "text": "Because software licenses assign 100% of all legal liability to cloud data center cooling fans.",
+          "correct": false,
+          "note": "Incorrect: cooling fans are mechanical components without legal personhood."
+        }
+      ],
+      "explanation": "Taking responsibility is the bedrock of professional engineering ethics. Language models operate as cognitive amplifiers, but they lack legal personhood, moral agency, and operational accountability. When an AI-assisted script causes a network outage, data breach, or calculation error, the engineer who authorized the deployment remains solely accountable. The {{opt:c,a}} options are humorous legal impossibilities. Exercising diligence and thorough human oversight ensures that AI speed is always paired with uncompromising professional accountability, protecting organizations from liability and ensuring technical integrity."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does the four-step loop (Describe, Discern, Refine, Integrate) bridge the gap between initial plan and final artifact?",
+      "difficulty": "medium",
+      "term_refs": [
+        "feedback loop",
+        "refine",
+        "integrate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It compresses entire computer hard drives into single-byte files.",
+          "correct": false,
+          "note": "Incorrect: the loop governs cognitive collaboration, not extreme compression."
+        },
+        {
+          "id": "b",
+          "text": "It eliminates the need for human software developers in all technology companies.",
+          "correct": false,
+          "note": "Incorrect: the loop relies directly on human judgment and domain integration."
+        },
+        {
+          "id": "c",
+          "text": "It converts high-level project intentions into verified, production-ready deliverables through progressive conversational refinement.",
+          "correct": true,
+          "note": "Correct: iterative cycles progressively shape raw concepts into finished products."
+        }
+      ],
+      "explanation": "The four-step execution loop bridges the gap between abstract delegation plans and finished artifacts through disciplined iteration. In Step 1 you describe requirements, in Step 2 you discern output quality, in Step 3 you refine prompts based on flaws, and in Step 4 you integrate domain judgment. This structured cycle prevents monolithic failures by breaking implementation into manageable, verifiable increments. The {{opt:b,a}} options are nonsensical claims. Progressive refinement guarantees that final deliverables align with rigorous technical standards, transforming ambitious ideas into solid production systems."
+    },
+    {
+      "id": "q8",
+      "prompt": "An architect pulls up an old cloud deployment plan and notices a new security standard. How should she proceed?",
+      "difficulty": "medium",
+      "term_refs": [
+        "pull up",
+        "refine",
+        "integrate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Pull up the plan, refine the delegation constraints to incorporate the new security policy, and integrate updated IAM rules.",
+          "correct": true,
+          "note": "Correct: updates delegation plan with fresh security requirements before execution."
+        },
+        {
+          "id": "b",
+          "text": "Cancel all cloud hosting contracts across the entire enterprise.",
+          "correct": false,
+          "note": "Incorrect: updating configuration scripts resolves security compliance smoothly."
+        },
+        {
+          "id": "c",
+          "text": "Ignore the new security policy and execute outdated scripts blindly on live servers.",
+          "correct": false,
+          "note": "Incorrect: ignoring security standards introduces severe organizational vulnerabilities."
+        }
+      ],
+      "explanation": "Before executing multi-step workflows, pulling up previous plans allows engineers to refine assumptions based on new information. When security policies change, updating the process description ensures the AI assistant generates compliant IAM policies and encryption configurations. The {{opt:c}} option is an irresponsible security risk. The {{opt:b}} option is a drastic overreaction. By integrating updated standards into the initial prompt description, the architect ensures that all generated infrastructure code conforms to current organizational benchmarks, preventing security vulnerabilities and compliance audit failures."
+    },
+    {
+      "id": "q9",
+      "prompt": "A CLI agent generates a complex deployment pipeline that includes deprecated API calls. How does the feedback loop resolve this?",
+      "difficulty": "hard",
+      "term_refs": [
+        "feedback loop",
+        "refine",
+        "discard"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Run the deprecated pipeline on live production servers to see if it causes a crash.",
+          "correct": false,
+          "note": "Incorrect: running known deprecated code on production risks severe outages."
+        },
+        {
+          "id": "b",
+          "text": "Delete the entire codebase and switch to managing infrastructure on paper notebooks.",
+          "correct": false,
+          "note": "Incorrect: prompt refinement cleanly updates API versions without abandoning software."
+        },
+        {
+          "id": "c",
+          "text": "Discern the deprecated APIs, discard the outdated functions, and refine the prompt with explicit modern library versions.",
+          "correct": true,
+          "note": "Correct: spots obsolete syntax, rejects it, and provides updated version constraints."
+        }
+      ],
+      "explanation": "In this scenario, Discernment immediately spots the model's knowledge cutoff shortcoming: synthesizing deprecated API calls. Through the feedback loop, the engineer discards the obsolete syntax and refines the prompt by specifying modern API versions and linking to current documentation. The AI assistant then regenerates compliant code using up-to-date syntax. The {{opt:a}} option invites critical production downtime. The {{opt:b}} option is an absurd retreat from technology. Iterative refinement reliably bridges model knowledge gaps, ensuring that all deployed software leverages current framework features and security patches."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does mastering the Description-Discernment loop directly prepare an engineer for the final 4D competency: Diligence?",
+      "difficulty": "hard",
+      "term_refs": [
+        "diligence",
+        "accountable",
+        "take responsibility"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It instills the rigorous habit of active inspection, verification, and human accountability required for ethical, transparent AI deployment.",
+          "correct": true,
+          "note": "Correct: Description-Discernment builds the quality discipline that Diligence scales to ethics and safety."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that software will never have to be tested or maintained again in the future.",
+          "correct": false,
+          "note": "Incorrect: testing and maintenance remain lifelong engineering responsibilities."
+        },
+        {
+          "id": "c",
+          "text": "It automatically translates all program code into ancient Latin scripts.",
+          "correct": false,
+          "note": "Incorrect: the 4D framework enhances technical engineering workflows in modern languages."
+        }
+      ],
+      "explanation": "The Description-Discernment loop serves as the practical proving ground for Diligence. While Delegation, Description, and Discernment focus primarily on speed, precision, and technical correctness, Diligence expands this discipline to ethics, data privacy, bias prevention, and transparency. Developing the muscle memory of active inspection and taking personal responsibility for outputs ensures that AI-driven automation remains safe, accountable, and legally sound. The {{opt:b,c}} options are absurd. Practicing continuous verification is the hallmark of true AI fluency, empowering developers to deploy automated systems with complete confidence."
+    }
+  ],
+  "speaking_prompts": [
+    "How do Description-Discernment feedback loops help you achieve results that exceed what you or an AI could create alone?",
+    "When you pull up a technical plan and dive into execution, how do you establish clear expectations across product, process, and performance?",
+    "Describe a scenario where discernment prompted you to refine instructions or discard flawed suggestions along the way.",
+    "Why is it vital that the human engineer integrates domain judgment and takes full responsibility for the final production output?",
+    "How does practicing diligence prepare you to keep automated CLI workflows transparent, safe, and accountable?"
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 11 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds explaining how you execute the 4-step loop (Describe, Discern, Refine, Integrate). Check your pronunciation of accountable and diligence.",
+    "Draft a 3-minute talk skeleton for your teacher presenting your completed course project and analyzing the feedback loops you used."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

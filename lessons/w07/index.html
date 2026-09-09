@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Lesson</title>
+<style>
+  /* ---------- base ---------- */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --incorrect: #a15c00;      /* amber, not red: feedback informs, it does not punish */
+    --incorrect-bg: #fdf3e3;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 15vh; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h1 { font-size: 2em; line-height: 1.2; margin: 0.2em 0; }
+  h2 { font-size: 1.5em; margin-top: 0; color: var(--text); }
+  h3 { font-size: 1.15em; }
+  a { color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .todo { color: var(--muted); font-style: italic; }
+
+  /* ---------- progress bar ---------- */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px; width: 0;
+    background: var(--accent); z-index: 100; transition: width 200ms ease;
+  }
+
+  /* ---------- nav ---------- */
+  #nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; font-size: 0.85em;
+  }
+  #nav button {
+    border: 1px solid transparent; background: none; border-radius: 6px;
+    padding: 4px 10px; color: var(--muted);
+  }
+  #nav button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  #nav .hint { margin-left: auto; color: var(--muted); }
+
+  /* ---------- header section ---------- */
+  #sec-header .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); }
+
+  /* ---------- vocabulary cards ---------- */
+  #vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px; perspective: 1200px;
+  }
+  .card { min-height: 200px; cursor: pointer; outline-offset: 3px; }
+  .card-inner {
+    position: relative; width: 100%; height: 100%; min-height: 200px;
+    transition: transform 400ms; transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .card-front { align-items: center; font-size: 1.25em; font-weight: 600; text-align: center; }
+  .card-back { transform: rotateY(180deg); font-size: 0.9em; gap: 6px; }
+  .card-back .colloc { color: var(--accent); }
+  .card-back .ua { color: var(--muted); }
+
+  /* ---------- reading ---------- */
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .toggle button { border: none; background: var(--card-bg); padding: 8px 16px; }
+  .toggle button.active { background: var(--accent); color: #fff; }
+  .reading-version.hidden { display: none; }
+  .reading-version > h3.print-only { display: none; }
+  .term {
+    border-bottom: 2px dotted var(--accent); cursor: help; position: relative;
+  }
+  .term:hover::after, .term:focus::after {
+    content: attr(data-def);
+    position: absolute; left: 0; bottom: calc(100% + 6px);
+    background: var(--text); color: #fff;
+    padding: 8px 12px; border-radius: 8px;
+    width: max-content; max-width: 36ch;
+    font-size: 0.8em; line-height: 1.4; z-index: 50;
+  }
+
+  /* ---------- quiz ---------- */
+  .quiz-progress { color: var(--muted); margin-bottom: 8px; }
+  .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    margin: 10px 0 0; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .quiz-option:not(:disabled):hover { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; opacity: 0.75; }
+  .quiz-option.chosen-correct,
+  .quiz-option.revealed-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 1; }
+  .quiz-option.chosen-incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); opacity: 1; }
+  .option-note {
+    margin: 2px 0 10px; padding: 0 16px;
+    font-size: 0.82em; color: var(--muted);
+  }
+  /* The explanation is the main content of the screen after answering. */
+  .quiz-explanation {
+    margin: 20px 0; padding: 20px 22px; border-radius: 10px;
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    font-size: 1em; line-height: 1.65;
+    opacity: 0; transition: opacity 200ms ease;
+  }
+  .quiz-explanation.show { opacity: 1; }
+  .quiz-explanation .verdict { font-weight: 700; display: block; margin-bottom: 6px; }
+  .quiz-explanation .verdict.v-correct { color: var(--correct); }
+  .quiz-explanation .verdict.v-incorrect { color: var(--incorrect); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-weight: 600;
+  }
+  .quiz-print-note { display: none; }
+
+  /* ---------- speaking ---------- */
+  .speaking-item { margin: 28px 0; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
+  .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
+  .timer-display.running { color: var(--accent); font-weight: 700; }
+  .timer-display.done { color: var(--correct); font-weight: 700; }
+  .timer button { border: 1px solid var(--border); background: var(--card-bg); border-radius: 8px; padding: 6px 14px; }
+
+  /* ---------- homework ---------- */
+  .hw-item { display: flex; gap: 12px; align-items: baseline; margin: 10px 0; }
+  .hw-item input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .hw-item input:checked + label { color: var(--muted); text-decoration: line-through; }
+
+  /* ---------- presentation mode ---------- */
+  body.presentation { font-size: 26px; }
+  body.presentation #nav { display: none; }
+  body.presentation main { max-width: 1100px; }
+  body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
+  body.presentation section.active { display: block; }
+
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
+  /* ---------- print ---------- */
+  @media print {
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
+    body { font-size: 12pt; background: #fff; }
+    section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+    /* reading expanded: both versions visible with their labels */
+    .reading-version.hidden { display: block; }
+    .reading-version > h3.print-only { display: block; }
+    /* quiz collapsed: interactive body hidden, note shown */
+    #quiz-app { display: none; }
+    .quiz-print-note { display: block; color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav"></nav>
+<main id="sections"></main>
+
+<!-- Lesson data lives inline: fetch() of an external JSON fails on file:// (CORS).
+     Do not edit this block by hand — edit lesson.json and run scripts/build_lesson.py. -->
+<script id="lesson-data" type="application/json">
+{
+  "week": "w07",
+  "title": "Project Planning and Delegation",
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "duration_min": 90,
+  "objectives": [
+    "By the end of this lesson I can scope a multi-step technical project for AI-assisted execution.",
+    "By the end of this lesson I can perform a detailed task breakdown through the lens of Delegation.",
+    "By the end of this lesson I can challenge assumptions and specify clear criteria for AI collaboration."
+  ],
+  "vocabulary": [
+    {
+      "term": "substantial",
+      "definition_b1": "large in size, value, importance, or amount",
+      "collocations": [
+        "substantial project",
+        "substantial progress"
+      ],
+      "ua": "значний; ґрунтовний; вагомий",
+      "source_sentence": "Substantial enough to involve multiple types of tasks"
+    },
+    {
+      "term": "manageable",
+      "definition_b1": "easy or possible to control, organize, or accomplish",
+      "collocations": [
+        "manageable task",
+        "manageable pieces"
+      ],
+      "ua": "здійсненний; посильний для виконання",
+      "source_sentence": "Manageable enough to complete within about 1 hour of work"
+    },
+    {
+      "term": "compelling",
+      "definition_b1": "attracting strong interest, attention, or admiration",
+      "collocations": [
+        "compelling presentation",
+        "compelling argument"
+      ],
+      "ua": "переконливий; захоплюючий; вражаючий",
+      "source_sentence": "Create a compelling presentation on a topic you're knowledgeable about"
+    },
+    {
+      "term": "pitch",
+      "definition_b1": "a short speech or presentation designed to persuade someone to accept an idea",
+      "collocations": [
+        "make a pitch",
+        "project pitch"
+      ],
+      "ua": "пітч; коротка презентація ідеї",
+      "source_sentence": "Develop a proposal or pitch for an idea you'd like to pursue"
+    },
+    {
+      "term": "pursue",
+      "definition_b1": "to work hard to achieve or follow a goal over a period of time",
+      "collocations": [
+        "pursue an idea",
+        "pursue a goal"
+      ],
+      "ua": "реалізовувати; переслідувати (мету)",
+      "source_sentence": "Develop a proposal or pitch for an idea you'd like to pursue"
+    },
+    {
+      "term": "emerging",
+      "definition_b1": "starting to exist, develop, or become prominent and known",
+      "collocations": [
+        "emerging technology",
+        "emerging trends"
+      ],
+      "ua": "нова / новітня (технологія); та, що активно з'являється",
+      "source_sentence": "Research and summarize the current state of an emerging technology or trend"
+    },
+    {
+      "term": "breakdown",
+      "definition_b1": "a detailed division of something into smaller parts for analysis",
+      "collocations": [
+        "task breakdown",
+        "detailed breakdown"
+      ],
+      "ua": "розбивка (на складові); деталізація",
+      "source_sentence": "Task breakdown and delegation analysis"
+    },
+    {
+      "term": "through the lens of",
+      "definition_b1": "examining or analyzing a situation from a specific viewpoint",
+      "collocations": [
+        "through the lens of",
+        "look through the lens"
+      ],
+      "ua": "крізь призму (чогось)",
+      "source_sentence": "Similar to what you did in the previous lesson, work with Claude to explore your project through the lens of Delegation:"
+    },
+    {
+      "term": "challenge assumptions",
+      "definition_b1": "to question whether beliefs or ideas are truly correct or justified",
+      "collocations": [
+        "challenge assumptions",
+        "challenge existing assumptions"
+      ],
+      "ua": "ставити під сумнів припущення",
+      "source_sentence": "Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion."
+    },
+    {
+      "term": "clarification",
+      "definition_b1": "the act of making something clearer or easier to understand",
+      "collocations": [
+        "ask for clarification",
+        "provide clarification"
+      ],
+      "ua": "уточнення; роз'яснення",
+      "source_sentence": "Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion."
+    },
+    {
+      "term": "anticipate",
+      "definition_b1": "to imagine or expect that something will happen and prepare for it",
+      "collocations": [
+        "anticipate challenges",
+        "anticipate problems"
+      ],
+      "ua": "передбачати; очікувати",
+      "source_sentence": "What do you anticipate will be the most challenging aspect of your delegation plan?"
+    },
+    {
+      "term": "specify",
+      "definition_b1": "to state or describe something clearly, precisely, and in detail",
+      "collocations": [
+        "specify requirements",
+        "specify details"
+      ],
+      "ua": "чітко вказувати; деталізувати",
+      "source_sentence": "This includes techniques for defining what you want, guiding how the AI approaches the task, and specifying how you want the AI to interact with you throughout the process."
+    }
+  ],
+  "reading": {
+    "b1": "In this module, you apply delegation principles to a real practical project. You will work on this project throughout the course. First, choose a **substantial** yet **manageable** project. It should involve multiple tasks and take about one hour. You can **pursue** a communication **pitch**, research an **emerging** technology, create a story, or build a tutorial.\n\nNext, define a clear project vision. Have a conversation with Claude to clarify what success looks like. Establish what makes the project particularly valuable. A clear goal prevents confusion later.\n\nThen, perform a detailed task **breakdown**. Examine each task **through the lens of** delegation. Discuss what human skills or AI capabilities are needed. Identify where AI creates value and where human judgment is required. During planning, **challenge assumptions** and ask for **clarification**. Save this delegation plan for future lessons.\n\nFinally, reflect on potential bottlenecks. Consider what challenges you **anticipate** during execution. This preparation sets up the next competency: Description. You will learn to **specify** detailed prompts and interaction styles to execute your plan successfully.",
+    "original": "---\nTotal video duration in this module: 20 min\nWord count (wc -w): 620\nWords per minute: 31\nVerdict: <130 comfortable\n---\n\n# Project planning and Delegation\n\nWhat you'll learn\n\nBy the end of this lesson, you'll be able to:\n\n- Apply your understanding of Delegation to a practical multi-step project you'll work on throughout the rest of this course\n\n### Project planning and delegation\n\n*Estimated time: 20 minutes*\n\n#### Step 1: Choose your project\n\nSelect a medium-sized, multi-step project that you can work on throughout the remainder of this course. Your project should be:\n\n- Substantial enough to involve multiple types of tasks\n- Manageable enough to complete within about 1 hour of work\n- Something you're genuinely interested in creating or accomplishing\n\nHere are some suggestions to consider:\n\n**Communication Projects:**\n\n- Create a compelling presentation on a topic you're knowledgeable about\n- Write a post or series of posts explaining a complex topic to a general audience\n- Develop a proposal or pitch for an idea you'd like to pursue\n- Create a personal or professional bio with supporting materials\n\n**Research Projects:**\n\n- Research and summarize the current state of an emerging technology or trend\n- Analyze a dataset to identify patterns and create recommendations\n- Compare multiple products, services, or approaches and create a recommendation\n- Investigate a historical event and present your findings in an engaging format\n\n**Creative Projects:**\n\n- Outline a short story with fully developed characters and plot\n- Design a simple website structure with content for key pages\n- Develop a concept for a product, service, or experience\n\n**Learning Projects:**\n\n- Create a structured learning plan for a skill you want to develop\n- Build a resource collection on a topic you're learning about\n- Develop a tutorial or guide for a process you understand well\n- Create a set of study materials for a topic you want to master\n\n#### Step 2: Project vision and goals\n\nStart a conversation with Claude. Share your project idea and invite Claude to ask you some questions until you feel you have a solid vision for the final result. Work together until you have a clear picture of:\n\n- What success looks like for your project\n- What would make this project particularly valuable or meaningful to you\n\n#### Step 3: Task breakdown and delegation analysis\n\nSimilar to what you did in the previous lesson, work with Claude to explore your project through the lens of Delegation:\n\n1. Identify together the major tasks needed to complete your project.\n2. For each task, one at a time, discuss:\n   1. What specific skills, knowledge, or AI capabilities are needed?\n   2. Which parts would benefit from uniquely human strengths?\n   3. Which parts could leverage AI capabilities well?\n   4. Where might collaboration have the most impact?\n   5. *Note: Again, have a genuine conversation about these questions rather than just exchanging statements. Challenge assumptions, ask for clarification, and remain open to unexpected insights that emerge during your discussion.*\n   6. Create a project plan that includes your major tasks and delegation decisions.\n   7. Save your project plan—you'll return to this project later in the course to practice your Description, Discernment, and Diligence skills.\n\n### Reflection\n\nBefore moving on, take a moment to consider:\n\n- What insights emerged from your planning conversation with Claude?\n- What do you anticipate will be the most challenging aspect of your delegation plan?\n- What additional information or skills might help you delegate more effectively to AI?\n\n#### What's next\n\nIn the next lesson, we'll explore the second core competency: Description. You'll learn approaches for communicating effectively with AI systems, which will help you implement the plan you've just created. This includes techniques for defining what you want, guiding how the AI approaches the task, and specifying how you want the AI to interact with you throughout the process.\n"
+  },
+  "audio": [],
+  "quiz": [
+    {
+      "id": "q1",
+      "prompt": "What criteria should you use when choosing a multi-step project for the AI Fluency course?",
+      "difficulty": "easy",
+      "term_refs": [
+        "substantial",
+        "manageable",
+        "pursue"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "The project should be substantial enough to involve multiple tasks, yet manageable within about an hour.",
+          "correct": true,
+          "note": "Correct: balances multi-step complexity with achievable scope."
+        },
+        {
+          "id": "b",
+          "text": "It should consist of a single word query with zero subtasks.",
+          "correct": false,
+          "note": "Incorrect: single-word tasks cannot demonstrate multi-step delegation."
+        },
+        {
+          "id": "c",
+          "text": "It must require five years of full-time development and a team of fifty engineers.",
+          "correct": false,
+          "note": "Incorrect: the project must be manageable within about an hour."
+        }
+      ],
+      "explanation": "The course recommends selecting a project that is substantial enough to require diverse cognitive tasks (such as researching, drafting, structuring, and reviewing), yet manageable enough to complete within about one hour of focused work. Choosing something you genuinely care to pursue ensures meaningful engagement. The {{opt:c}} option is absurdly oversized for a course exercise. The {{opt:b}} option fails to provide enough structural complexity to practice delegation. A well-scoped project gives you realistic opportunities to test automation, augmentation, and human review."
+    },
+    {
+      "id": "q2",
+      "prompt": "What is the purpose of conducting a task breakdown before delegating to an AI assistant?",
+      "difficulty": "easy",
+      "term_refs": [
+        "breakdown",
+        "through the lens of"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "To delete all project requirements and start over with no goals.",
+          "correct": false,
+          "note": "Incorrect: task breakdown organizes requirements rather than deleting them."
+        },
+        {
+          "id": "b",
+          "text": "To divide complex work into discrete steps and evaluate each through the lens of delegation.",
+          "correct": true,
+          "note": "Correct: breaking work into components reveals where AI and humans excel."
+        },
+        {
+          "id": "c",
+          "text": "To force the AI model to write the entire application in binary machine code.",
+          "correct": false,
+          "note": "Incorrect: task breakdown is a planning process, not a compiler directive."
+        }
+      ],
+      "explanation": "A task breakdown decomposes an ambitious project into clear, modular subtasks. By analyzing each subtask through the lens of delegation, you can deliberately decide whether it should be automated, explored collaboratively through augmentation, handled by an autonomous agent, or reserved exclusively for human judgment. The {{opt:a}} option is counterproductive. The {{opt:c}} option is a technical absurdity. In software engineering, breaking an epic into small user stories allows developers to delegate routine boilerplate to coding assistants while maintaining architectural control. This structural clarity ensures that every contributor, human or AI, understands their exact responsibilities."
+    },
+    {
+      "id": "q3",
+      "prompt": "Why should you challenge assumptions and ask for clarification during an AI planning discussion?",
+      "difficulty": "easy",
+      "term_refs": [
+        "challenge assumptions",
+        "clarification"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because language models will permanently erase their memory if you agree with them.",
+          "correct": false,
+          "note": "Incorrect: AI models do not erase memory based on agreement."
+        },
+        {
+          "id": "b",
+          "text": "To intentionally slow down the project until deadlines expire.",
+          "correct": false,
+          "note": "Incorrect: challenging assumptions saves time by preventing mistakes."
+        },
+        {
+          "id": "c",
+          "text": "To expose hidden constraints, avoid vague requirements, and discover unexpected insights.",
+          "correct": true,
+          "note": "Correct: dynamic dialogue sharpens project vision and catches flaws early."
+        }
+      ],
+      "explanation": "Having an interactive dialogue where you challenge assumptions and ask for clarification turns planning into a true thinking partnership. Rather than passively accepting the AI's first generic outline, probing deeper helps you uncover unstated constraints, refine goals, and discover valuable alternative approaches. The {{opt:b}} option is wrong because catching misunderstandings early prevents costly rework. The {{opt:a}} option is nonsense. In technical projects, asking 'What edge cases might break this plan?' often reveals critical security and performance requirements that initial prompts omitted."
+    },
+    {
+      "id": "q4",
+      "prompt": "A developer prepares a pitch for an emerging IoT networking tool. How does delegation support this project?",
+      "difficulty": "medium",
+      "term_refs": [
+        "pitch",
+        "emerging",
+        "compelling"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "AI can research market comparisons and draft slide outlines, while the developer crafts the compelling core argument.",
+          "correct": true,
+          "note": "Correct: leverages AI for drafting while keeping domain perspective."
+        },
+        {
+          "id": "b",
+          "text": "The developer bans all digital tools and writes the pitch on stone tablets.",
+          "correct": false,
+          "note": "Incorrect: refusing modern tools forfeits efficiency and research speed."
+        },
+        {
+          "id": "c",
+          "text": "The developer lets AI present live to investors while he sleeps.",
+          "correct": false,
+          "note": "Incorrect: live pitch delivery and investor questions require human presence."
+        }
+      ],
+      "explanation": "Developing a compelling project pitch for an emerging technology benefits from strategic task distribution. An AI assistant can rapidly gather comparative data, structure talking points, and draft presentation slides. Meanwhile, the developer uses domain insight to refine technical claims, anticipate skeptical stakeholder questions, and deliver the core narrative. The {{opt:c}} option is an irresponsible abdication of professional duties. The {{opt:b}} option is an exaggerated rejection of technology. Strategic collaboration allows engineers to build persuasive technical proposals in hours instead of days."
+    },
+    {
+      "id": "q5",
+      "prompt": "What should a project leader do when anticipating potential bottlenecks in an AI delegation plan?",
+      "difficulty": "medium",
+      "term_refs": [
+        "anticipate",
+        "manageable",
+        "specify"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Cancel the project immediately whenever any task requires more than two steps.",
+          "correct": false,
+          "note": "Incorrect: multi-step tasks are standard and manageable with proper planning."
+        },
+        {
+          "id": "b",
+          "text": "Anticipate failure modes, specify clear verification checkpoints, and keep high-risk tasks manageable.",
+          "correct": true,
+          "note": "Correct: proactive risk anticipation enables robust error recovery."
+        },
+        {
+          "id": "c",
+          "text": "Ignore all risks and assume the AI will automatically fix broken production servers.",
+          "correct": false,
+          "note": "Incorrect: unmonitored delegation invites severe operational failures."
+        }
+      ],
+      "explanation": "When planning multi-step projects, anticipating challenges allows you to design specific verification gates and fallback procedures. For example, if an AI agent generates script syntax, the plan should specify automated unit tests and manual diff review before merging. The {{opt:c}} option assumes magical infallibility, which causes catastrophic outages when models hallucinate. The {{opt:a}} option exhibits unnecessary fear of multi-step complexity. Proactive planning ensures that unexpected AI errors become manageable learning checkpoints rather than project-stopping disasters. By setting up sandboxed environments, developers can test agent-generated configs safely without risking production downtime."
+    },
+    {
+      "id": "q6",
+      "prompt": "Why does saving your delegation plan matter for the upcoming Description, Discernment, and Diligence modules?",
+      "difficulty": "medium",
+      "term_refs": [
+        "specify",
+        "through the lens of",
+        "substantial"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Because you will execute the same plan across future lessons, practicing how to specify prompts, evaluate outputs, and ensure diligence.",
+          "correct": true,
+          "note": "Correct: the project serves as a continuous practical thread across the 4Ds."
+        },
+        {
+          "id": "b",
+          "text": "Because course certificates are only awarded to students who keep 1,000 text files on their Desktop.",
+          "correct": false,
+          "note": "Incorrect: file count has no relationship to course accreditation."
+        },
+        {
+          "id": "c",
+          "text": "Because future lessons will forbid you from writing any new prompts or code.",
+          "correct": false,
+          "note": "Incorrect: future lessons involve active prompting and code evaluation."
+        }
+      ],
+      "explanation": "The delegation plan created in this lesson serves as the practical backbone for the rest of the course. In upcoming weeks, you will specify precise instructions for each subtask using Description, critically review generated artifacts with Discernment, and verify safety and ethics through Diligence. The {{opt:b}} option is an absurd administrative joke. The {{opt:c}} option contradicts the course design, which requires continuous hands-on collaboration. Using one substantial project across all 4D modules turns abstract principles into durable practical muscle memory."
+    },
+    {
+      "id": "q7",
+      "prompt": "How does defining 'what success looks like' in Step 2 prevent project drift during AI collaboration?",
+      "difficulty": "medium",
+      "term_refs": [
+        "clarification",
+        "compelling",
+        "manageable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "It makes prompt writing completely unnecessary for the remainder of the project.",
+          "correct": false,
+          "note": "Incorrect: clear goals inform better prompts rather than replacing them."
+        },
+        {
+          "id": "b",
+          "text": "It forces the AI to automatically rewrite all internet articles in lowercase letters.",
+          "correct": false,
+          "note": "Incorrect: goal definition guides task direction, not character casing."
+        },
+        {
+          "id": "c",
+          "text": "It establishes unambiguous objective criteria to evaluate whether intermediate AI drafts are moving in the right direction.",
+          "correct": true,
+          "note": "Correct: clear success criteria anchor discernment and prompt refinement."
+        }
+      ],
+      "explanation": "Defining what success looks like provides an essential reference anchor for the entire project. When collaborating with versatile AI models, discussions can easily drift into interesting but irrelevant tangents unless you have established measurable deliverables, target formats, and success benchmarks. The {{opt:b}} option is nonsensical. The {{opt:a}} option is false because clear goals make subsequent prompt description sharper and more effective. When an AI generates draft materials, having clear criteria allows you to ask for targeted clarification and course corrections immediately."
+    },
+    {
+      "id": "q8",
+      "prompt": "A student wants to build a tutorial for a complex deployment process. Which task breakdown best reflects strategic delegation?",
+      "difficulty": "medium",
+      "term_refs": [
+        "breakdown",
+        "substantial",
+        "manageable"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "AI executes root commands directly on production routers without saving a tutorial text.",
+          "correct": false,
+          "note": "Incorrect: this fails to create a tutorial and introduces extreme risk."
+        },
+        {
+          "id": "b",
+          "text": "Human outlines the deployment sequence, AI drafts step-by-step commands, human validates commands in a test lab, AI formats markdown.",
+          "correct": true,
+          "note": "Correct: combines human system expertise with AI drafting and formatting speed."
+        },
+        {
+          "id": "c",
+          "text": "Human writes every single letter by hand and uses AI only to calculate 2 + 2.",
+          "correct": false,
+          "note": "Incorrect: underutilizes AI drafting and formatting capabilities."
+        }
+      ],
+      "explanation": "This breakdown represents optimal delegation synergy. The engineer outlines the technical flow based on real architecture knowledge, the AI expands the outline into well-formatted explanatory prose, the engineer verifies every command in a sandbox lab, and the AI finalizes the markdown formatting. The {{opt:a}} option bypasses tutorial creation and risks catastrophic outages. The {{opt:c}} option severely underutilizes AI capabilities. Strategic delegation balances speed in content generation with rigorous human technical verification. Dividing tasks this way allows technical writers and engineers to publish comprehensive documentation in a fraction of the traditional time."
+    },
+    {
+      "id": "q9",
+      "prompt": "What is the primary advantage of exploring project planning through conversational dialogue rather than static prompt submission?",
+      "difficulty": "hard",
+      "term_refs": [
+        "challenge assumptions",
+        "clarification",
+        "emerging"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Iterative dialogue exposes edge cases, prompts clarifying questions, and stimulates emergent problem-solving ideas.",
+          "correct": true,
+          "note": "Correct: conversational back-and-forth deepens analysis and uncovers blind spots."
+        },
+        {
+          "id": "b",
+          "text": "Static single-turn prompts are legally banned in software architecture work.",
+          "correct": false,
+          "note": "Incorrect: single-turn prompts are permitted but less effective for complex planning."
+        },
+        {
+          "id": "c",
+          "text": "Conversational dialogue reduces the electrical power needed by cloud data centers.",
+          "correct": false,
+          "note": "Incorrect: dialogue exchanges require standard API compute cycles."
+        }
+      ],
+      "explanation": "Conversational planning is far more powerful than single-turn prompt submissions because it enables dynamic bidirectional refinement. When you invite the AI to ask clarifying questions, challenge your assumptions, and propose alternative breakdowns, the collaborative exchange surfaces unconsidered trade-offs and edge cases. The {{opt:c}} option is an absurd claim about energy physics. The {{opt:b}} option is factually untrue. Multi-turn planning transforms AI from a basic text autocomplete tool into a genuine intellectual partner, sharpening your vision before implementation begins. In complex infrastructure design, this dialogue helps identify network latency bottlenecks and security constraints early."
+    },
+    {
+      "id": "q10",
+      "prompt": "How does thorough project planning in Delegation directly empower the next competency: Description?",
+      "difficulty": "hard",
+      "term_refs": [
+        "specify",
+        "breakdown",
+        "anticipate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Delegation planning eliminates the need for written communication in all future steps.",
+          "correct": false,
+          "note": "Incorrect: Description explicitly requires precise written prompts."
+        },
+        {
+          "id": "b",
+          "text": "It guarantees that the AI model will never need any further input or evaluation.",
+          "correct": false,
+          "note": "Incorrect: the 4D framework is an iterative loop requiring ongoing engagement."
+        },
+        {
+          "id": "c",
+          "text": "Knowing the exact task breakdown and required outcomes enables you to specify context-rich, unambiguous instructions during Description.",
+          "correct": true,
+          "note": "Correct: clear delegation planning provides the exact requirements that Description articulates."
+        }
+      ],
+      "explanation": "The 4D competencies build sequentially upon one another. Thorough planning in Delegation defines exactly what subtasks exist, who is responsible for each, and what success criteria apply. This clarity directly empowers Description, allowing you to specify rich context, clear formats, and explicit constraints without hesitation. The {{opt:a}} option contradicts the framework, as Description relies on articulate prompt writing. The {{opt:b}} option is false because collaboration requires ongoing discernment. Without solid delegation planning, prompts become vague and outputs require endless correction."
+    }
+  ],
+  "speaking_prompts": [
+    "Which multi-step technical project would you like to pursue in this course? Explain why it is substantial yet manageable.",
+    "When you break down a complex coding or networking task, how do you look at it through the lens of delegation? Give a concrete example.",
+    "Why is it important to challenge assumptions and ask for clarification during an AI planning session instead of accepting the first plan?",
+    "What potential bottlenecks or risks do you anticipate when delegating parts of a live infrastructure project to a CLI agent?",
+    "How would you create a compelling pitch to explain your AI-assisted project workflow to a manager or client? Use pitch and specify."
+  ],
+  "homework": [
+    "Complete two review sessions with the Week 7 vocabulary deck in Anki. Say each term, its definition, and one personal example aloud.",
+    "Record 60 seconds describing your project's task breakdown and delegation plan. Check your pronunciation of substantial and anticipate.",
+    "Draft a 3-minute talk plan for your teacher explaining your chosen project, goals, and strategic delegation decisions."
+  ]
+}
+</script>
+
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("lesson-data").textContent);
+const LS = key => "etai:" + data.week + ":" + key;
+document.title = data.week.toUpperCase() + " — " + data.title;
+
+/* ---------- tiny helpers ---------- */
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
+
+/* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
+function mdToHtml(md) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  return md.trim().split(/\n\s*\n/).map(block => {
+    const b = block.trim();
+    const h = b.match(/^(#{1,4})\s+(.*)$/s);
+    if (h) return "<h3>" + inline(escHtml(h[2])) + "</h3>";
+    const lines = b.split("\n").map(l => l.trim());
+    if (lines.every(l => /^[-*]\s+/.test(l)))
+      return "<ul>" + lines.map(l => "<li>" + inline(escHtml(l.replace(/^[-*]\s+/, ""))) + "</li>").join("") + "</ul>";
+    return "<p>" + inline(escHtml(b)).replace(/\n/g, "<br>") + "</p>";
+  }).join("\n");
+}
+
+/* Wrap vocabulary terms in the reading text with a tooltip span.
+   Single-pass alternation regex, applied to text between tags only. */
+function highlightTerms(html) {
+  const vocab = data.vocabulary.filter(v => v.term && !isTodo(v.term));
+  if (!vocab.length) return html;
+  const byTerm = {};
+  vocab.forEach(v => { byTerm[v.term.toLowerCase()] = v; });
+  const re = new RegExp("\\b(" + vocab.map(v => escRe(v.term))
+    .sort((a, b) => b.length - a.length).join("|") + ")\\b", "gi");
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith("<")) return part;
+    return part.replace(re, m => {
+      const v = byTerm[m.toLowerCase()];
+      const def = isTodo(v.definition_b1) ? "definition coming soon" : v.definition_b1;
+      return '<span class="term" tabindex="0" data-def="' + escAttr(def) + '">' + m + "</span>";
+    });
+  }).join("");
+}
+
+/* ---------- section builders ---------- */
+const main = document.getElementById("sections");
+const addSection = (id, title, node) => {
+  const s = el("section", { id: "sec-" + id });
+  if (title) s.append(el("h2", {}, title));
+  s.append(node);
+  main.append(s);
+  return s;
+};
+
+/* 1. Header */
+{
+  const s = el("div", {},
+    el("p", { class: "muted" }, "English Through AI — Week " + data.week.replace(/^w0?/, "")),
+    el("h1", {}, data.title),
+    el("div", { class: "meta" },
+      el("span", {}, "Source: " + data.source),
+      el("span", {}, "Duration: " + data.duration_min + " min")
+    )
+  );
+  addSection("header", null, s);
+}
+
+/* 2. Objectives */
+{
+  const ul = el("ul", {});
+  data.objectives.forEach(o => ul.append(el("li", { class: isTodo(o) ? "todo" : "" }, o)));
+  addSection("objectives", "Objectives", ul);
+}
+
+/* 3. Vocabulary — flip cards + quick quiz */
+{
+  const wrap = el("div", {});
+  const grid = el("div", { id: "vocab-grid" });
+  data.vocabulary.forEach(v => {
+    const back = el("div", { class: "card-face card-back" },
+      el("strong", {}, v.term),
+      el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
+      el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      el("span", { class: "ua" }, v.ua)
+    );
+    const card = el("div", { class: "card", tabindex: "0", role: "button",
+        "aria-label": "Vocabulary card: " + v.term },
+      el("div", { class: "card-inner" },
+        el("div", { class: "card-face card-front" }, v.term), back));
+    const flip = () => card.classList.toggle("flipped");
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    grid.append(card);
+  });
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 4. Reading — B1 / Original toggle, terms highlighted */
+{
+  const wrap = el("div", {});
+  const mkVersion = (id, label, text) => {
+    const d = el("div", { class: "reading-version", id: "reading-" + id });
+    d.innerHTML = '<h3 class="print-only">' + label + "</h3>" +
+      (isTodo(text) ? '<p class="todo">' + escHtml(text) + "</p>" : highlightTerms(mdToHtml(text)));
+    return d;
+  };
+  const b1 = mkVersion("b1", "B1 version", data.reading.b1);
+  const orig = mkVersion("orig", "Original transcript", data.reading.original);
+  orig.classList.add("hidden");
+  const btnB1 = el("button", { class: "active" }, "B1 version");
+  const btnOrig = el("button", {}, "Original transcript");
+  const select = which => {
+    b1.classList.toggle("hidden", which !== "b1");
+    orig.classList.toggle("hidden", which !== "orig");
+    btnB1.classList.toggle("active", which === "b1");
+    btnOrig.classList.toggle("active", which === "orig");
+  };
+  btnB1.addEventListener("click", () => select("b1"));
+  btnOrig.addEventListener("click", () => select("orig"));
+  wrap.append(el("div", { class: "toggle" }, btnB1, btnOrig), b1, orig);
+  addSection("reading", "Reading", wrap);
+}
+
+/* 5. Quiz */
+{
+  const app = el("div", { id: "quiz-app" });
+  const note = el("p", { class: "quiz-print-note" },
+    "The quiz is interactive — open this file in a browser to take it.");
+  const state = { i: 0, score: 0, reviewTerms: new Set() };
+
+  function renderQuestion() {
+    app.replaceChildren();
+    const q = data.quiz[state.i];
+    app.append(
+      el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
+      el("p", { class: "quiz-prompt" }, q.prompt)
+    );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
+    const rows = [];
+    order.forEach(opt => {
+      const btn = el("button", { class: "quiz-option" }, opt.text);
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
+      rows.push({ opt, btn, note });
+      app.append(btn, note);
+    });
+  }
+
+  function answer(q, chosen, rows, order) {
+    /* Lock all options: no re-selection — that would spoil the exercise. */
+    rows.forEach(({ opt, btn, note }) => {
+      btn.disabled = true;
+      /* The correct option is always revealed, even when not chosen. */
+      if (opt.correct) btn.classList.add(opt === chosen ? "chosen-correct" : "revealed-correct");
+      else if (opt === chosen) btn.classList.add("chosen-incorrect");
+      note.hidden = false;
+    });
+    if (chosen.correct) state.score++;
+    else (q.term_refs || []).forEach(t => state.reviewTerms.add(t));
+
+    /* One explanation per question — the main content after answering. */
+    const exp = el("div", { class: "quiz-explanation" },
+      el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
+        chosen.correct ? "Correct" : "Not quite"),
+      resolveOptionRefs(q.explanation, order));
+    const next = el("button", { class: "btn-primary" },
+      state.i + 1 < data.quiz.length ? "Next" : "Finish");
+    next.addEventListener("click", () => {
+      state.i++;
+      state.i < data.quiz.length ? renderQuestion() : renderSummary();
+    });
+    app.append(exp, next);
+    requestAnimationFrame(() => requestAnimationFrame(() => exp.classList.add("show")));
+  }
+
+  function renderSummary() {
+    app.replaceChildren(
+      el("h3", {}, "Result: " + state.score + " / " + data.quiz.length),
+      state.reviewTerms.size
+        ? el("div", {}, el("p", {}, "Terms to review:"),
+            el("ul", {}, ...[...state.reviewTerms].map(t => el("li", {}, t))))
+        : el("p", {}, "Nothing flagged for review — well done."),
+      el("button", { class: "btn-primary", onclick: () => {
+        state.i = 0; state.score = 0; state.reviewTerms.clear(); renderQuestion();
+      } }, "Restart quiz")
+    );
+  }
+
+  if (data.quiz.length) renderQuestion();
+  else app.append(el("p", { class: "todo" }, "TODO: quiz questions"));
+  const holder = el("div", {}, app, note);
+  addSection("quiz", "Quiz", holder);
+}
+
+/* 6. Speaking prompts — big type, 60 s timer each */
+{
+  const wrap = el("div", {});
+  data.speaking_prompts.forEach(p => {
+    const display = el("span", { class: "timer-display" }, "60");
+    const btn = el("button", {}, "Start 60 s");
+    let interval = null;
+    btn.addEventListener("click", () => {
+      clearInterval(interval);
+      let left = 60;
+      display.textContent = left;
+      display.className = "timer-display running";
+      interval = setInterval(() => {
+        left--;
+        display.textContent = left;
+        if (left <= 0) {
+          clearInterval(interval);
+          display.textContent = "Time!";
+          display.className = "timer-display done";
+        }
+      }, 1000);
+    });
+    wrap.append(el("div", { class: "speaking-item" },
+      el("p", { class: "prompt-text " + (isTodo(p) ? "todo" : "") }, p),
+      el("div", { class: "timer" }, btn, display)));
+  });
+  addSection("speaking", "Speaking", wrap);
+}
+
+/* 7. Homework — checklist persisted to localStorage */
+{
+  const wrap = el("div", {});
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(LS("homework")) || "[]"); } catch (e) { saved = []; }
+  data.homework.forEach((h, i) => {
+    const cb = el("input", { type: "checkbox", id: "hw-" + i });
+    cb.checked = !!saved[i];
+    cb.addEventListener("change", () => {
+      saved[i] = cb.checked;
+      localStorage.setItem(LS("homework"), JSON.stringify(saved));
+    });
+    wrap.append(el("div", { class: "hw-item" }, cb,
+      el("label", { for: "hw-" + i, class: isTodo(h) ? "todo" : "" }, h)));
+  });
+  addSection("homework", "Homework", wrap);
+}
+
+/* ---------- navigation, presentation mode, progress ---------- */
+const sections = [...document.querySelectorAll("main > section")];
+const nav = document.getElementById("nav");
+const bar = document.getElementById("progress-bar");
+const navButtons = sections.map((s, i) => {
+  const label = s.querySelector("h2") ? s.querySelector("h2").textContent : "Start";
+  const b = el("button", { onclick: () => setCurrent(i, true) }, label);
+  nav.append(b);
+  return b;
+});
+nav.append(el("span", { class: "hint" }, "← → sections · P presentation · F fullscreen"));
+
+let current = 0;
+function setCurrent(i, scroll) {
+  current = Math.max(0, Math.min(sections.length - 1, i));
+  navButtons.forEach((b, j) => b.classList.toggle("active", j === current));
+  sections.forEach((s, j) => s.classList.toggle("active", j === current));
+  bar.style.width = ((current + 1) / sections.length * 100) + "%";
+  if (scroll && !document.body.classList.contains("presentation"))
+    sections[current].scrollIntoView({ behavior: "smooth", block: "start" });
+  if (document.body.classList.contains("presentation")) window.scrollTo(0, 0);
+}
+setCurrent(0, false);
+
+document.addEventListener("keydown", e => {
+  const t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "AUDIO") return;
+  if (e.key === "ArrowRight") setCurrent(current + 1, true);
+  else if (e.key === "ArrowLeft") setCurrent(current - 1, true);
+  else if (e.key === "f" || e.key === "F") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  } else if (e.key === "p" || e.key === "P") {
+    document.body.classList.toggle("presentation");
+    setCurrent(current, false);
+  }
+});
+</script>
+</body>
+</html>

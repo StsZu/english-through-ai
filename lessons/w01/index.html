@@ -103,11 +103,6 @@
     font-size: 0.8em; line-height: 1.4; z-index: 50;
   }
 
-  /* ---------- audio ---------- */
-  #sec-audio figure { margin: 0 0 20px; }
-  #sec-audio figcaption { margin-bottom: 6px; font-weight: 600; }
-  #sec-audio audio { width: 100%; }
-
   /* ---------- quiz ---------- */
   .quiz-progress { color: var(--muted); margin-bottom: 8px; }
   .quiz-prompt { font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
@@ -145,7 +140,7 @@
 
   /* ---------- speaking ---------- */
   .speaking-item { margin: 28px 0; }
-  .speaking-item .prompt-text { font-size: 1.5em; font-weight: 600; line-height: 1.35; }
+  .speaking-item .prompt-text { font-size: 1em; font-weight: normal; line-height: 1.6; margin: 0 0 10px; }
   .speaking-item .timer { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
   .timer-display { font-variant-numeric: tabular-nums; font-size: 1.2em; color: var(--muted); min-width: 3.5ch; }
   .timer-display.running { color: var(--accent); font-weight: 700; }
@@ -164,9 +159,12 @@
   body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
   body.presentation section.active { display: block; }
 
+  /* ---------- vocab quiz ---------- */
+  #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
+
   /* ---------- print ---------- */
   @media print {
-    #nav, #progress-bar, .timer, .btn-primary, .toggle { display: none !important; }
+    #nav, #progress-bar, .timer, .btn-primary, .toggle, #vocab-quiz-block { display: none !important; }
     body { font-size: 12pt; background: #fff; }
     section { display: block !important; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
     /* reading expanded: both versions visible with their labels */
@@ -192,59 +190,109 @@
   "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
   "duration_min": 90,
   "objectives": [
-    "TODO: By the end of this lesson I can …",
-    "TODO: By the end of this lesson I can …",
-    "TODO: By the end of this lesson I can …"
+    "By the end of this lesson I can explain AI Fluency and the four Ds with one work example.",
+    "By the end of this lesson I can compare short-term prompting tactics with lasting AI competencies.",
+    "By the end of this lesson I can describe two AI experiences using present perfect and correct articles."
   ],
   "vocabulary": [
     {
-      "term": "delegation",
-      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "term": "collaborate",
+      "definition_b1": "work with another person or tool to reach a shared goal",
       "collocations": [
-        "TODO",
-        "TODO"
+        "collaborate closely",
+        "collaborate with AI"
       ],
-      "ua": "TODO",
-      "source_sentence": "TODO: verbatim from transcript"
+      "source_sentence": "Instead, it's mostly about you and I, us humans, and how we interact and collaborate with AI systems.",
+      "ua": "співпрацювати"
     },
     {
-      "term": "description",
-      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "term": "confidently",
+      "definition_b1": "in a way that shows you feel sure about what you are doing",
       "collocations": [
-        "TODO",
-        "TODO"
+        "speak confidently",
+        "act confidently"
       ],
-      "ua": "TODO",
-      "source_sentence": "TODO: verbatim from transcript"
+      "source_sentence": "And it's about approaching these possibilities confidently and capably.",
+      "ua": "впевнено"
+    },
+    {
+      "term": "outdated",
+      "definition_b1": "old and no longer useful because things have changed",
+      "collocations": [
+        "become outdated",
+        "outdated advice"
+      ],
+      "source_sentence": "You'll learn plenty of practical skills, but it isn't just another collection of technical definitions or prompting tips that may be outdated next month.",
+      "ua": "застарілий"
+    },
+    {
+      "term": "evaluate",
+      "definition_b1": "judge the quality, value, or safety of something",
+      "collocations": [
+        "evaluate results",
+        "evaluate carefully"
+      ],
+      "source_sentence": "In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”",
+      "ua": "оцінювати"
+    },
+    {
+      "term": "accountable",
+      "definition_b1": "responsible for a decision and ready to explain it",
+      "collocations": [
+        "remain accountable",
+        "hold someone accountable"
+      ],
+      "source_sentence": "In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”",
+      "ua": "відповідальний"
+    },
+    {
+      "term": "delegation",
+      "definition_b1": "deciding which work another person or tool should do",
+      "collocations": [
+        "task delegation",
+        "effective delegation"
+      ],
+      "source_sentence": "In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”",
+      "ua": "делегування"
     },
     {
       "term": "discernment",
-      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "definition_b1": "careful judgment about what is good, true, or useful",
       "collocations": [
-        "TODO",
-        "TODO"
+        "exercise discernment",
+        "use discernment"
       ],
-      "ua": "TODO",
-      "source_sentence": "TODO: verbatim from transcript"
+      "source_sentence": "In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”",
+      "ua": "проникливість; критичне мислення; розрізнення"
     },
     {
       "term": "diligence",
-      "definition_b1": "TODO: max 20 words, B1 vocabulary only",
+      "definition_b1": "careful work that checks details and avoids careless mistakes",
       "collocations": [
-        "TODO",
-        "TODO"
+        "show diligence",
+        "due diligence"
       ],
-      "ua": "TODO",
-      "source_sentence": "TODO: verbatim from transcript"
+      "source_sentence": "In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”",
+      "ua": "старанність; ретельність"
+    },
+    {
+      "term": "grounding",
+      "definition_b1": "basic knowledge that gives you a strong starting point",
+      "collocations": [
+        "solid grounding",
+        "basic grounding"
+      ],
+      "source_sentence": "Let's face it, the AI world moves extremely quickly, and it's very hard to know where to start or how to keep up unless you have a grounding, fundamental framework to guide you and get you past that next prompt-engineering fad.",
+      "ua": "базова основа; фундаментальні знання"
     }
   ],
   "reading": {
-    "b1": "TODO: paste the B1 reading version here (docs/manual-pipeline.md, step 4). Markdown is supported: **bold**, lists, headings. Vocabulary terms are highlighted automatically.",
-    "original": "TODO: paste the original transcript here (docs/manual-pipeline.md, step 1)."
+    "b1": "This module takes about 10–15 minutes. The lesson belongs to the **AI Fluency: Framework & Foundations Course**. Joe Feller is a professor at Cork University Business School. Drew Bent teaches, programs, and serves on Anthropic’s technical staff. Rick Dacon is from Ringling College of Art and Design. Goals cover purpose, importance, the learning journey, and expected gains. Maggie Vo works on Anthropic’s education research team.\n\nThe course is not mainly about **AI** technology. It focuses on humans working with **AI systems**. **AI** can be more than a next-level spellchecker and become a trusted creative partner. We should approach this work confidently and capably.\n\nThe **AI** world changes extremely quickly. People may not know where to start or keep up. A fundamental **framework** guides them beyond the next **prompt-engineering** fad. The course calls this ability **AI Fluency**. It means using **AI systems** effectively, efficiently, ethically, and safely. It teaches practical skills, not only technical definitions or prompting tips. Those tips may become outdated next month. It changes how we approach **AI** and teaches us to think with **AI**.\n\nRecently, **AI** changed from specialized technologies into interactive systems. Millions now use them at school, work, and home. This change creates opportunities and uncertainty. Some organizations adopt **AI** without clear strategies. Some people feel frustrated with systems they do not fully understand. A widening gap exists. It separates what is possible from what feels comfortable and intuitive. The course wants to bridge this gap together.\n\nFirst, the course gives an overview of the **AI Fluency Framework**. It presents a useful and powerful model for human-**AI interaction**. Then it explains four core competencies, called the **four Ds**. They make interactions richer and rewarding.\n\n**Delegation** asks when humans should work and when **AI** should work. **Description** asks how we communicate clearly with **AI systems**. **Discernment** asks how we evaluate what **AI** gives us. **Diligence** asks how we keep interactions responsible, transparent, and accountable.\n\nEach section includes focused videos, exercises, and materials. Learners should spend much time applying lessons. Anthropic staff explain why today’s **AI** differs from earlier technologies. They discuss real capabilities and limitations. They show practical **four Ds** techniques.\n\nMost **AI training** focuses only on tactical skills. Examples include specific prompts, settings, or chosen systems. These skills can be useful but quickly become outdated. This course focuses on core competencies and deeper understanding instead. The goal is readiness for today’s **AI** and future changes.\n\nBy the end, learners get a **framework** for their own **AI interactions**. They should gain confidence deciding when and how to engage **AI** effectively. They should build thoughtful and fluid human-**AI collaboration** skills. They should also evaluate outcomes and take responsibility for them.\n\nThe practical exercise needs a **language model** and takes 5–10 minutes. Learners work directly with a **language model** throughout the course. Examples use **Claude**, Anthropic’s **AI assistant**. Learners may use any preferred **language model**. The principles and skills apply across different **AI systems**.\n\nStarting is simple and free. Learners can create a free **Claude** account at claude.ai. No paid subscription is required for course activities. Other **AI chatbots** are also allowed. New **Claude** users receive clear guidance with each exercise.\n\nReflection asks three questions. Learners consider challenges when using **AI** for specific outcomes. They consider exciting possibilities for **AI collaboration**. They also state what they hope to gain.\n\nThe next lesson explains why **AI Fluency** matters today. It covers a rapidly evolving technological landscape. It introduces **Automation**, **Augmentation**, and **Agency**. These are three key ways people collaborate with **AI**. It also revisits **Delegation**, **Description**, **Discernment**, and **Diligence**.\n\nThe course invites feedback about work, life, classes, and course concepts. Learners can share feedback at forms.gle/zURqLbVgdDqGhHZk9. The course copyright is 2025 Rick Dakan, Joseph Feller, and Anthropic. It uses the CC BY-NC-SA 4.0 license. The course draws on The **AI Fluency Framework** by Dakan and Feller. Ireland’s Higher Education Authority partly supported the course. Support came through the National Forum for the Enhancement of Teaching and Learning.\n\nThe module lists a total duration of 15 minutes. Its word count is 1,112. The stated reading speed is 74 words per minute. The verdict says this is comfortable because it is below 130.",
+    "original": "## Introduction to AI Fluency\n\n*(4 minutes)*\n\n**Lesson 1: Introduction to AI Fluency | AI Fluency: Framework & Foundations Course |**\n\nI'm Joe Feller. I'm a professor at the Cork University Business School. My name is Drew Bent, and I'm a teacher, programmer, and a member of the technical staff at Anthropic. My name is Rick Dacon from the Ringling College of Art and Design. I'm Maggie Vo, and I work on the education research team at Anthropic.\n\nLet's begin our exploration of the AI fluency framework.\n\nThe focus of this course is not really about AI as a technology. Instead, it's mostly about you and I, us humans, and how we interact and collaborate with AI systems. It's about imagining possibilities that don't treat AI as some sort of next-level spellchecker, but instead as a trusted partner for doing creative and innovative problem-solving work. And it's about approaching these possibilities confidently and capably. Let's face it, the AI world moves extremely quickly, and it's very hard to know where to start or how to keep up unless you have a grounding, fundamental framework to guide you and get you past that next prompt-engineering fad. That's why we're publishing this course. In this course, we explore AI fluency, our ability to engage with AI systems in ways that are effective, efficient, ethical, and safe. You'll learn plenty of practical skills, but it isn't just another collection of technical definitions or prompting tips that may be outdated next month. This course is about fundamentally shifting how we approach AI.\n\nWe want to change how we think about AI so that we can learn how to think with AI. Over the last few years, AI has transformed from specialized technologies to interactive systems that millions use daily at school, at work, and at home. This transformation creates both opportunities and uncertainty. We see organizations adopting AI without clear strategies. We watch people growing frustrated with systems that they don't fully understand. And we're all experiencing a widening gap between what's possible and what feels comfortable and intuitive. This course exists to help us bridge this gap together.\n\nHere's the journey we'll take across this course. First, we'll give an overview of the AI fluency framework, a model for human-AI interaction that we have found useful and powerful. We'll discuss the ways we interact with AI systems and four core competencies, which we call the four Ds, that transform those interactions into something richer and much more rewarding. Then we'll look at each competency more closely. In brief, these are delegation, which asks, “When should humans do work, and when should AI?”; description, which asks, “How do we communicate clearly with AI systems?”; discernment, which asks, “How do we evaluate what AI gives us?”; and diligence, which asks, “How do we ensure our interaction with AI is responsible, transparent, and accountable?”\n\nEach section includes focused videos paired with exercises and materials to build practical understanding. We hope you'll spend much of your time during this course trying what you're learning.\n\nYou'll also hear directly from a few of us at Anthropic about what makes today's AI different from previous technologies, the real capabilities and limitations of these systems, and practical techniques that apply the four Ds. Most AI training focuses solely on tactical skills, like specific prompts, which settings to adjust, or which systems to use. While useful, these skills can quickly become outdated. We're taking a different approach and focusing on core competencies and deep understanding so that you're prepared not just for today's AI, but for the changes to come.\n\nBy the end of our time together, you'll have a framework to guide your own interactions with AI, confidence in deciding when and how to engage AI effectively, practical skills for more thoughtful and fluid human-AI collaboration, and the ability to evaluate and take responsibility for the outcomes of these collaborations. Thank you for joining us.\n\n--- reading: Introduction to AI Fluency ---\n\n#### Key takeaways\n\n- This course focuses on human-AI collaboration, not just understanding AI as a technology\n- AI Fluency means engaging with AI systems effectively, efficiently, ethically, and safely\n- The AI Fluency Framework centers on the \"4D\" competencies of Delegation, Description, Discernment and Diligence\n- The goal is to develop lasting skills that remain relevant as AI technology evolves\n- Effective AI collaboration requires both practical skills and a fundamental shift in how we think about working with AI\n\n"
   },
   "audio": [
     {
-      "label": "TODO: Module 1 — video 1 (put the mp3 into ./audio/ and set src to ./audio/w01-v1.mp3)",
+      "label": "Module 1 — video 1",
       "src": null,
       "url": null
     }
@@ -252,75 +300,320 @@
   "quiz": [
     {
       "id": "q1",
-      "prompt": "In the AI Fluency framework, what does 'Delegation' mean? (demo question — replace with your own)",
-      "term_refs": [
-        "delegation",
-        "description"
-      ],
+      "prompt": "You want a CLI agent to rename files and update imports in a small git branch. Which choice best shows delegation?",
       "difficulty": "easy",
+      "term_refs": [
+        "delegation"
+      ],
       "options": [
         {
           "id": "a",
-          "text": "Letting the AI make every decision for you.",
-          "correct": false,
-          "note": "Too far — delegation keeps you in control of the goal and the final result."
+          "text": "Decide which tasks the agent handles and which checks you keep for yourself.",
+          "correct": true,
+          "note": "Correct: you divide work between the human and AI."
         },
         {
           "id": "b",
-          "text": "Deciding what work to do yourself and what work to give to the AI.",
-          "correct": true,
-          "note": "Yes — you split the task between yourself and the AI, and stay responsible."
+          "text": "Ask the agent to explain every technical word before touching the files.",
+          "correct": false,
+          "note": "Not quite: this improves communication, but it does not divide responsibility."
         },
         {
           "id": "c",
-          "text": "Writing very detailed instructions for the AI.",
+          "text": "Accept every changed file because the agent is faster than manual editing.",
           "correct": false,
-          "note": "That is Description, a different D: how you explain the task, not whether to hand it over."
+          "note": "Incorrect: speed alone does not justify giving away all control."
         }
       ],
-      "explanation": "Delegation is the first of the four Ds. Before you write any prompt, you ask: is this a good job for AI at all? Which parts need my human judgement? Option (a) goes too far, because delegation is not about giving away all control. You stay responsible for the goal and the final result, like a good manager who gives tasks to a team but still checks the work. Option (c) describes a different D, called Description: how you explain a task to the AI — the context, the format and the style you want. Delegation happens one step earlier, and the two skills work together: first you delegate, then you describe. For example, AI can draft a summary quickly, but you should choose the goal and check the facts."
+      "explanation": "The correct answer is A because delegation is about deciding who should do each part of the work. In a git task, the agent can rename files and update imports, while you can keep final checks and merging. B is mainly about clear communication, not dividing the work. C gives the agent too much control without deciding where human judgment is still needed. A useful extra step is to give the agent a separate branch. That makes delegation safer because you can inspect the diff before any change reaches your main branch."
     },
     {
       "id": "q2",
-      "prompt": "You asked an AI to explain a topic, and the answer sounds very confident. What does 'Discernment' tell you to do? (demo question — replace with your own)",
+      "prompt": "An AI answer about a MikroTik firewall rule looks confident, but one command seems unusual. What should you do first?",
+      "difficulty": "easy",
       "term_refs": [
-        "discernment"
+        "discernment",
+        "evaluate"
       ],
-      "difficulty": "medium",
       "options": [
         {
           "id": "a",
-          "text": "Trust the answer, because confident language means the facts are correct.",
+          "text": "Run the command immediately because confident wording usually means the answer is reliable.",
           "correct": false,
-          "note": "Confident style is not evidence — AI can sound sure and still be wrong."
+          "note": "Incorrect: confident language is not evidence that a command is safe."
         },
         {
           "id": "b",
-          "text": "Evaluate the answer critically: check the facts, the logic, and what might be missing.",
+          "text": "Evaluate the command against documentation and your current router configuration.",
           "correct": true,
-          "note": "Yes — judge the quality yourself: facts, logic, and what is missing."
+          "note": "Correct: check the output before applying it to a real router."
         },
         {
           "id": "c",
-          "text": "Ask the same question again until the AI gives a shorter answer.",
+          "text": "Rewrite the prompt until the AI gives a shorter answer.",
           "correct": false,
-          "note": "Repeating the question may only give you the same errors in fewer words."
+          "note": "Not enough: a shorter answer can still contain a dangerous command."
         }
       ],
-      "explanation": "Discernment is the skill of judging AI output with a critical eye. It applies to both the product (are the facts right? is the logic sound?) and the process (did the AI understand my request?). Option (a) is exactly the trap: AI models often sound confident even when they are wrong — this is sometimes called a hallucination, so confident style is not evidence. Option (c) mixes up quality and length: asking again can be useful, but a shorter answer is not automatically a better one, and you may get the same errors in fewer words. One practical habit: always verify names, numbers and dates in another source before you use them. Discernment is what makes you the editor, not just the reader."
+      "explanation": "The correct answer is B because discernment means checking what AI gives you before using it. Router commands can affect connectivity and security, so a confident tone is not enough. A is wrong because AI can sound certain while making a technical mistake. C may improve readability, but it does not verify the command. One useful nuance is to compare the proposed command with a safe export or backup of your current configuration. You can also test risky changes in a lab router before applying them to equipment you depend on."
+    },
+    {
+      "id": "q3",
+      "prompt": "Which sentence best uses present perfect to describe the learner's AI experience?",
+      "difficulty": "easy",
+      "term_refs": [
+        "collaborate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "I collaborate with CLI agents yesterday on a Python script.",
+          "correct": false,
+          "note": "Incorrect: yesterday normally requires the past simple."
+        },
+        {
+          "id": "b",
+          "text": "I am collaborating with CLI agents since two years.",
+          "correct": false,
+          "note": "Incorrect: this form does not fit a continuing experience with since."
+        },
+        {
+          "id": "c",
+          "text": "I have collaborated with CLI agents on several coding projects.",
+          "correct": true,
+          "note": "Correct: present perfect describes experience up to now."
+        }
+      ],
+      "explanation": "The correct answer is C because present perfect is useful for experience connected to the present. The speaker has done this work before, and that experience matters now. A is wrong because “yesterday” points to a finished past time, so past simple is better. B is wrong because “since two years” is not natural; English normally uses “for two years” for a duration. An extra example is: “I have used AI to build static sites on Vercel.” This tense is especially useful when describing your background in interviews or technical conversations."
+    },
+    {
+      "id": "q4",
+      "prompt": "A prompt technique worked well six months ago but now gives weaker results. Which conclusion best fits the lesson?",
+      "difficulty": "medium",
+      "term_refs": [
+        "outdated",
+        "grounding"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Keep the technique unchanged because old methods are always more stable.",
+          "correct": false,
+          "note": "Incorrect: tactical methods can lose value as AI tools change."
+        },
+        {
+          "id": "b",
+          "text": "Stop using AI until one permanent prompting method becomes available.",
+          "correct": false,
+          "note": "Incorrect: the lesson argues for lasting skills, not a permanent trick."
+        },
+        {
+          "id": "c",
+          "text": "Use strong grounding in core skills and replace outdated tactics when needed.",
+          "correct": true,
+          "note": "Correct: lasting principles should guide changing technical tactics."
+        }
+      ],
+      "explanation": "The correct answer is C because the lesson separates lasting competencies from short-lived tactics. A grounding in core skills helps you adapt when a prompt pattern becomes outdated. A is wrong because older techniques are not automatically stable or better. B is wrong because no single prompting method is likely to remain perfect while AI tools continue changing. One useful example is coding agents: a special prompt format may change, but checking requirements, testing outputs, and deciding what to delegate remain useful. Those habits survive changes in tools and interfaces."
+    },
+    {
+      "id": "q5",
+      "prompt": "Your drone-planning assistant suggests a route near controlled airspace. Which response shows the strongest discernment?",
+      "difficulty": "medium",
+      "term_refs": [
+        "discernment",
+        "accountable",
+        "evaluate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Evaluate the route against current aviation rules and remain accountable for the final decision.",
+          "correct": true,
+          "note": "Correct: verify the advice and keep responsibility for the outcome."
+        },
+        {
+          "id": "b",
+          "text": "Use the route if the assistant explains its reasoning in enough detail.",
+          "correct": false,
+          "note": "Incorrect: a detailed explanation can still be wrong or outdated."
+        },
+        {
+          "id": "c",
+          "text": "Avoid AI for all drone planning because mistakes are possible.",
+          "correct": false,
+          "note": "Too extreme: AI can help when its output is checked responsibly."
+        }
+      ],
+      "explanation": "The correct answer is A because discernment requires you to evaluate AI output, especially when safety or rules matter. You also remain accountable for the final choice. B is wrong because a long explanation does not prove that the route follows current aviation rules. C is wrong because the lesson supports thoughtful collaboration, not avoiding AI completely. An important extra point is that drone rules can change by country and airspace type. For certification abroad, checking an official aviation source is stronger evidence than relying only on an assistant’s memory."
+    },
+    {
+      "id": "q6",
+      "prompt": "You are building a feature for your typing platform. Which workflow best reflects collaboration with AI?",
+      "difficulty": "medium",
+      "term_refs": [
+        "collaborate",
+        "delegation",
+        "evaluate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Let AI build and deploy everything without checking the code or user behavior.",
+          "correct": false,
+          "note": "Incorrect: collaboration still requires human decisions and evaluation."
+        },
+        {
+          "id": "b",
+          "text": "Write every line yourself and use AI only to correct spelling in comments.",
+          "correct": false,
+          "note": "Too limited: AI can support more than simple text correction."
+        },
+        {
+          "id": "c",
+          "text": "Delegate a draft to AI, evaluate the code, and refine it together.",
+          "correct": true,
+          "note": "Correct: the human and AI share work while keeping judgment."
+        }
+      ],
+      "explanation": "The correct answer is C because collaboration means using AI as a partner while keeping human judgment active. You can delegate a first implementation, evaluate the code, test the feature, and then ask for improvements. A is wrong because it removes meaningful human checking. B is wrong because it treats AI like a simple spellchecker, which the lesson specifically moves beyond. One extra example is your typing platform: an agent could generate a scoring function, but you could test whether it rewards speed without encouraging too many typing errors."
+    },
+    {
+      "id": "q7",
+      "prompt": "A teammate says, “We only need better prompts; deeper AI skills are unnecessary.” Which reply best challenges that view?",
+      "difficulty": "medium",
+      "term_refs": [
+        "outdated",
+        "grounding",
+        "confidently"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Prompt tricks are enough if we collect a very large library of them.",
+          "correct": false,
+          "note": "Incorrect: a large library can still become outdated quickly."
+        },
+        {
+          "id": "b",
+          "text": "Prompt tactics can become outdated, so grounding helps us adapt confidently.",
+          "correct": true,
+          "note": "Correct: lasting skills support adaptation when tools and tactics change."
+        },
+        {
+          "id": "c",
+          "text": "Prompts are unimportant because AI should always understand vague requests.",
+          "correct": false,
+          "note": "Incorrect: clear prompting still matters even within a broader framework."
+        }
+      ],
+      "explanation": "The correct answer is B because the lesson does not reject prompts; it puts them inside a larger set of lasting skills. Specific tactics can become outdated, while grounding in core competencies helps people adapt confidently. A is wrong because collecting more prompt tricks does not solve the problem of changing tools. C is wrong because clear communication with AI still matters. A useful nuance is that strong users often change both the prompt and the workflow. For example, they may add tests, files, tools, or checkpoints instead of only rewriting one instruction."
+    },
+    {
+      "id": "q8",
+      "prompt": "A CLI agent produces working code, but you cannot explain why one security change is safe. What is the best next step?",
+      "difficulty": "medium",
+      "term_refs": [
+        "diligence",
+        "accountable",
+        "evaluate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Merge it because passing tests mean the security change is fully understood.",
+          "correct": false,
+          "note": "Incorrect: passing tests do not prove every security effect is safe."
+        },
+        {
+          "id": "b",
+          "text": "Remove the tests and ask the agent for a simpler answer.",
+          "correct": false,
+          "note": "Incorrect: removing evidence makes evaluation weaker, not stronger."
+        },
+        {
+          "id": "c",
+          "text": "Evaluate the change, document the reason, and stay accountable before merging.",
+          "correct": true,
+          "note": "Correct: careful checking and responsibility belong before deployment."
+        }
+      ],
+      "explanation": "The correct answer is C because diligence includes responsible, transparent, and accountable use of AI. If you cannot explain a security change, you should evaluate it before merging and record why it is acceptable. A is wrong because tests cover only what they were designed to test. B is wrong because removing tests reduces useful evidence. One extra practice is to ask the agent to point to the exact changed lines and possible risks. Then you can compare those claims with documentation or a security checklist before approving the pull request."
+    },
+    {
+      "id": "q9",
+      "prompt": "You want to explain an AI-assisted Raspberry Pi project to your teacher. Which answer is most effective?",
+      "difficulty": "hard",
+      "term_refs": [
+        "collaborate",
+        "confidently",
+        "evaluate"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "State your position, give one concrete project example, and explain how you evaluated the AI output.",
+          "correct": true,
+          "note": "Correct: it answers directly and supports the point with evidence."
+        },
+        {
+          "id": "b",
+          "text": "Tell a long story about when you first bought the Raspberry Pi, without answering the question.",
+          "correct": false,
+          "note": "Incorrect: the answer drifts away from the requested point."
+        },
+        {
+          "id": "c",
+          "text": "List technical words about AI and Raspberry Pi without saying what you decided.",
+          "correct": false,
+          "note": "Incorrect: vocabulary alone does not make a clear, direct answer."
+        }
+      ],
+      "explanation": "The correct answer is A because a strong spoken response answers the exact question and supports it with a concrete example. It also uses the learner’s strength in extended speech without drifting away from the task. B is wrong because a personal story can become unrelated. C is wrong because technical terms do not replace a clear position. One useful speaking technique is a three-part structure: answer, example, conclusion. For instance, say what AI did, explain how you evaluated it, then state whether you would collaborate with AI that way again."
+    },
+    {
+      "id": "q10",
+      "prompt": "A company wants AI to handle customer messages automatically. Which plan best applies the course framework?",
+      "difficulty": "hard",
+      "term_refs": [
+        "delegation",
+        "discernment",
+        "diligence"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "text": "Automate every message immediately because fast replies are the main goal.",
+          "correct": false,
+          "note": "Incorrect: speed does not replace judgment, checking, or responsibility."
+        },
+        {
+          "id": "b",
+          "text": "Decide which messages AI handles, check difficult outputs, and define responsibility for mistakes.",
+          "correct": true,
+          "note": "Correct: it combines delegation, discernment, and diligence in one workflow."
+        },
+        {
+          "id": "c",
+          "text": "Keep every message manual because responsible AI use means avoiding automation.",
+          "correct": false,
+          "note": "Incorrect: responsible use can include automation with suitable human control."
+        }
+      ],
+      "explanation": "The correct answer is B because it combines three important competencies. Delegation decides which messages AI should handle. Discernment checks difficult or uncertain outputs. Diligence makes responsibility clear when something goes wrong. A is wrong because fast automation without controls can create poor or unsafe responses. C is wrong because the framework does not say humans must do everything manually. One extra nuance is that companies can use confidence thresholds or message categories. Simple requests may be automated, while legal, financial, or sensitive cases can be sent to a human."
     }
   ],
   "speaking_prompts": [
-    "TODO: speaking prompt 1",
-    "TODO: speaking prompt 2",
-    "TODO: speaking prompt 3",
-    "TODO: speaking prompt 4",
-    "TODO: speaking prompt 5"
+    "Your CLI agent can edit many files in a git branch. What would you delegate, and what would you keep for yourself? Give one concrete example and use delegation, discernment, and accountable.",
+    "Would you allow an AI assistant to change a MikroTik router configuration automatically? Take a position, give a specific router example, and use evaluate, diligence, and confidently.",
+    "For drone planning, which is more valuable: fast AI suggestions or careful human checking? Compare them, disagree with one weak approach, and use discernment, accountable, and evaluate.",
+    "On your typing platform, where has AI collaboration helped most, and where should a human stay in control? Give one feature example and use collaborate, delegation, and diligence.",
+    "Do you agree that collecting better prompts is enough to stay effective with AI tools? Argue your position with one CLI-agent example and use outdated, grounding, and confidently."
   ],
   "homework": [
-    "TODO: homework item 1",
-    "TODO: homework item 2",
-    "TODO: homework item 3"
+    "Complete two passes through the \"AI Fluency Lesson 1 — 9 Words\" deck in 12 minutes. Say each term, definition, and one personal example aloud.",
+    "Record 30–45 seconds saying engaging, discernment, and accountable twice in full sentences. Run the recording through a transcription tool and repeat until all three words appear correctly.",
+    "Record a 90-second answer about one AI task you have completed. Explain what you delegated, how you evaluated the output, and why you remained accountable. Use at least five vocabulary terms."
   ]
 }
 </script>
@@ -349,6 +642,27 @@ const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g
 const escAttr = s => escHtml(s).replace(/"/g, "&quot;");
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const isTodo = s => typeof s === "string" && /^\s*TODO/i.test(s);
+
+/* Fisher-Yates: an unbiased shuffle. sort(() => Math.random() - 0.5) is not. */
+const shuffled = arr => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Quiz explanations point at options with {{opt:b}} / {{opt:b,c}} instead of
+   naming a position, so the text stays true after the options are shuffled.
+   The token resolves to the ordinal of where that option actually sits now. */
+const ORDINAL_WORDS = ["first", "second", "third", "fourth"];
+const resolveOptionRefs = (text, order) =>
+  String(text).replace(/\{\{opt:([a-z](?:,[a-z])*)\}\}/g, (whole, ids) => {
+    const positions = ids.split(",").map(id => order.findIndex(o => o.id === id));
+    if (positions.some(i => i < 0 || i >= ORDINAL_WORDS.length)) return whole;
+    return positions.sort((x, y) => x - y).map(i => ORDINAL_WORDS[i]).join(" and ");
+  });
 
 /* Minimal markdown: ## headings, - lists, paragraphs, **bold**, *italic*. */
 function mdToHtml(md) {
@@ -415,8 +729,9 @@ const addSection = (id, title, node) => {
   addSection("objectives", "Objectives", ul);
 }
 
-/* 3. Vocabulary — flip cards */
+/* 3. Vocabulary — flip cards + quick quiz */
 {
+  const wrap = el("div", {});
   const grid = el("div", { id: "vocab-grid" });
   data.vocabulary.forEach(v => {
     const back = el("div", { class: "card-face card-back" },
@@ -434,7 +749,76 @@ const addSection = (id, title, node) => {
     card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
     grid.append(card);
   });
-  addSection("vocabulary", "Vocabulary", grid);
+  wrap.append(grid);
+
+  const validTerms = data.vocabulary.filter(v => v.term && !isTodo(v.term) && v.definition_b1 && !isTodo(v.definition_b1));
+  if (validTerms.length >= 3) {
+    const quizBlock = el("div", { id: "vocab-quiz-block" },
+      el("h3", {}, "Vocabulary Quiz"),
+      el("p", { class: "muted" }, "Match the definition with the correct word.")
+    );
+    const app = el("div", { id: "vocab-quiz-app", style: "margin-top: 16px;" });
+    quizBlock.append(app);
+    wrap.append(quizBlock);
+
+    const shuffle = shuffled;
+    let qList = shuffle(validTerms);
+    let qIdx = 0;
+    let score = 0;
+
+    function renderVocabQ() {
+      app.replaceChildren();
+      const current = qList[qIdx];
+      const otherTerms = validTerms.filter(t => t.term !== current.term);
+      const distractors = shuffle(otherTerms).slice(0, 2);
+      const opts = shuffle([current, ...distractors]);
+
+      const progress = el("p", { class: "quiz-progress" }, "Question " + (qIdx + 1) + " of " + qList.length);
+      const prompt = el("p", { class: "quiz-prompt", style: "font-weight: 500;" }, current.definition_b1);
+      app.append(progress, prompt);
+
+      const buttons = [];
+      opts.forEach(item => {
+        const btn = el("button", { class: "quiz-option" }, item.term);
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.term === current.term) b.classList.add(b === btn ? "chosen-correct" : "revealed-correct");
+            else if (b === btn) b.classList.add("chosen-incorrect");
+          });
+          if (item.term === current.term) score++;
+
+          const next = el("button", { class: "btn-primary", style: "margin-top: 18px;" },
+            qIdx + 1 < qList.length ? "Next word" : "Finish");
+          next.addEventListener("click", () => {
+            qIdx++;
+            qIdx < qList.length ? renderVocabQ() : renderVocabSummary();
+          });
+          app.append(next);
+        });
+        btn.dataset.term = item.term;
+        buttons.push(btn);
+        app.append(btn);
+      });
+    }
+
+    function renderVocabSummary() {
+      app.replaceChildren(
+        el("h3", {}, "Result: " + score + " / " + qList.length),
+        el("p", { class: "muted" }, score === qList.length ? "Perfect score! All terms mastered." : "Great practice!"),
+        el("button", { class: "btn-primary", style: "margin-top: 12px;", onclick: () => {
+          qList = shuffle(validTerms);
+          qIdx = 0;
+          score = 0;
+          renderVocabQ();
+        } }, "Restart quiz")
+      );
+    }
+
+    renderVocabQ();
+  }
+
+  addSection("vocabulary", "Vocabulary", wrap);
 }
 
 /* 4. Reading — B1 / Original toggle, terms highlighted */
@@ -463,28 +847,7 @@ const addSection = (id, title, node) => {
   addSection("reading", "Reading", wrap);
 }
 
-/* 5. Audio — local files + external links */
-{
-  const wrap = el("div", {});
-  const links = el("ul", {});
-  data.audio.forEach(a => {
-    if (a.src) {
-      wrap.append(el("figure", {},
-        el("figcaption", {}, a.label),
-        el("audio", { controls: "", preload: "none", src: a.src })));
-    } else if (a.url) {
-      links.append(el("li", {}, el("a", { href: a.url, target: "_blank", rel: "noopener" }, a.label)));
-    } else {
-      wrap.append(el("p", { class: "todo" }, a.label));
-    }
-  });
-  if (links.children.length) {
-    wrap.append(el("h3", {}, "External links (audio not downloaded)"), links);
-  }
-  addSection("audio", "Audio", wrap);
-}
-
-/* 6. Quiz */
+/* 5. Quiz */
 {
   const app = el("div", { id: "quiz-app" });
   const note = el("p", { class: "quiz-print-note" },
@@ -498,17 +861,21 @@ const addSection = (id, title, node) => {
       el("p", { class: "quiz-progress" }, "Question " + (state.i + 1) + " of " + data.quiz.length),
       el("p", { class: "quiz-prompt" }, q.prompt)
     );
+    /* Options are shuffled on every render: the correct answer must not be
+       findable by position, and a re-taken quiz must not be muscle memory. */
+    const order = shuffled(q.options);
     const rows = [];
-    q.options.forEach(opt => {
+    order.forEach(opt => {
       const btn = el("button", { class: "quiz-option" }, opt.text);
-      const note = el("p", { class: "option-note", hidden: "" }, opt.note);
-      btn.addEventListener("click", () => answer(q, opt, rows));
+      const note = el("p", { class: "option-note", hidden: "" },
+        resolveOptionRefs(opt.note, order));
+      btn.addEventListener("click", () => answer(q, opt, rows, order));
       rows.push({ opt, btn, note });
       app.append(btn, note);
     });
   }
 
-  function answer(q, chosen, rows) {
+  function answer(q, chosen, rows, order) {
     /* Lock all options: no re-selection — that would spoil the exercise. */
     rows.forEach(({ opt, btn, note }) => {
       btn.disabled = true;
@@ -524,7 +891,7 @@ const addSection = (id, title, node) => {
     const exp = el("div", { class: "quiz-explanation" },
       el("span", { class: "verdict " + (chosen.correct ? "v-correct" : "v-incorrect") },
         chosen.correct ? "Correct" : "Not quite"),
-      q.explanation);
+      resolveOptionRefs(q.explanation, order));
     const next = el("button", { class: "btn-primary" },
       state.i + 1 < data.quiz.length ? "Next" : "Finish");
     next.addEventListener("click", () => {
@@ -554,7 +921,7 @@ const addSection = (id, title, node) => {
   addSection("quiz", "Quiz", holder);
 }
 
-/* 7. Speaking prompts — big type, 60 s timer each */
+/* 6. Speaking prompts — big type, 60 s timer each */
 {
   const wrap = el("div", {});
   data.speaking_prompts.forEach(p => {
@@ -583,7 +950,7 @@ const addSection = (id, title, node) => {
   addSection("speaking", "Speaking", wrap);
 }
 
-/* 8. Homework — checklist persisted to localStorage */
+/* 7. Homework — checklist persisted to localStorage */
 {
   const wrap = el("div", {});
   let saved = [];
