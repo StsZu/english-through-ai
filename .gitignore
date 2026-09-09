@@ -7,3 +7,4 @@ lessons/*/audio/*.m4a
 node_modules/
 __pycache__/
 .venv/
+.idea/
