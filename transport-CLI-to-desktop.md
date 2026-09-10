@@ -1,5 +1,124 @@
 # transport-CLI-to-desktop
 
+## T-003 — 2026-09-10 — course revision, quiz randomisation, publication
+
+Direct request from the owner, not via `transport-desktop-to-CLI.md`: audit the
+course material, write a technical specification, execute it, then publish.
+The audit is `docs/revision-spec.md` (R1–R11); this is the execution record.
+
+### Done
+
+- **R1+R2 — the quiz (the reason for the whole pass).** The correct answer sat
+  in position `a` in all 10 questions of every week w03–w14: 120 of 140
+  questions. The template rendered options in stored order, so twelve lessons
+  were scorable 10/10 by always clicking the top button. `source_prompt.md:130`
+  had required a 3–4 spread and was already marked "has been violated before" —
+  a prompt is not an enforcement mechanism, so the rule moved into the build.
+  Shuffling alone was impossible: 202 explanations named their distractors by
+  position ("The second option is false because…"), which shuffling turns into
+  a lie. Fixed together — explanations now reference options symbolically
+  (`{{opt:b}}`, `{{opt:b,c}}`), resolved at render time to the ordinal the
+  option actually occupies; the template shuffles on every render
+  (Fisher–Yates — the vocabulary quiz's biased `sort(() => Math.random() - 0.5)`
+  now shares the same helper); stored order was permuted to 4/3/3 per week.
+  No explanation text was rewritten, only the referring expression.
+  Verified across all 14 weeks × all 6 display orders: **1368 ordinal
+  references, none ever points at the correct answer, no token unresolved**.
+- **R3+R4 — source.md hygiene.** w03, w05, w06 carried the scaffold's own
+  instructions as if they were course text (w05/w06 stated their word count
+  twice, once real and once as `___`); w03, w09, w10, w12, w13 carried the
+  generator's voice, "Here is the polished transcript…". Removed. All 14 weeks
+  now share one YAML header. Every removed line was diffed to confirm no course
+  content went with it.
+- **R5** — `lessons/w00 copy/` was failing `--all`; renamed `_w00_copy`, out of
+  the build glob. **R7** — w13's text began mid-word, "y the end".
+- **R6** — w07/w09/w11 record impossible reading rates (31, 249, 19 wpm)
+  because module duration and transcript word count measure different things.
+  Marked `TODO — re-measure` rather than guessed.
+- **R8** — `termbank.csv` held only its header while 162 terms sat in the
+  lesson files. `scripts/termbank_sync.py` now derives it (stdlib-only,
+  idempotent, keeps `added_at`, drops nothing).
+- **R9+R11** — w07–w14 were cloned from w06 and never re-labelled: 24
+  prep/agenda/friction files titled w06, telling the student to build w06.
+  All prep files also named artefacts of the retired flow.
+- **Landing page + publication.** `index.html` at the repo root, generated from
+  every `lesson.json` by `build_lesson.py --index` (`--all` includes it).
+  Cards, a search over lesson titles and all 162 terms, and a progress board
+  reading each week's `etai:<week>:homework` key. Published to
+  <https://stszu.github.io/english-through-ai/>.
+- **Speech records removed from git.** `recordings/w00_baseline.txt` is a
+  verbatim transcript of the owner's own unscripted baseline recording and was
+  tracked, including in history. Before publishing, it was purged from all 12
+  commits and the leftover refs dropped; verified 0 reachable objects and a 404
+  on the live site. The file is intact on disk and gitignored, along with
+  future talk transcripts and `errors/*.json`.
+- **The two recorded format gaps, closed.** `pronunciation_focus` and the
+  per-term `example` were requested by the prompt and silently discarded. Both
+  are now rendered — an optional Pronunciation section and the example on the
+  flip-card back — and validated when present.
+
+### Tree after
+
+Unchanged in shape. New: `index.html`, `.nojekyll`, `docs/revision-spec.md`,
+`docs/editing-lesson-text.md`, `scripts/termbank_sync.py`,
+`templates/index-template.html`, `.agents/skills/lesson-builder/SKILL.md`,
+`pyproject.toml`, `lessons/Outline_course.md`, `lessons/w01/source_B1.md`,
+`transportation_to_you.md`, two w03 handouts. Renamed: `lessons/w00 copy/` →
+`lessons/_w00_copy/` (untracked).
+
+### Decisions
+
+Taken under instruction to decide independently:
+
+1. **The 12 short readings were not rewritten.** `reading.b1` runs 155–253
+   words against the prompt's 400–500 in every week from w03. Rewriting them is
+   inventing learning content, which the hard rules forbid and which is the
+   whole point of the course. The build now warns and names each week.
+2. **`pronunciation_focus` was rendered, not dropped.** The alternative was to
+   stop asking for it. Rejected: homework item 2 is specified to be built from
+   it and speaking is the diagnosed weakness, so dropping it would have removed
+   the one lesson element aimed at that weakness.
+3. **The explanation limit moved to 80–120 in the build**, matching the prompt,
+   rather than loosening the prompt to 150. Nothing in the course exceeds 102
+   words, so the stricter, already-stated number costs nothing.
+4. **`legacy/` was left untouched** although it is now public — the rule is
+   absolute. See Questions.
+5. **`description-SKILL.md` and `lessons/_w00_copy/` were left untracked**, not
+   deleted. The first duplicates the skill file in Ukrainian at the repo root;
+   the second is a broken duplicate lesson (`week` says w06, one 42-word
+   explanation). Both remain on disk.
+6. **The w03 PDFs were committed** — CC BY-NC-SA handouts belonging to that
+   week, matching the precedent of the already-tracked vocabulary cheat sheet.
+7. **`transportation_to_you.md` was committed in Ukrainian.** It documents its
+   own exception to the English-only rule as a deliberate request.
+
+### Questions
+
+1. `legacy/` is now publicly readable: `English_Through_AI.pdf`, `.pptx` and
+   the Microsoft "Generative AI for Beginners" material. Untouched per the
+   rule, but worth a decision now that the repository is public.
+2. `transportation_to_you.md` says the course is 12 weeks; there are 14.
+3. Four terms are taught in two different weeks: *accountable* (w01, w11),
+   *diligence* (w01, w11), *discernment* (w01, w10), *stand behind* (w03, w12).
+   Surfaced by the termbank sync — a content signal, not an error.
+4. w02 still carries `example` data for 9 terms while the other 13 weeks have
+   none, so the flip-card back is richer in that one week.
+
+### Blockers
+
+None. `python3 scripts/build_lesson.py --all` exits 0; the site is live.
+
+### Files changed
+
+`CLAUDE.md`, `.gitignore`, `docs/manual-pipeline.md`, `docs/revision-spec.md`,
+`docs/editing-lesson-text.md`, `scripts/build_lesson.py`,
+`scripts/termbank_sync.py`, `scripts/instruction.md`,
+`templates/lesson-template.html`, `templates/index-template.html`,
+`templates/lesson.schema.json`, `termbank/termbank.csv`, `index.html`,
+`.nojekyll`, and all 14 `lessons/wNN/` (lesson.json, index.html, source.md,
+source_prompt.md, prep.md, agenda.md, friction.md).
+
+
 ## T-002 — 2026-08-28 20:19
 
 ### Done
