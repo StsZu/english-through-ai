@@ -214,14 +214,9 @@ Recorded here rather than fixed silently:
   for in every week from w03 onward. The build warns about it; the readings
   themselves have not been regenerated. See `docs/revision-spec.md` R10.
 
-- `source_prompt.md` asks for `pronunciation_focus` and a per-term `example`.
-  Neither exists in `lesson.json`, `templates/lesson.schema.json` or
-  `templates/lesson-template.html`, so both are currently discarded at step 4.
-  Either the format grows to hold them or the prompt should stop asking.
-- `source_prompt.md` caps `explanation` at 120 words while the build allows
-  150. The prompt is the stricter of the two, so generated lessons pass — but
-  the two numbers should agree.
-- `scripts/instruction.md` is still in Ukrainian and pending translation.
+- `lessons/Outline_course.md` is a rough paste from Coursera and carries stray
+  "Success: Complete" lines. The `lesson-builder` skill reads module names from
+  it, so it works, but it deserves a clean-up.
 - `source_prompt.md` is not part of `templates/week-scaffold/`, so every new
   week starts by copying it from the previous one.
 

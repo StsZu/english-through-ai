@@ -74,10 +74,9 @@ exit 0 with no `error:` lines) and open the resulting `index.html` from
    that file is the spec for the future `lessonfactory` automation.
 
 Known gaps are listed at the end of `docs/manual-pipeline.md` — chiefly that
-`source_prompt.md` asks for `pronunciation_focus` and a per-term `example`
-that no consumer reads, and that `reading.b1` runs 40–60 % short of the length
-the prompt asks for from w03 onward. `docs/revision-spec.md` is the audit that
-found these and records what was fixed.
+`reading.b1` runs 40–60 % short of the length the prompt asks for from w03
+onward. `docs/revision-spec.md` is the audit that found these and records what
+was fixed.
 
 ## Lesson architecture
 
@@ -99,10 +98,12 @@ read is wrapped in try/catch, because `file://` blocks `localStorage`.
 `templates/lesson-template.html` is the template for a lesson. The build substitutes
 the literal token `__LESSON_DATA__` with the JSON payload (`</` escaped so the
 payload cannot terminate the `<script>` block) — if you edit the template, that
-token must survive. The template renders seven sections from the data, in
-order: Header, Objectives, Vocabulary (flip cards + quick quiz), Reading
-(B1/Original toggle with vocabulary terms highlighted), Quiz, Speaking prompts
-(60 s timer each), Homework (persisted checklist).
+token must survive. The template renders these sections from the data, in
+order: Header, Objectives, Vocabulary (flip cards + quick quiz, with the
+optional per-term `example` on the card back), Pronunciation (only when the
+week supplies `pronunciation_focus`), Reading (B1/Original toggle with
+vocabulary terms highlighted), Quiz, Speaking prompts (60 s timer each),
+Homework (persisted checklist).
 
 ## Build validation
 
@@ -117,7 +118,7 @@ documentation, not executed**; if you change the data format, update both.
 - an empty `quiz`
 - a question without exactly 3 options, or without exactly one `correct: true`
 - an option with a missing/empty `note`, or a `note` over 25 words
-- an `explanation` that is missing, empty, or outside 80–150 words
+- an `explanation` that is missing, empty, or outside 80–120 words
   (measured after `{{opt:...}}` tokens expand)
 - an `explanation` or `note` naming an option by position ("the second
   option"); options are shuffled at render time, so references use

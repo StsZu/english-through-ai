@@ -78,6 +78,10 @@
           },
           "source_sentence": {
             "type": "string"
+          },
+          "example": {
+            "type": "string",
+            "description": "Optional. One sentence placing the term in the learner's own context. Rendered on the back of the flip card when present."
           }
         }
       }
@@ -217,7 +221,7 @@
             "type": "string",
             "minLength": 1,
             "$comment": "80-150 words, CEFR B1. Explains the correct answer, briefly why the other two are wrong, and adds one new fact, example or nuance not in the question.",
-            "description": "80-150 words, measured after {{opt:...}} tokens expand. Options are shuffled at render time, so an option is referenced with a token naming its id - {{opt:b}} renders as the ordinal that option currently occupies ('second'), {{opt:b,c}} renders as 'second and third' in ascending display order. Naming an option by position in prose is rejected by the build."
+            "description": "80-120 words, measured after {{opt:...}} tokens expand. Options are shuffled at render time, so an option is referenced with a token naming its id - {{opt:b}} renders as the ordinal that option currently occupies ('second'), {{opt:b,c}} renders as 'second and third' in ascending display order. Naming an option by position in prose is rejected by the build."
           }
         }
       },
@@ -238,6 +242,31 @@
       "items": {
         "type": "string",
         "minLength": 1
+      }
+    },
+    "pronunciation_focus": {
+      "type": "array",
+      "description": "Optional. Rendered as its own Pronunciation section between Vocabulary and Reading, and the source of homework item 2. Omitted entirely when the week has none.",
+      "items": {
+        "type": "object",
+        "required": [
+          "word",
+          "stress",
+          "why"
+        ],
+        "properties": {
+          "word": {
+            "type": "string"
+          },
+          "stress": {
+            "type": "string",
+            "description": "The word with the stressed syllable in CAPITALS, e.g. in-TEL-li-gence"
+          },
+          "why": {
+            "type": "string",
+            "description": "One sentence naming the problem for this learner"
+          }
+        }
       }
     }
   }

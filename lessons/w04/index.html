@@ -159,6 +159,23 @@
   body.presentation section { display: none; border: none; min-height: 92vh; padding-top: 6vh; }
   body.presentation section.active { display: block; }
 
+  /* ---------- pronunciation ---------- */
+  .pron-item {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px 16px; align-items: baseline;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .pron-item:last-child { border-bottom: none; }
+  .pron-item .stress {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em; color: var(--accent);
+  }
+  .pron-item .why { grid-column: 1 / -1; font-size: 0.9em; }
+  @media (max-width: 600px) {
+    .pron-item { grid-template-columns: 1fr; }
+  }
+  .card-face .example { font-style: italic; font-size: 0.85em; }
+
   /* ---------- vocab quiz ---------- */
   #vocab-quiz-block { margin-top: 48px; padding-top: 32px; border-top: 1px dashed var(--border); }
 
@@ -762,6 +779,7 @@ const addSection = (id, title, node) => {
       el("strong", {}, v.term),
       el("span", { class: isTodo(v.definition_b1) ? "todo" : "" }, v.definition_b1),
       el("span", { class: "colloc" }, (v.collocations || []).join(" · ")),
+      v.example ? el("span", { class: "example" }, v.example) : null,
       el("span", { class: "ua" }, v.ua)
     );
     const card = el("div", { class: "card", tabindex: "0", role: "button",
@@ -843,6 +861,23 @@ const addSection = (id, title, node) => {
   }
 
   addSection("vocabulary", "Vocabulary", wrap);
+}
+
+/* 3b. Pronunciation — optional. Homework item 2 is built from this data and
+   pronunciation is the learner's diagnosed weakness, so it gets its own
+   section when the week provides it. Weeks without it render no section. */
+{
+  const items = (data.pronunciation_focus || []).filter(p => p && p.word);
+  if (items.length) {
+    const wrap = el("div", { id: "pron-list" });
+    items.forEach(p => {
+      wrap.append(el("div", { class: "pron-item" },
+        el("strong", {}, p.word),
+        el("span", { class: "stress" }, p.stress || ""),
+        el("span", { class: "why muted" }, p.why || "")));
+    });
+    addSection("pronunciation", "Pronunciation", wrap);
+  }
 }
 
 /* 4. Reading — B1 / Original toggle, terms highlighted */

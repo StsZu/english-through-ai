@@ -32,7 +32,7 @@ COURSE_LEAD = ("A B1 English course built on the AI Fluency framework: one "
 
 NOTE_MAX_WORDS = 25
 EXPLANATION_MIN_WORDS = 80
-EXPLANATION_MAX_WORDS = 150
+EXPLANATION_MAX_WORDS = 120   # same number source_prompt.md asks for
 QUIZ_EXPECTED = 10
 DIFFICULTIES = ("easy", "medium", "hard")
 # source_prompt.md asks for 400-500 words, up to 700 when the facts need it.
@@ -183,6 +183,15 @@ def validate(week, data):
         elif len(quiz) == QUIZ_EXPECTED and not all(3 <= c <= 4 for c in counts):
             warnings.append(f"{week} quiz: correct-answer spread is {shape}; "
                             "source_prompt.md asks for 3-4 per position")
+
+    for i, item in enumerate(data.get("pronunciation_focus") or []):
+        if not isinstance(item, dict):
+            errors.append(f"{week} pronunciation_focus[{i}]: expected an object")
+            continue
+        for field in ("word", "stress", "why"):
+            if not str(item.get(field, "")).strip():
+                errors.append(f"{week} pronunciation_focus[{i}]: "
+                              f"'{field}' is missing or empty")
 
     b1 = data.get("reading", {}).get("b1")
     if isinstance(b1, str) and not is_todo(b1):
