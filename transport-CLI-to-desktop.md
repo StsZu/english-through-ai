@@ -103,6 +103,12 @@ Taken under instruction to decide independently:
    Surfaced by the termbank sync — a content signal, not an error.
 4. w02 still carries `example` data for 9 terms while the other 13 weeks have
    none, so the flip-card back is richer in that one week.
+5. `docs/baseline-protocol.md` was still in Ukrainian — it was never on the
+   pending-translation list in `CLAUDE.md`, which named only three files.
+   Found after the report was first written and translated in the same pass;
+   it also gained a short privacy note, since it is the document that tells the
+   learner to produce the recordings and diagnostics that are now gitignored.
+   Worth checking whether anything else escaped that list.
 
 ### Blockers
 

@@ -1,31 +1,32 @@
-# Baseline & Error Loop — протокол
+# Baseline & Error Loop — protocol
 
-Мета: отримати вимірювану нульову точку і потім щотижня бачити дельту
-в цифрах, а не у відчуттях.
+Goal: get a measurable zero point, then see the delta every week in numbers
+rather than in feelings.
 
 ---
 
-## Частина 1. Baseline (робиться ОДИН раз, до першого уроку)
+## Part 1. Baseline (done ONCE, before the first lesson)
 
-### Правила
+### Rules
 
-1. **Англійською. Усно. Записом.** Письмовий текст не годиться — він не
-   діагностує ні часи, ні артиклі, ні швидкість, ні вимову.
-2. **Без нотаток, без плану, без підготовки.**
-3. **Без перезапису.** Перший дубль і є baseline. Затинання — це дані,
-   а не провал.
-4. Рівно 3 хвилини. Таймер.
+1. **In English. Spoken. Recorded.** A written text will not do — it diagnoses
+   neither tenses, nor articles, nor speed, nor pronunciation.
+2. **No notes, no plan, no preparation.**
+3. **No second take.** The first take is the baseline. Hesitation is data,
+   not failure.
+4. Exactly 3 minutes. Use a timer.
 
-### Процедура
+### Procedure
 
-1. Диктофон на телефоні. Файл → `recordings/w00_baseline.m4a`
-2. Питання: **"What do you know about AI?"**
-3. Говорити 3 хвилини. Не знаєте слова — опишіть іншими словами і йдіть далі.
-4. Зупинити. Не слухати. Не переробляти.
+1. Voice recorder on your phone. File → `recordings/w00_baseline.m4a`
+2. The question: **"What do you know about AI?"**
+3. Talk for 3 minutes. If you do not know a word, describe it another way and
+   move on.
+4. Stop. Do not listen back. Do not redo it.
 
-### Транскрипція
+### Transcription
 
-Завантажити аудіо в ChatGPT або Gemini:
+Upload the audio to ChatGPT or Gemini:
 
 ```
 Transcribe this audio verbatim, including hesitations, false starts,
@@ -33,11 +34,11 @@ repetitions and grammatical errors. Do not correct anything.
 Do not clean it up. Output plain text only.
 ```
 
-→ `recordings/w00_baseline.txt`
+→ `recordings/w00_baseline.txt` (kept on disk only — it is not committed)
 
-### Діагностика
+### Diagnosis
 
-Транскрипт → Claude Project:
+Transcript → Claude Project:
 
 ```
 You are an ESL diagnostician. Learner level: B1. Target: B2.
@@ -67,26 +68,27 @@ Return ONLY JSON, no fences:
 }
 ```
 
-→ `errors/w00.json`
+→ `errors/w00.json` (also kept on disk only)
 
-**Блок `content_accuracy` важливий не менше за граматику.** Він ловить
-концептуальні помилки — наприклад, плутанину між `training` (ваги моделі,
-назавжди) і `runtime loop` (контекстне вікно, зникає після сесії).
+**The `content_accuracy` block matters as much as the grammar.** It catches
+conceptual mistakes — for example, confusing `training` (the model's weights,
+permanent) with the `runtime loop` (the context window, gone after the
+session).
 
 ---
 
-## Частина 2. Error Loop (щотижня)
+## Part 2. Error Loop (every week)
 
-Після кожного 3-хвилинного виступу на уроці:
+After each 3-minute talk in the lesson:
 
 ```
 recordings/wNN_talk.m4a
-   -> транскрипція (той самий промпт)
-   -> діагностика (той самий промпт + блок нижче)
+   -> transcription (the same prompt)
+   -> diagnosis (the same prompt plus the block below)
    -> errors/wNN.json
 ```
 
-Додати до промпту діагностики:
+Add to the diagnosis prompt:
 
 ```
 RECURRING ERRORS FROM PREVIOUS SESSIONS:
@@ -96,24 +98,33 @@ For every error, set "recurring": true if it appears in the history above.
 Sort the output so recurring errors come first.
 ```
 
-Помилки з `recurring: true` йдуть у блок 10–20 хв наступного уроку —
-це і є персональна програма граматики, зібрана з реальних даних, а не
-з підручника.
+Errors marked `recurring: true` go into the 10–20 minute block of the next
+lesson. That is the personal grammar syllabus, assembled from real data rather
+than from a textbook.
 
 ---
 
-## Частина 3. Метрики прогресу
+## Part 3. Progress metrics
 
-Раз на 4 тижні звести в `errors/progress.md`:
+Every 4 weeks, collect them in `errors/progress.md`:
 
-| Метрика | w00 | w04 | w08 | w12 | Напрям |
+| Metric | w00 | w04 | w08 | w12 | Direction |
 |---|---|---|---|---|---|
-| wpm | | | | | вгору (ціль 110–130) |
-| type_token_ratio | | | | | вгору |
-| filler_count | | | | | вниз |
-| errors total | | | | | вниз |
-| recurring errors | | | | | вниз швидше за total |
-| терміни в активі | | | | | вгору |
+| wpm | | | | | up (target 110–130) |
+| type_token_ratio | | | | | up |
+| filler_count | | | | | down |
+| errors total | | | | | down |
+| recurring errors | | | | | down faster than the total |
+| terms in active use | | | | | up |
 
-**Фінальний замір (тиждень 12):** той самий запис, те саме питання
-"What do you know about AI?", та сама діагностика. Порівняти з w00.
+**Final measurement (week 12):** the same recording, the same question —
+"What do you know about AI?" — and the same diagnosis. Compare against w00.
+
+---
+
+## A note on privacy
+
+The recordings, their transcripts and the `errors/*.json` diagnostics are
+records of the learner's own speech. The repository is public, so none of them
+are committed — `.gitignore` covers `recordings/*` and `errors/*.json`. They
+live on disk only.

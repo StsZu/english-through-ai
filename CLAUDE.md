@@ -9,8 +9,9 @@ files are written in English. (This overrides the earlier "docs in Ukrainian"
 convention from T-001.) The only Ukrainian that appears is the `ua` field in
 vocabulary/termbank entries — the learner is a Ukrainian speaker.
 
-Still in Ukrainian and pending translation: `scripts/instruction.md`. Do not
-copy its style; if you touch it, translate it.
+Everything outside `legacy/` is now in English. `legacy/` is an archive and is
+left as it is, Ukrainian included. Older entries in
+`transport-CLI-to-desktop.md` are historical records and are not retranslated.
 
 ## What this project is
 
