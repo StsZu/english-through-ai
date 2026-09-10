@@ -151,6 +151,6 @@ teaches, it does not grade.
 ## Conventions
 
 - Weeks: `w01`…`w12`, always two digits. Files: `kebab-case`, except `index.html`.
-- Recordings: `recordings/wNN_talk.m4a`, `recordings/w00_baseline.m4a`; diagnostics: `errors/wNN.json`. Audio files are not committed (large and personal); transcripts (`.txt`, `.json`) are.
+- Recordings: `recordings/wNN_talk.m4a`, `recordings/w00_baseline.m4a`; diagnostics: `errors/wNN.json`. **None of it is committed** — not the audio, not the transcripts, not the error diagnostics. They are recordings of the learner's own speech and the repository is public. They live on disk only.
 - Commits: `w01: add glossary`, `docs: fix paths`, `feat(template): quiz`.
 - Term definitions: CEFR B1, max 20 words; termbank schema: `week;term;definition_b1;collocation_1;collocation_2;ua;source_sentence;added_at`.

@@ -8,3 +8,9 @@ node_modules/
 __pycache__/
 .venv/
 .idea/
+
+# Personal learning records: the student's own speech and its diagnostics.
+# The repository is public, so these stay on disk only.
+recordings/*.txt
+recordings/*.json
+errors/*.json
