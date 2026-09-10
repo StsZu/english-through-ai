@@ -4,7 +4,8 @@
 Usage:
     python3 scripts/build_lesson.py w01            build one week + progress block
     python3 scripts/build_lesson.py w01 --quiet    build without the progress block
-    python3 scripts/build_lesson.py --all          rebuild every week, one line each
+    python3 scripts/build_lesson.py --all          rebuild every week + the index
+    python3 scripts/build_lesson.py --index        rebuild only the landing page
 
 Validation is intentionally hand-rolled (T-002): the repo must run on a clean
 Python 3 with zero dependencies, so there is no `jsonschema` import. The rules
@@ -22,6 +23,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "templates" / "lesson-template.html"
 PLACEHOLDER = "__LESSON_DATA__"
+INDEX_TEMPLATE = ROOT / "templates" / "index-template.html"
+INDEX_PLACEHOLDER = "__COURSE_DATA__"
+INDEX_OUT = ROOT / "index.html"
+COURSE_LEAD = ("A B1 English course built on the AI Fluency framework: one "
+               "90-minute lesson a week, student-led, each week a single "
+               "self-contained page that works offline.")
 
 NOTE_MAX_WORDS = 25
 EXPLANATION_MIN_WORDS = 80
@@ -275,22 +282,97 @@ def build(week, quiet=False, summary_only=False):
     return summary
 
 
+def build_index():
+    """Generate the course landing page at the repo root (for GitHub Pages).
+
+    Like a lesson, it is derived from the lesson.json files and must never be
+    edited by hand. Weeks whose JSON does not parse are skipped and reported;
+    a broken week must not take the whole index down.
+    """
+    template = INDEX_TEMPLATE.read_text(encoding="utf-8")
+    if INDEX_PLACEHOLDER not in template:
+        print(f"index BUILD FAILED — placeholder {INDEX_PLACEHOLDER} not found "
+              f"in {INDEX_TEMPLATE.relative_to(ROOT)}", file=sys.stderr)
+        return None
+
+    weeks, skipped = [], []
+    for lesson_path in sorted((ROOT / "lessons").glob("w[0-9][0-9]/lesson.json")):
+        week = lesson_path.parent.name
+        try:
+            data = json.loads(lesson_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            skipped.append(week)
+            continue
+        if not (lesson_path.parent / "index.html").is_file():
+            skipped.append(week)
+            continue
+
+        reading = data.get("reading", {}).get("b1", "")
+        weeks.append({
+            "week": week,
+            "title": data.get("title", week),
+            "href": f"lessons/{week}/index.html",
+            "duration_min": data.get("duration_min", 0),
+            "vocabulary": len(data.get("vocabulary", [])),
+            "quiz": len(data.get("quiz", [])),
+            "homework": len(data.get("homework", [])),
+            "reading_words": words(reading) if isinstance(reading, str) else 0,
+            "terms": [
+                {"term": v.get("term", ""),
+                 "definition": v.get("definition_b1", "")}
+                for v in data.get("vocabulary", [])
+                if v.get("term") and "TODO" not in v.get("term", "")
+            ],
+        })
+
+    if not weeks:
+        print("index BUILD FAILED — no built lesson found", file=sys.stderr)
+        return None
+
+    sources = {w.get("source") for w in
+               [json.loads((ROOT / "lessons" / wk["week"] / "lesson.json")
+                           .read_text(encoding="utf-8")) for wk in weeks]}
+    payload = {
+        "source": sorted(sources)[0] if len(sources) == 1 else "Multiple sources",
+        "lead": COURSE_LEAD,
+        "weeks": weeks,
+    }
+    body = json.dumps(payload, ensure_ascii=False, indent=2).replace("</", "<\\/")
+    INDEX_OUT.write_text(template.replace(INDEX_PLACEHOLDER, body), encoding="utf-8")
+
+    print(f"index built -> {INDEX_OUT.relative_to(ROOT)}   "
+          f"{len(weeks)} lesson(s), "
+          f"{sum(len(w['terms']) for w in weeks)} term(s)")
+    for week in skipped:
+        print(f"  warning: {week} left out of the index (no index.html or "
+              "unreadable lesson.json)", file=sys.stderr)
+    return True
+
+
 def main():
     args = sys.argv[1:]
     quiet = "--quiet" in args
     args = [a for a in args if a != "--quiet"]
+
+    if args == ["--index"]:
+        if build_index() is None:
+            sys.exit(1)
+        return
 
     if args == ["--all"]:
         weeks = sorted(p.parent.name for p in (ROOT / "lessons").glob("w*/lesson.json"))
         if not weeks:
             sys.exit("No lessons/wNN/lesson.json found.")
         failed = [w for w in weeks if build(w, summary_only=True) is None]
+        if build_index() is None:
+            failed.append("index")
         if failed:
             sys.exit(f"\n{len(failed)} week(s) failed: {', '.join(failed)}")
         return
 
     if len(args) != 1 or not re.fullmatch(r"w\d{2}", args[0]):
-        sys.exit("Usage: python3 scripts/build_lesson.py wNN [--quiet] | --all")
+        sys.exit("Usage: python3 scripts/build_lesson.py wNN [--quiet] "
+                 "| --all | --index")
     if build(args[0], quiet=quiet) is None:
         sys.exit(1)
 

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Course</title>
+<meta name="description" content="B1 English through the AI Fluency framework: 14 self-contained lessons.">
+<style>
+  /* Same tokens as templates/lesson-template.html — the landing page and the
+     lessons must read as one artefact. */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 0 24px 15vh; }
+  a { color: var(--accent); }
+  .muted { color: var(--muted); }
+
+  /* ---------- header ---------- */
+  header { max-width: 960px; margin: 0 auto; padding: 64px 24px 0; }
+  .eyebrow {
+    font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+  }
+  h1 { font-size: 2.6em; line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .lead { font-size: 1.1em; color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 32px; padding: 24px 0; border-top: 1px solid var(--border); }
+  .stat .n { font-size: 1.6em; font-weight: 700; line-height: 1; display: block; }
+  .stat .k { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 16px 0; border-top: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+    box-shadow: 0 6px 12px -10px rgba(0, 0, 0, 0.5);
+  }
+  #search {
+    font: inherit; font-size: 0.95em; flex: 1 1 240px; min-width: 0;
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card-bg); color: var(--text);
+  }
+  #search:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  /* flex: 0 0 auto keeps the status readable and lets it wrap onto its own
+     line on a narrow screen instead of running off the edge. */
+  #overall { font-size: 0.9em; color: var(--muted); flex: 0 0 auto; margin-left: auto; }
+
+  /* ---------- lesson grid ---------- */
+  .grid {
+    display: grid; gap: 16px; padding: 8px 0 40px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .card {
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; text-decoration: none; color: inherit;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .week {
+    font-size: 0.75em; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 3px 8px; border-radius: 5px;
+  }
+  .dur { font-size: 0.8em; color: var(--muted); }
+  .card h2 { font-size: 1.1em; line-height: 1.3; margin: 0; }
+  .meta { font-size: 0.85em; color: var(--muted); margin: 0 0 4px; }
+
+  /* margin-top:auto pins the progress footer to the bottom, so the bars line
+     up across a row however long the titles wrap. */
+  .bar { height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; margin-top: auto; }
+  .bar > i { display: block; height: 100%; background: var(--correct); width: 0; }
+  .hw { font-size: 0.78em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .card.done { border-color: var(--correct); }
+  .card.done .week { color: var(--correct); background: var(--correct-bg); }
+
+  /* ---------- termbank ---------- */
+  details { border-top: 1px solid var(--border); padding: 24px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  summary::marker { color: var(--muted); }
+  .terms { columns: 3 220px; column-gap: 32px; padding-top: 20px; }
+  .term { break-inside: avoid; margin-bottom: 12px; font-size: 0.9em; }
+  .term b { font-weight: 600; }
+  .term .def { color: var(--muted); display: block; font-size: 0.95em; }
+  .term a { font-size: 0.85em; text-decoration: none; }
+
+  .empty { color: var(--muted); font-style: italic; padding: 24px 0; }
+
+  footer {
+    max-width: 960px; margin: 0 auto; padding: 32px 24px 64px;
+    border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em;
+  }
+  footer p { margin: 0 0 8px; }
+
+  @media (max-width: 600px) {
+    body { font-size: 17px; }
+    h1 { font-size: 2em; }
+    header { padding-top: 40px; }
+    .stats { gap: 20px; }
+    #search { flex: 1 1 100%; }
+    #overall { margin-left: 0; }
+  }
+  @media print {
+    .controls, .bar { display: none; }
+    .card { break-inside: avoid; border-color: #bbb; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow" id="source"></p>
+  <h1>English Through AI</h1>
+  <p class="lead" id="lead"></p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search lessons and vocabulary…" autocomplete="off" aria-label="Search lessons and vocabulary">
+    <span id="overall"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="no-lessons" hidden>No lesson matches that search.</p>
+
+  <details id="termbank-block">
+    <summary>Vocabulary from every week (<span id="term-count"></span>)</summary>
+    <div class="terms" id="terms"></div>
+    <p class="empty" id="no-terms" hidden>No term matches that search.</p>
+  </details>
+</main>
+
+<footer>
+  <p>Each lesson is a single self-contained HTML file: no server, no network, no
+     tracking. It works offline, straight from disk.</p>
+  <p>This page and every lesson are generated from
+     <code>lessons/wNN/lesson.json</code> by
+     <code>scripts/build_lesson.py</code> — never edit the HTML by hand.</p>
+</footer>
+
+<script id="course-data" type="application/json">__COURSE_DATA__</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("course-data").textContent);
+
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== false) node.setAttribute(k, v === true ? "" : v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+
+/* The lessons persist their homework checklist under etai:<week>:homework.
+   Reading it here turns the landing page into a progress board. localStorage
+   can throw or be empty (private window, file:// in some browsers), so every
+   read degrades to "not started" rather than breaking the page. */
+function homeworkDone(week) {
+  try {
+    const raw = localStorage.getItem("etai:" + week + ":homework");
+    if (!raw) return 0;
+    return JSON.parse(raw).filter(Boolean).length;
+  } catch (e) {
+    return 0;
+  }
+}
+
+/* ---------- header ---------- */
+document.getElementById("source").textContent = data.source;
+document.getElementById("lead").textContent = data.lead;
+document.title = "English Through AI — " + data.weeks.length + " lessons";
+
+const totals = data.weeks.reduce((acc, w) => ({
+  terms: acc.terms + w.vocabulary,
+  questions: acc.questions + w.quiz,
+  minutes: acc.minutes + w.duration_min,
+}), { terms: 0, questions: 0, minutes: 0 });
+
+const stat = (n, k) => el("div", { class: "stat" },
+  el("span", { class: "n" }, String(n)), el("span", { class: "k" }, k));
+document.getElementById("stats").append(
+  stat(data.weeks.length, "lessons"),
+  stat(totals.terms, "terms"),
+  stat(totals.questions, "quiz questions"),
+  stat(Math.round(totals.minutes / 60), "hours of class")
+);
+
+/* ---------- lesson cards ---------- */
+const grid = document.getElementById("grid");
+const cards = data.weeks.map(w => {
+  const done = homeworkDone(w.week);
+  const card = el("a", { class: "card", href: w.href },
+    el("div", { class: "card-top" },
+      el("span", { class: "week" }, w.week),
+      el("span", { class: "dur" }, w.duration_min + " min")),
+    el("h2", {}, w.title),
+    el("p", { class: "meta" },
+      w.vocabulary + " terms · " + w.quiz + " questions · " + w.reading_words + "-word reading")
+  );
+  if (w.homework) {
+    const fill = el("i", {});
+    fill.style.width = (done / w.homework * 100) + "%";
+    card.append(
+      el("div", { class: "bar" }, fill),
+      el("div", { class: "hw" },
+        el("span", {}, "Homework"),
+        el("span", {}, done + " / " + w.homework))
+    );
+    if (done === w.homework) card.classList.add("done");
+  }
+  grid.append(card);
+  return { w, card, done };
+});
+
+const started = cards.filter(c => c.done > 0).length;
+const finished = cards.filter(c => c.w.homework && c.done === c.w.homework).length;
+document.getElementById("overall").textContent =
+  started === 0 ? "Nothing started yet"
+                : finished + " of " + data.weeks.length + " lessons complete";
+
+/* ---------- termbank ---------- */
+const termsBox = document.getElementById("terms");
+const termNodes = [];
+data.weeks.forEach(w => w.terms.forEach(t => {
+  const node = el("div", { class: "term" },
+    el("b", {}, t.term),
+    el("span", { class: "def" }, t.definition),
+    el("a", { href: w.href }, w.week));
+  termsBox.append(node);
+  termNodes.push({ node, hay: (t.term + " " + t.definition + " " + w.week).toLowerCase() });
+}));
+document.getElementById("term-count").textContent = termNodes.length;
+
+/* ---------- search ---------- */
+const search = document.getElementById("search");
+const noLessons = document.getElementById("no-lessons");
+const noTerms = document.getElementById("no-terms");
+const termbankBlock = document.getElementById("termbank-block");
+
+cards.forEach(c => {
+  c.hay = (c.w.week + " " + c.w.title + " " + c.w.terms.map(t => t.term).join(" ")).toLowerCase();
+});
+
+search.addEventListener("input", () => {
+  const q = search.value.trim().toLowerCase();
+  let shownCards = 0, shownTerms = 0;
+  cards.forEach(c => {
+    const hit = !q || c.hay.includes(q);
+    c.card.hidden = !hit;
+    if (hit) shownCards++;
+  });
+  termNodes.forEach(t => {
+    const hit = !q || t.hay.includes(q);
+    t.node.hidden = !hit;
+    if (hit) shownTerms++;
+  });
+  noLessons.hidden = shownCards > 0;
+  noTerms.hidden = shownTerms > 0;
+  /* A search is a question about the whole course, so open the vocabulary. */
+  if (q) termbankBlock.open = true;
+});
+</script>
+</body>
+</html>

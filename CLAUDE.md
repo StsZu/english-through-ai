@@ -43,12 +43,14 @@ the `Questions` section of the report.
 ```bash
 python3 scripts/build_lesson.py w01           # lesson.json → validate → index.html + progress block
 python3 scripts/build_lesson.py w01 --quiet   # same, without the progress block
-python3 scripts/build_lesson.py --all         # rebuild every week, one summary line each
+python3 scripts/build_lesson.py --all         # rebuild every week + the landing page
+python3 scripts/build_lesson.py --index       # rebuild only the landing page (root index.html)
 bash scripts/new_week.sh w02                  # scaffold a week folder (never overwrites)
 bash scripts/wpm.sh lessons/w01/source.md 25  # words / wpm / listening-difficulty verdict
 python3 scripts/termbank_sync.py             # lesson.json vocabulary -> termbank/termbank.csv
 python3 scripts/termbank_sync.py --check     # report drift, write nothing
 open lessons/w01/index.html                   # must work from file://, offline
+open index.html                              # course landing page (also the GitHub Pages entry point)
 ```
 
 There is no test suite, linter, or CI. Verification is: run the build (it must
@@ -87,7 +89,14 @@ with no server, no build tooling, no internet. Consequences:
 - `lesson.json` next to `index.html` is the source of truth. **Never hand-edit `index.html`** — it is generated; edit the JSON and rebuild.
 - `localStorage` keys are namespaced `etai:<week>:<key>` via the `LS()` helper (currently only the homework checklist persists).
 
-`templates/lesson-template.html` is the only template. The build substitutes
+`templates/index-template.html` builds the landing page the same way, from a
+`__COURSE_DATA__` token: week titles, counts and the full vocabulary list,
+derived from the `lesson.json` files. It links to `lessons/wNN/index.html` with
+relative paths, so the site works both from `file://` and from GitHub Pages,
+and it reads each week's `etai:<week>:homework` key to show progress — every
+read is wrapped in try/catch, because `file://` blocks `localStorage`.
+
+`templates/lesson-template.html` is the template for a lesson. The build substitutes
 the literal token `__LESSON_DATA__` with the JSON payload (`</` escaped so the
 payload cannot terminate the `<script>` block) — if you edit the template, that
 token must survive. The template renders seven sections from the data, in
@@ -132,7 +141,8 @@ teaches, it does not grade.
 
 - `docs/` — methodology: `course-idea.md`, `manual-pipeline.md`, `baseline-protocol.md` (progress measurement and error loop), `conventions.md`
 - `lessons/wNN/` — `lesson.json` (source of truth), `index.html` (generated), `source.md`, `source_prompt.md`, `prep.md`, `agenda.md`, `friction.md`, `audio/`
-- `templates/` — `lesson-template.html`, `lesson.schema.json`, `week-scaffold/`
+- `index.html` — generated course landing page at the repo root; the GitHub Pages entry point. Built from every `lesson.json` by `build_lesson.py --index`. **Never hand-edit it**, exactly like a lesson.
+- `templates/` — `lesson-template.html`, `index-template.html`, `lesson.schema.json`, `week-scaffold/`
 - `scripts/` — `build_lesson.py`, `termbank_sync.py`, `new_week.sh`, `wpm.sh`
 - `termbank/termbank.csv` — cumulative master term file
 - `recordings/`, `errors/` — talk recordings and JSON error diagnostics

@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Through AI — Course</title>
+<meta name="description" content="B1 English through the AI Fluency framework: 14 self-contained lessons.">
+<style>
+  /* Same tokens as templates/lesson-template.html — the landing page and the
+     lessons must read as one artefact. */
+  :root {
+    --bg: #fafaf7;
+    --text: #1c1c1c;
+    --muted: #5c5c56;
+    --accent: #2456d6;
+    --accent-soft: #e8eefc;
+    --correct: #2e7d32;
+    --correct-bg: #e8f3e9;
+    --border: #d8d8d2;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 0 24px 15vh; }
+  a { color: var(--accent); }
+  .muted { color: var(--muted); }
+
+  /* ---------- header ---------- */
+  header { max-width: 960px; margin: 0 auto; padding: 64px 24px 0; }
+  .eyebrow {
+    font-size: 0.8em; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+  }
+  h1 { font-size: 2.6em; line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .lead { font-size: 1.1em; color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 32px; padding: 24px 0; border-top: 1px solid var(--border); }
+  .stat .n { font-size: 1.6em; font-weight: 700; line-height: 1; display: block; }
+  .stat .k { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    padding: 16px 0; border-top: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+    box-shadow: 0 6px 12px -10px rgba(0, 0, 0, 0.5);
+  }
+  #search {
+    font: inherit; font-size: 0.95em; flex: 1 1 240px; min-width: 0;
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card-bg); color: var(--text);
+  }
+  #search:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  /* flex: 0 0 auto keeps the status readable and lets it wrap onto its own
+     line on a narrow screen instead of running off the edge. */
+  #overall { font-size: 0.9em; color: var(--muted); flex: 0 0 auto; margin-left: auto; }
+
+  /* ---------- lesson grid ---------- */
+  .grid {
+    display: grid; gap: 16px; padding: 8px 0 40px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .card {
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; text-decoration: none; color: inherit;
+    transition: border-color 120ms ease, transform 120ms ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .week {
+    font-size: 0.75em; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 3px 8px; border-radius: 5px;
+  }
+  .dur { font-size: 0.8em; color: var(--muted); }
+  .card h2 { font-size: 1.1em; line-height: 1.3; margin: 0; }
+  .meta { font-size: 0.85em; color: var(--muted); margin: 0 0 4px; }
+
+  /* margin-top:auto pins the progress footer to the bottom, so the bars line
+     up across a row however long the titles wrap. */
+  .bar { height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; margin-top: auto; }
+  .bar > i { display: block; height: 100%; background: var(--correct); width: 0; }
+  .hw { font-size: 0.78em; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .card.done { border-color: var(--correct); }
+  .card.done .week { color: var(--correct); background: var(--correct-bg); }
+
+  /* ---------- termbank ---------- */
+  details { border-top: 1px solid var(--border); padding: 24px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  summary::marker { color: var(--muted); }
+  .terms { columns: 3 220px; column-gap: 32px; padding-top: 20px; }
+  .term { break-inside: avoid; margin-bottom: 12px; font-size: 0.9em; }
+  .term b { font-weight: 600; }
+  .term .def { color: var(--muted); display: block; font-size: 0.95em; }
+  .term a { font-size: 0.85em; text-decoration: none; }
+
+  .empty { color: var(--muted); font-style: italic; padding: 24px 0; }
+
+  footer {
+    max-width: 960px; margin: 0 auto; padding: 32px 24px 64px;
+    border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em;
+  }
+  footer p { margin: 0 0 8px; }
+
+  @media (max-width: 600px) {
+    body { font-size: 17px; }
+    h1 { font-size: 2em; }
+    header { padding-top: 40px; }
+    .stats { gap: 20px; }
+    #search { flex: 1 1 100%; }
+    #overall { margin-left: 0; }
+  }
+  @media print {
+    .controls, .bar { display: none; }
+    .card { break-inside: avoid; border-color: #bbb; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow" id="source"></p>
+  <h1>English Through AI</h1>
+  <p class="lead" id="lead"></p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search lessons and vocabulary…" autocomplete="off" aria-label="Search lessons and vocabulary">
+    <span id="overall"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="no-lessons" hidden>No lesson matches that search.</p>
+
+  <details id="termbank-block">
+    <summary>Vocabulary from every week (<span id="term-count"></span>)</summary>
+    <div class="terms" id="terms"></div>
+    <p class="empty" id="no-terms" hidden>No term matches that search.</p>
+  </details>
+</main>
+
+<footer>
+  <p>Each lesson is a single self-contained HTML file: no server, no network, no
+     tracking. It works offline, straight from disk.</p>
+  <p>This page and every lesson are generated from
+     <code>lessons/wNN/lesson.json</code> by
+     <code>scripts/build_lesson.py</code> — never edit the HTML by hand.</p>
+</footer>
+
+<script id="course-data" type="application/json">{
+  "source": "Coursera / Anthropic / AI Fluency: Framework & Foundations",
+  "lead": "A B1 English course built on the AI Fluency framework: one 90-minute lesson a week, student-led, each week a single self-contained page that works offline.",
+  "weeks": [
+    {
+      "week": "w01",
+      "title": "AI Fluency — Module 1",
+      "href": "lessons/w01/index.html",
+      "duration_min": 90,
+      "vocabulary": 9,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 692,
+      "terms": [
+        {
+          "term": "collaborate",
+          "definition": "work with another person or tool to reach a shared goal"
+        },
+        {
+          "term": "confidently",
+          "definition": "in a way that shows you feel sure about what you are doing"
+        },
+        {
+          "term": "outdated",
+          "definition": "old and no longer useful because things have changed"
+        },
+        {
+          "term": "evaluate",
+          "definition": "judge the quality, value, or safety of something"
+        },
+        {
+          "term": "accountable",
+          "definition": "responsible for a decision and ready to explain it"
+        },
+        {
+          "term": "delegation",
+          "definition": "deciding which work another person or tool should do"
+        },
+        {
+          "term": "discernment",
+          "definition": "careful judgment about what is good, true, or useful"
+        },
+        {
+          "term": "diligence",
+          "definition": "careful work that checks details and avoids careless mistakes"
+        },
+        {
+          "term": "grounding",
+          "definition": "basic knowledge that gives you a strong starting point"
+        }
+      ]
+    },
+    {
+      "week": "w02",
+      "title": "The AI Fluency Framework",
+      "href": "lessons/w02/index.html",
+      "duration_min": 90,
+      "vocabulary": 9,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 622,
+      "terms": [
+        {
+          "term": "AI fluency",
+          "definition": "The ability to work with artificial intelligence effectively, safely, and responsibly."
+        },
+        {
+          "term": "automation",
+          "definition": "Using technology to complete a defined task with little human involvement."
+        },
+        {
+          "term": "augmentation",
+          "definition": "Working with technology as a partner to improve your own thinking or work."
+        },
+        {
+          "term": "agency",
+          "definition": "A way for technology to act independently toward a goal you set."
+        },
+        {
+          "term": "versatile",
+          "definition": "Able to do many different kinds of work well."
+        },
+        {
+          "term": "responsibly",
+          "definition": "In a careful way that considers risks, rules, and other people."
+        },
+        {
+          "term": "highlight",
+          "definition": "To make an important point easier to notice."
+        },
+        {
+          "term": "reinforce",
+          "definition": "To make an idea, skill, or effect stronger."
+        },
+        {
+          "term": "straightforward",
+          "definition": "Simple, clear, and not difficult to understand or complete."
+        }
+      ]
+    },
+    {
+      "week": "w03",
+      "title": "The 4D Framework",
+      "href": "lessons/w03/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 253,
+      "terms": [
+        {
+          "term": "competency",
+          "definition": "an important skill or ability needed to do a task well"
+        },
+        {
+          "term": "navigate",
+          "definition": "to deal successfully with a difficult situation or complex process"
+        },
+        {
+          "term": "offload",
+          "definition": "to give a task or responsibility to someone else to reduce your work"
+        },
+        {
+          "term": "context-rich",
+          "definition": "providing a lot of useful background information and clear details"
+        },
+        {
+          "term": "articulate",
+          "definition": "to express an idea, thought, or feeling clearly in words"
+        },
+        {
+          "term": "align with",
+          "definition": "to match or agree with specific goals, standards, or values"
+        },
+        {
+          "term": "refinement",
+          "definition": "the process of making small changes to improve something"
+        },
+        {
+          "term": "set aside",
+          "definition": "to decide not to use or consider something"
+        },
+        {
+          "term": "fairness",
+          "definition": "treating people equally and without unfair advantage"
+        },
+        {
+          "term": "bias",
+          "definition": "an unfair preference or prejudice for or against something"
+        },
+        {
+          "term": "transparency",
+          "definition": "being open, clear, and honest about how something is done"
+        },
+        {
+          "term": "stand behind",
+          "definition": "to support and take full responsibility for a product or decision"
+        }
+      ]
+    },
+    {
+      "week": "w04",
+      "title": "Deep Dive 1 — What is Generative AI? (Part 1)",
+      "href": "lessons/w04/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 222,
+      "terms": [
+        {
+          "term": "under the hood",
+          "definition": "how something works behind the scenes or internally"
+        },
+        {
+          "term": "breakthrough",
+          "definition": "an important discovery or development that helps solve a problem"
+        },
+        {
+          "term": "prominent",
+          "definition": "very well known, important, or easy to notice"
+        },
+        {
+          "term": "game changer",
+          "definition": "something that completely changes the way a situation develops"
+        },
+        {
+          "term": "vast",
+          "definition": "extremely large in size, amount, or area"
+        },
+        {
+          "term": "scaling laws",
+          "definition": "rules showing how AI improves predictably with more data and computing power"
+        },
+        {
+          "term": "emergent",
+          "definition": "appearing unexpectedly as a complex system grows larger"
+        },
+        {
+          "term": "pre-training",
+          "definition": "the initial training phase where a model learns language patterns from huge data"
+        },
+        {
+          "term": "fine-tuning",
+          "definition": "additional training that teaches a model to follow instructions and be helpful"
+        },
+        {
+          "term": "reinforcement learning",
+          "definition": "a training method that uses rewards and penalties to guide AI behavior"
+        },
+        {
+          "term": "context window",
+          "definition": "the maximum amount of text an AI model can remember during a conversation"
+        },
+        {
+          "term": "in-context learning",
+          "definition": "the ability of an AI to learn new tasks directly from prompt examples"
+        }
+      ]
+    },
+    {
+      "week": "w05",
+      "title": "Deep Dive 1 (Part 2) — Capabilities & Limitations",
+      "href": "lessons/w05/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 234,
+      "terms": [
+        {
+          "term": "condense",
+          "definition": "to make text or speech shorter by keeping only the most important parts"
+        },
+        {
+          "term": "knowledge cutoff",
+          "definition": "the specific date after which an AI model has no information about the world"
+        },
+        {
+          "term": "innate",
+          "definition": "existing naturally or built inside from the start"
+        },
+        {
+          "term": "hallucination",
+          "definition": "a situation where an AI confidently generates plausible-sounding but false information"
+        },
+        {
+          "term": "plausible",
+          "definition": "seeming likely to be true, believable, or reasonable"
+        },
+        {
+          "term": "non-deterministic",
+          "definition": "producing slightly different results each time given the same input"
+        },
+        {
+          "term": "temperature",
+          "definition": "a setting that controls how random or creative an AI output is"
+        },
+        {
+          "term": "extended-thinking",
+          "definition": "a model capability that performs step-by-step reasoning before answering"
+        },
+        {
+          "term": "retrieval-augmented",
+          "definition": "connecting a language model to external live databases or documents to find facts"
+        },
+        {
+          "term": "foreseeable",
+          "definition": "able to be predicted or expected in the near future"
+        },
+        {
+          "term": "leverage",
+          "definition": "to use something to its maximum advantage"
+        },
+        {
+          "term": "stay abreast of",
+          "definition": "to stay informed about the latest news, changes, or developments"
+        }
+      ]
+    },
+    {
+      "week": "w06",
+      "title": "Delegation",
+      "href": "lessons/w06/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 212,
+      "terms": [
+        {
+          "term": "nuanced",
+          "definition": "having small and subtle but important differences in meaning or approach"
+        },
+        {
+          "term": "cornerstone",
+          "definition": "something of basic and fundamental importance upon which everything else depends"
+        },
+        {
+          "term": "time-consuming",
+          "definition": "taking a lot of time and effort to complete"
+        },
+        {
+          "term": "intervention",
+          "definition": "action taken to become intentionally involved in a situation to improve it"
+        },
+        {
+          "term": "problem awareness",
+          "definition": "clearly understanding your project goals and work requirements before using AI"
+        },
+        {
+          "term": "platform awareness",
+          "definition": "working knowledge of available AI systems and their specific strengths and limits"
+        },
+        {
+          "term": "task delegation",
+          "definition": "the strategic process of dividing work between humans and AI systems"
+        },
+        {
+          "term": "prioritize",
+          "definition": "to treat something as more important than other things"
+        },
+        {
+          "term": "distribute",
+          "definition": "to divide and share tasks or resources among different people or systems"
+        },
+        {
+          "term": "exclusively",
+          "definition": "only and completely, without sharing with anyone or anything else"
+        },
+        {
+          "term": "hand over the wheel",
+          "definition": "to surrender total control and responsibility to someone or something else"
+        },
+        {
+          "term": "call it a day",
+          "definition": "to stop working or conclude that a task is finished"
+        }
+      ]
+    },
+    {
+      "week": "w07",
+      "title": "Project Planning and Delegation",
+      "href": "lessons/w07/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 169,
+      "terms": [
+        {
+          "term": "substantial",
+          "definition": "large in size, value, importance, or amount"
+        },
+        {
+          "term": "manageable",
+          "definition": "easy or possible to control, organize, or accomplish"
+        },
+        {
+          "term": "compelling",
+          "definition": "attracting strong interest, attention, or admiration"
+        },
+        {
+          "term": "pitch",
+          "definition": "a short speech or presentation designed to persuade someone to accept an idea"
+        },
+        {
+          "term": "pursue",
+          "definition": "to work hard to achieve or follow a goal over a period of time"
+        },
+        {
+          "term": "emerging",
+          "definition": "starting to exist, develop, or become prominent and known"
+        },
+        {
+          "term": "breakdown",
+          "definition": "a detailed division of something into smaller parts for analysis"
+        },
+        {
+          "term": "through the lens of",
+          "definition": "examining or analyzing a situation from a specific viewpoint"
+        },
+        {
+          "term": "challenge assumptions",
+          "definition": "to question whether beliefs or ideas are truly correct or justified"
+        },
+        {
+          "term": "clarification",
+          "definition": "the act of making something clearer or easier to understand"
+        },
+        {
+          "term": "anticipate",
+          "definition": "to imagine or expect that something will happen and prepare for it"
+        },
+        {
+          "term": "specify",
+          "definition": "to state or describe something clearly, precisely, and in detail"
+        }
+      ]
+    },
+    {
+      "week": "w08",
+      "title": "A Closer Look at Description",
+      "href": "lessons/w08/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 206,
+      "terms": [
+        {
+          "term": "intention",
+          "definition": "an aim, purpose, or plan that you want to achieve"
+        },
+        {
+          "term": "steer",
+          "definition": "to guide or control the direction of a conversation or process"
+        },
+        {
+          "term": "product description",
+          "definition": "the clear definition of what you want the AI to create or provide"
+        },
+        {
+          "term": "tackle",
+          "definition": "to make a determined effort to deal with a difficult problem or task"
+        },
+        {
+          "term": "process description",
+          "definition": "guiding the exact method, steps, and approach an AI should use"
+        },
+        {
+          "term": "draw on",
+          "definition": "to use information, knowledge, or experience to help you achieve something"
+        },
+        {
+          "term": "tremendous",
+          "definition": "extremely good, large, important, or effective"
+        },
+        {
+          "term": "vending machine",
+          "definition": "an automatic machine that drops items after money is inserted, used metaphorically for non-collaborative tools"
+        },
+        {
+          "term": "follow your lead",
+          "definition": "to accept someone's direction and do what they do or say"
+        },
+        {
+          "term": "performance description",
+          "definition": "defining the behavioral style, persona, and tone of an AI interaction"
+        },
+        {
+          "term": "finely tuned",
+          "definition": "adjusted very carefully and precisely to work at maximum effectiveness"
+        },
+        {
+          "term": "makeover",
+          "definition": "a set of changes that significantly improves the appearance or quality of something"
+        }
+      ]
+    },
+    {
+      "week": "w09",
+      "title": "Deep Dive 2 — Effective Prompting Techniques",
+      "href": "lessons/w09/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 167,
+      "terms": [
+        {
+          "term": "prompt engineering",
+          "definition": "the practice of designing clear and effective instructions for AI systems"
+        },
+        {
+          "term": "emulate",
+          "definition": "to copy or follow the style or behavior of an example"
+        },
+        {
+          "term": "few-shot prompting",
+          "definition": "providing one or more sample input-output pairs in the prompt"
+        },
+        {
+          "term": "chain-of-thought",
+          "definition": "a prompting method where the AI explains its step-by-step reasoning"
+        },
+        {
+          "term": "go astray",
+          "definition": "to become lost, wander off topic, or make unintended mistakes"
+        },
+        {
+          "term": "hone",
+          "definition": "to sharpen, refine, or improve a skill over time"
+        },
+        {
+          "term": "persona",
+          "definition": "a specific role, personality, or character adopted for an interaction"
+        },
+        {
+          "term": "secret weapon",
+          "definition": "a particularly effective method, tool, or advantage that is not widely recognized"
+        },
+        {
+          "term": "iterative",
+          "definition": "involving repeated cycles of testing, learning, and improving"
+        },
+        {
+          "term": "overload",
+          "definition": "to put too much work, information, or tasks onto someone or something"
+        },
+        {
+          "term": "swift",
+          "definition": "happening very quickly, promptly, or without delay"
+        },
+        {
+          "term": "timeless",
+          "definition": "remaining valuable, true, and effective across all eras and generations"
+        }
+      ]
+    },
+    {
+      "week": "w10",
+      "title": "A Closer Look at Discernment",
+      "href": "lessons/w10/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 180,
+      "terms": [
+        {
+          "term": "discernment",
+          "definition": "the ability to judge well and evaluate quality critically"
+        },
+        {
+          "term": "shortcoming",
+          "definition": "a fault, defect, or failure to meet a certain standard"
+        },
+        {
+          "term": "safeguard",
+          "definition": "a protection against something undesirable, harmful, or risky"
+        },
+        {
+          "term": "product discernment",
+          "definition": "the ability to critically judge the factual accuracy and value of AI output"
+        },
+        {
+          "term": "lapse",
+          "definition": "a temporary failure in concentration, memory, or quality"
+        },
+        {
+          "term": "circular reasoning",
+          "definition": "a logical error where an argument repeats its premise as the conclusion"
+        },
+        {
+          "term": "process discernment",
+          "definition": "the ability to evaluate the steps, logic, and methodology the AI used"
+        },
+        {
+          "term": "in sync",
+          "definition": "working together harmoniously and sharing the same understanding"
+        },
+        {
+          "term": "performance discernment",
+          "definition": "evaluating the behavioral quality and communication style of an AI interaction"
+        },
+        {
+          "term": "revisit",
+          "definition": "to return to a topic, decision, or plan to re-examine or change it"
+        },
+        {
+          "term": "oversight",
+          "definition": "the responsibility of watching over something to ensure it is done correctly"
+        },
+        {
+          "term": "flip side",
+          "definition": "the opposite, reverse, or complementary aspect of a situation"
+        }
+      ]
+    },
+    {
+      "week": "w11",
+      "title": "The Description-Discernment Loop",
+      "href": "lessons/w11/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 156,
+      "terms": [
+        {
+          "term": "feedback loop",
+          "definition": "a continuous cycle where output evaluations are used to adjust future inputs"
+        },
+        {
+          "term": "exceed",
+          "definition": "to be greater, larger, or better than an expected amount or limit"
+        },
+        {
+          "term": "pull up",
+          "definition": "to open, retrieve, or display a file or document on a screen"
+        },
+        {
+          "term": "dive into",
+          "definition": "to start doing something enthusiastically or energetically without delay"
+        },
+        {
+          "term": "expectation",
+          "definition": "a belief about what will happen or what someone should achieve"
+        },
+        {
+          "term": "refine",
+          "definition": "to improve something by making small and precise changes"
+        },
+        {
+          "term": "integrate",
+          "definition": "to combine two or more things effectively to create a whole"
+        },
+        {
+          "term": "discard",
+          "definition": "to get rid of something that is no longer useful or needed"
+        },
+        {
+          "term": "take responsibility",
+          "definition": "to accept personal accountability for an action, decision, or final outcome"
+        },
+        {
+          "term": "along the way",
+          "definition": "during the course of a process, journey, or period of time"
+        },
+        {
+          "term": "accountable",
+          "definition": "responsible for explaining one's decisions and bearing the consequences"
+        },
+        {
+          "term": "diligence",
+          "definition": "careful, thorough, and persistent effort to ensure quality, safety, and ethics"
+        }
+      ]
+    },
+    {
+      "week": "w12",
+      "title": "A Closer Look at Diligence",
+      "href": "lessons/w12/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 194,
+      "terms": [
+        {
+          "term": "implication",
+          "definition": "a likely consequence or future effect of an action or decision"
+        },
+        {
+          "term": "vacuum",
+          "definition": "a space entirely empty of matter, used metaphorically for isolated situations"
+        },
+        {
+          "term": "creation diligence",
+          "definition": "being critical and intentional about which AI tools you use and data shared"
+        },
+        {
+          "term": "disclosure",
+          "definition": "the act of making new or secret information known openly"
+        },
+        {
+          "term": "forthright",
+          "definition": "direct, honest, and outspoken in communication without hiding facts"
+        },
+        {
+          "term": "transparency diligence",
+          "definition": "being open and accurate about AI's role in your work with stakeholders"
+        },
+        {
+          "term": "deployment diligence",
+          "definition": "taking full responsibility to verify and validate outputs before sharing them"
+        },
+        {
+          "term": "stand behind",
+          "definition": "to support, guarantee, and take personal responsibility for a piece of work"
+        },
+        {
+          "term": "familiarize",
+          "definition": "to learn about something so that you understand it well"
+        },
+        {
+          "term": "diligence statement",
+          "definition": "a written disclosure acknowledging AI's role and affirming human responsibility"
+        },
+        {
+          "term": "affirm",
+          "definition": "to state or declare something firmly and publicly as true"
+        },
+        {
+          "term": "instrumental",
+          "definition": "acting as an important and effective means in achieving an objective"
+        }
+      ]
+    },
+    {
+      "week": "w13",
+      "title": "Conclusion — The AI Fluency Framework",
+      "href": "lessons/w13/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 155,
+      "terms": [
+        {
+          "term": "consolidate",
+          "definition": "to combine and strengthen separate pieces of knowledge or skills into a solid whole"
+        },
+        {
+          "term": "cover ground",
+          "definition": "to travel over distance or deal with a large amount of material and information"
+        },
+        {
+          "term": "non-negotiable",
+          "definition": "mandatory and not open to debate, change, or compromise"
+        },
+        {
+          "term": "overnight",
+          "definition": "happening very quickly, suddenly, or within a single day"
+        },
+        {
+          "term": "silver bullet",
+          "definition": "a simple, magical solution that instantly solves a complicated problem"
+        },
+        {
+          "term": "back-and-forth",
+          "definition": "an active discussion or dialogue moving in alternating directions between parties"
+        },
+        {
+          "term": "dilemma",
+          "definition": "a difficult situation where a person must choose between two unfavorable options"
+        },
+        {
+          "term": "attribution",
+          "definition": "the act of giving credit to the creator or source of an idea or content"
+        },
+        {
+          "term": "shape",
+          "definition": "to influence, guide, and determine the development or future of something"
+        },
+        {
+          "term": "widely applicable",
+          "definition": "able to be used or put into practice across many different fields and situations"
+        },
+        {
+          "term": "equipped",
+          "definition": "having the necessary skills, tools, or knowledge to do a particular task"
+        },
+        {
+          "term": "integrity",
+          "definition": "the quality of being honest and possessing strong moral principles"
+        }
+      ]
+    },
+    {
+      "week": "w14",
+      "title": "Additional Activities & Lifelong Fluency",
+      "href": "lessons/w14/index.html",
+      "duration_min": 90,
+      "vocabulary": 12,
+      "quiz": 10,
+      "homework": 3,
+      "reading_words": 158,
+      "terms": [
+        {
+          "term": "resonate",
+          "definition": "to produce a positive feeling of emotional or intellectual connection"
+        },
+        {
+          "term": "proficiency",
+          "definition": "a high degree of skill, competence, or expertise in a subject"
+        },
+        {
+          "term": "placeholder",
+          "definition": "a temporary symbol or text used to mark where specific data will be inserted later"
+        },
+        {
+          "term": "recur",
+          "definition": "to happen again, periodically, or repeatedly over time"
+        },
+        {
+          "term": "playful",
+          "definition": "intended for fun, enjoyment, and lighthearted experimentation"
+        },
+        {
+          "term": "tricky",
+          "definition": "requiring great care, skill, or attention because of hidden difficulties"
+        },
+        {
+          "term": "nudge",
+          "definition": "to encourage or guide someone gently in a specific direction"
+        },
+        {
+          "term": "steering",
+          "definition": "guiding, controlling, or directing the course of a process or interaction"
+        },
+        {
+          "term": "cohesive",
+          "definition": "forming a united, well-integrated, and logically consistent whole"
+        },
+        {
+          "term": "coherence",
+          "definition": "the logical, smooth, and consistent connection of ideas in a text or plan"
+        },
+        {
+          "term": "thorny",
+          "definition": "full of unexpected difficulties, complexities, or tough challenges"
+        },
+        {
+          "term": "self-directed",
+          "definition": "guided, organized, and managed by oneself without direct external control"
+        }
+      ]
+    }
+  ]
+}</script>
+<script>
+"use strict";
+const data = JSON.parse(document.getElementById("course-data").textContent);
+
+const el = (tag, attrs, ...children) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== false) node.setAttribute(k, v === true ? "" : v);
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    node.append(child.nodeType ? child : document.createTextNode(child));
+  }
+  return node;
+};
+
+/* The lessons persist their homework checklist under etai:<week>:homework.
+   Reading it here turns the landing page into a progress board. localStorage
+   can throw or be empty (private window, file:// in some browsers), so every
+   read degrades to "not started" rather than breaking the page. */
+function homeworkDone(week) {
+  try {
+    const raw = localStorage.getItem("etai:" + week + ":homework");
+    if (!raw) return 0;
+    return JSON.parse(raw).filter(Boolean).length;
+  } catch (e) {
+    return 0;
+  }
+}
+
+/* ---------- header ---------- */
+document.getElementById("source").textContent = data.source;
+document.getElementById("lead").textContent = data.lead;
+document.title = "English Through AI — " + data.weeks.length + " lessons";
+
+const totals = data.weeks.reduce((acc, w) => ({
+  terms: acc.terms + w.vocabulary,
+  questions: acc.questions + w.quiz,
+  minutes: acc.minutes + w.duration_min,
+}), { terms: 0, questions: 0, minutes: 0 });
+
+const stat = (n, k) => el("div", { class: "stat" },
+  el("span", { class: "n" }, String(n)), el("span", { class: "k" }, k));
+document.getElementById("stats").append(
+  stat(data.weeks.length, "lessons"),
+  stat(totals.terms, "terms"),
+  stat(totals.questions, "quiz questions"),
+  stat(Math.round(totals.minutes / 60), "hours of class")
+);
+
+/* ---------- lesson cards ---------- */
+const grid = document.getElementById("grid");
+const cards = data.weeks.map(w => {
+  const done = homeworkDone(w.week);
+  const card = el("a", { class: "card", href: w.href },
+    el("div", { class: "card-top" },
+      el("span", { class: "week" }, w.week),
+      el("span", { class: "dur" }, w.duration_min + " min")),
+    el("h2", {}, w.title),
+    el("p", { class: "meta" },
+      w.vocabulary + " terms · " + w.quiz + " questions · " + w.reading_words + "-word reading")
+  );
+  if (w.homework) {
+    const fill = el("i", {});
+    fill.style.width = (done / w.homework * 100) + "%";
+    card.append(
+      el("div", { class: "bar" }, fill),
+      el("div", { class: "hw" },
+        el("span", {}, "Homework"),
+        el("span", {}, done + " / " + w.homework))
+    );
+    if (done === w.homework) card.classList.add("done");
+  }
+  grid.append(card);
+  return { w, card, done };
+});
+
+const started = cards.filter(c => c.done > 0).length;
+const finished = cards.filter(c => c.w.homework && c.done === c.w.homework).length;
+document.getElementById("overall").textContent =
+  started === 0 ? "Nothing started yet"
+                : finished + " of " + data.weeks.length + " lessons complete";
+
+/* ---------- termbank ---------- */
+const termsBox = document.getElementById("terms");
+const termNodes = [];
+data.weeks.forEach(w => w.terms.forEach(t => {
+  const node = el("div", { class: "term" },
+    el("b", {}, t.term),
+    el("span", { class: "def" }, t.definition),
+    el("a", { href: w.href }, w.week));
+  termsBox.append(node);
+  termNodes.push({ node, hay: (t.term + " " + t.definition + " " + w.week).toLowerCase() });
+}));
+document.getElementById("term-count").textContent = termNodes.length;
+
+/* ---------- search ---------- */
+const search = document.getElementById("search");
+const noLessons = document.getElementById("no-lessons");
+const noTerms = document.getElementById("no-terms");
+const termbankBlock = document.getElementById("termbank-block");
+
+cards.forEach(c => {
+  c.hay = (c.w.week + " " + c.w.title + " " + c.w.terms.map(t => t.term).join(" ")).toLowerCase();
+});
+
+search.addEventListener("input", () => {
+  const q = search.value.trim().toLowerCase();
+  let shownCards = 0, shownTerms = 0;
+  cards.forEach(c => {
+    const hit = !q || c.hay.includes(q);
+    c.card.hidden = !hit;
+    if (hit) shownCards++;
+  });
+  termNodes.forEach(t => {
+    const hit = !q || t.hay.includes(q);
+    t.node.hidden = !hit;
+    if (hit) shownTerms++;
+  });
+  noLessons.hidden = shownCards > 0;
+  noTerms.hidden = shownTerms > 0;
+  /* A search is a question about the whole course, so open the vocabulary. */
+  if (q) termbankBlock.open = true;
+});
+</script>
+</body>
+</html>

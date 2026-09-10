@@ -239,3 +239,22 @@ Options are shuffled every time the quiz is rendered, so an `explanation` or a
 and fails the build if one position holds more than half of the correct
 answers. The 80–150 word limit on an explanation is measured after the tokens
 expand — that is what the student reads.
+
+---
+
+## Publishing to GitHub Pages
+
+The site is pre-built and committed — there is no CI step and no Jekyll build.
+
+1. `python3 scripts/build_lesson.py --all` (regenerates every lesson **and**
+   the root `index.html`), then commit.
+2. Push to GitHub.
+3. Settings → Pages → Source: *Deploy from a branch*, branch `main`, folder
+   `/ (root)`.
+
+`.nojekyll` at the root turns Jekyll off, so the committed HTML is served
+exactly as it is. Every link is relative, so the same files work offline from
+`file://` — the lessons keep their one hard requirement either way.
+
+Rebuild and commit the HTML whenever a `lesson.json` changes; the published
+site is only ever as fresh as the last committed build.
