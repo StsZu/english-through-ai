@@ -231,7 +231,7 @@
           "note": "No. Technical expertise alone does not define AI fluency."
         }
       ],
-      "explanation": "The first answer is correct because AI fluency includes much more than having access to AI. A person must interact effectively, efficiently, ethically, and safely. That requires practical skills, judgment, and responsible behavior. Memorizing popular prompts is too narrow because technology and tasks keep changing. Being a technical expert is also not enough, because responsible decisions and effective collaboration matter too. For example, a person may know advanced prompting but still paste confidential company information into an unsafe service. Strong AI fluency includes deciding whether the tool, information, and method are appropriate before starting the task."
+      "explanation": "The {{opt:a}} option is correct because AI fluency includes much more than having access to AI. A person must interact effectively, efficiently, ethically, and safely. That requires practical skills, judgment, and responsible behavior. Memorizing popular prompts is too narrow because technology and tasks keep changing. Being a technical expert is also not enough, because responsible decisions and effective collaboration matter too. For example, a person may know advanced prompting but still paste confidential company information into an unsafe service. Strong AI fluency includes deciding whether the tool, information, and method are appropriate before starting the task."
     },
     {
       "id": "q5",
@@ -291,7 +291,7 @@
           "note": "Correct. Agency should operate inside deliberate safety boundaries."
         }
       ],
-      "explanation": "The third answer is correct because responsible agency needs boundaries. An AI can act independently, but independence does not mean unlimited authority. Permissions, logs, safe actions, and approval rules protect the system and the user. Unlimited access is risky because an incorrect decision could change important network settings. Removing logs is also poor practice because you lose information needed to understand what happened. A useful design might allow an agent to collect diagnostics automatically while requiring approval before changing firewall rules. This preserves much of the benefit of agency while keeping high-risk actions under human control."
+      "explanation": "The {{opt:c}} option is correct because responsible agency needs boundaries. An AI can act independently, but independence does not mean unlimited authority. Permissions, logs, safe actions, and approval rules protect the system and the user. Unlimited access is risky because an incorrect decision could change important network settings. Removing logs is also poor practice because you lose information needed to understand what happened. A useful design might allow an agent to collect diagnostics automatically while requiring approval before changing firewall rules. This preserves much of the benefit of agency while keeping high-risk actions under human control."
     },
     {
       "id": "q7",
@@ -321,7 +321,7 @@
           "note": "No. Ethical and technical abilities both remain important."
         }
       ],
-      "explanation": "The first answer is correct because AI fluency is described as a collection of connected skills, knowledge, insights, and values. They reinforce each other, meaning progress in one area can support progress in another. The second answer is wrong because the framework does not suggest that one skill replaces everything else. The third is wrong because ethical judgment remains part of fluent AI use. For example, learning how an agent accesses files may improve your technical knowledge. That knowledge can also help you make better privacy decisions. In this way, technical understanding and responsible behavior can develop together."
+      "explanation": "The {{opt:a}} option is correct because AI fluency is described as a collection of connected skills, knowledge, insights, and values. They reinforce each other, meaning progress in one area can support progress in another. The {{opt:b}} option is wrong because the framework does not suggest that one skill replaces everything else. The {{opt:c}} option is wrong because ethical judgment remains part of fluent AI use. For example, learning how an agent accesses files may improve your technical knowledge. That knowledge can also help you make better privacy decisions. In this way, technical understanding and responsible behavior can develop together."
     },
     {
       "id": "q8",
@@ -352,7 +352,7 @@
           "note": "No. The framework does not require a single specialized tool."
         }
       ],
-      "explanation": "The second answer is correct because a versatile system can perform many tasks, but the user still needs good judgment and interaction skills. A powerful tool cannot automatically choose the right goal, provide missing context, or guarantee responsible use. The first answer is wrong because versatile systems can help both beginners and experienced users. The third answer is wrong because AI fluency is about how you engage with AI, not about limiting yourself to one tool. For example, an advanced CLI agent may modify many project files, but unclear requirements can still lead it toward the wrong implementation."
+      "explanation": "The {{opt:b}} option is correct because a versatile system can perform many tasks, but the user still needs good judgment and interaction skills. A powerful tool cannot automatically choose the right goal, provide missing context, or guarantee responsible use. The {{opt:a}} option is wrong because versatile systems can help both beginners and experienced users. The {{opt:c}} option is wrong because AI fluency is about how you engage with AI, not about limiting yourself to one tool. For example, an advanced CLI agent may modify many project files, but unclear requirements can still lead it toward the wrong implementation."
     },
     {
       "id": "q9",
@@ -383,7 +383,7 @@
           "note": "Correct. The modes can coexist inside one project."
         }
       ],
-      "explanation": "The third answer is correct because the source explicitly treats Automation, Augmentation, and Agency as approaches for different situations. They are not a simple ladder where one replaces another. The first answer is wrong because no mode is inherently better in every situation. The second is wrong because automation remains useful whenever a task has a clear outcome. For example, one software project might automate formatting, use augmentation for architecture decisions, and give an agent responsibility for monitoring routine failures. Good AI fluency includes choosing the right relationship with AI for each part of the work."
+      "explanation": "The {{opt:c}} option is correct because the source explicitly treats Automation, Augmentation, and Agency as approaches for different situations. They are not a simple ladder where one replaces another. The {{opt:a}} option is wrong because no mode is inherently better in every situation. The {{opt:b}} option is wrong because automation remains useful whenever a task has a clear outcome. For example, one software project might automate formatting, use augmentation for architecture decisions, and give an agent responsibility for monitoring routine failures. Good AI fluency includes choosing the right relationship with AI for each part of the work."
     },
     {
       "id": "q10",
@@ -414,7 +414,7 @@
           "note": "No. Greater capability increases the importance of responsible choices."
         }
       ],
-      "explanation": "The first answer is correct because AI can now play several roles: tool, medium, partner, co-creator, or independent agent. That changes what humans must do. We need skills for giving direction, collaborating, evaluating results, and setting safe boundaries. The second answer is wrong because agency does not remove human responsibility. The third is also wrong because greater AI capability makes responsible decisions more important, not less important. For example, directing an autonomous coding agent requires deciding what it may edit, how results will be tested, and which changes need approval. The human role changes, but it does not disappear."
+      "explanation": "The {{opt:a}} option is correct because AI can now play several roles: tool, medium, partner, co-creator, or independent agent. That changes what humans must do. We need skills for giving direction, collaborating, evaluating results, and setting safe boundaries. The {{opt:b}} option is wrong because agency does not remove human responsibility. The {{opt:c}} option is also wrong because greater AI capability makes responsible decisions more important, not less important. For example, directing an autonomous coding agent requires deciding what it may edit, how results will be tested, and which changes need approval. The human role changes, but it does not disappear."
     }
   ],
   "speaking_prompts": [
